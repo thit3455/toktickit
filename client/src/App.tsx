@@ -6,16 +6,17 @@ type UiState = "idle" | "loading" | "success" | "error";
 export default function App() {
   const [state, setState] = useState<UiState>("idle");
   const [categories, setCategories] = useState<Category[]>([]);
-  void categories;
-  void setCategories;
 
   async function handleCheck() {
     setState("loading");
+    setCategories([]);
 
     try {
-      await checkSystem();
+      const result = await checkSystem();
+      setCategories(result.categories);
       setState("success");
     } catch {
+      setCategories([]);
       setState("error");
     }
   }
@@ -34,10 +35,24 @@ export default function App() {
         {state === "loading" ? "Loading…" : "Check System"}
       </button>
 
+      {state === "loading" && (
+        <p className="mt-4">Loading…</p>
+      )}
+
       {state === "success" && (
-        <p className="mt-4">
-          System Status: <span className="text-success">Online</span>
-        </p>
+        <div className="mt-4">
+          <p>
+            System Status: <span className="text-success">Online</span>
+          </p>
+
+          <h2 className="h5">Supported Request Categories</h2>
+
+          <ul>
+            {categories.map((category) => (
+              <li key={category.id}>{category.name}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {state === "error" && (
@@ -45,7 +60,10 @@ export default function App() {
           <p>
             System Status: <span className="text-danger">Offline</span>
           </p>
-          <p className="text-danger">Unable to connect to TokTickIT API</p>
+
+          <p className="text-danger">
+            Unable to connect to TokTickIT API
+          </p>
         </div>
       )}
     </div>

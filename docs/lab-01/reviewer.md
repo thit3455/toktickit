@@ -1,7 +1,7 @@
 # Lab 1 — Peer Review Record
 
-**Author:** <PHOO PHOO THIT> — <67070503455> — GitHub: @thit3455  
-**Peer reviewer:** <Chanya Tinnaphopworachot> — <67070503456> — GitHub: @Chanya-Grace-2546
+**Author:** PHOO PHOO THIT— 67070503455 — GitHub: @thit3455  
+**Peer reviewer:** Chanya Tinnaphopworachot — 67070503456 — GitHub: @Chanya-Grace-2546
 
 ## Pull Requests I authored (reviewed by my partner)
 

@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import {
-  checkSystem,
-  Category,
   DevelopmentRequester,
   getRequesters,
 } from "./api.js";
 
-type RequesterState = "loading" | "ready" | "empty" | "error";
-type SystemState = "idle" | "loading" | "success" | "error";
+type RequesterState =
+  | "loading"
+  | "ready"
+  | "empty"
+  | "error";
 
 export default function App() {
-  // ---------------------------------------------------------
-  // Lab 2 — Development Requester state
-  // ---------------------------------------------------------
   const [requesters, setRequesters] =
     useState<DevelopmentRequester[]>([]);
 
@@ -26,20 +24,13 @@ export default function App() {
     useState<RequesterState>("loading");
 
   // ---------------------------------------------------------
-  // Lab 1 — Existing system check state
-  // ---------------------------------------------------------
-  const [systemState, setSystemState] =
-    useState<SystemState>("idle");
-
-  const [categories, setCategories] =
-    useState<Category[]>([]);
-
-  // ---------------------------------------------------------
-  // Lab 2 — Load active Development Requesters
+  // Load active Development Requesters from the backend
   // ---------------------------------------------------------
   useEffect(() => {
     async function loadRequesters() {
       try {
+        setRequesterState("loading");
+
         const data = await getRequesters();
 
         setRequesters(data);
@@ -51,20 +42,26 @@ export default function App() {
 
         setRequesterState("ready");
 
-        // Restore the selected Requester for this browser session.
-        const storedRequesterId = sessionStorage.getItem(
-          "developmentRequesterId"
-        );
+        // Restore temporary Lab 2 Requester context
+        const storedRequesterId =
+          sessionStorage.getItem(
+            "developmentRequesterId"
+          );
 
         if (storedRequesterId) {
           const storedRequester = data.find(
             (requester) =>
-              requester.id === Number(storedRequesterId)
+              requester.id ===
+              Number(storedRequesterId)
           );
 
           if (storedRequester) {
-            setSelectedRequesterId(storedRequesterId);
-            setCurrentRequester(storedRequester);
+            setSelectedRequesterId(
+              storedRequesterId
+            );
+            setCurrentRequester(
+              storedRequester
+            );
           } else {
             sessionStorage.removeItem(
               "developmentRequesterId"
@@ -72,6 +69,7 @@ export default function App() {
           }
         }
       } catch {
+        setRequesters([]);
         setRequesterState("error");
       }
     }
@@ -80,44 +78,29 @@ export default function App() {
   }, []);
 
   // ---------------------------------------------------------
-  // Lab 1 — Existing system check
-  // ---------------------------------------------------------
-  async function handleCheck() {
-    setSystemState("loading");
-    setCategories([]);
-
-    try {
-      const result = await checkSystem();
-
-      setCategories(result.categories);
-      setSystemState("success");
-    } catch {
-      setCategories([]);
-      setSystemState("error");
-    }
-  }
-
-  // ---------------------------------------------------------
-  // Lab 2 — Continue with selected Requester
+  // Continue with selected Requester
   // ---------------------------------------------------------
   function handleContinue() {
     const requester = requesters.find(
       (item) =>
-        item.id === Number(selectedRequesterId)
+        item.id ===
+        Number(selectedRequesterId)
     );
 
-    if (requester) {
-      sessionStorage.setItem(
-        "developmentRequesterId",
-        String(requester.id)
-      );
-
-      setCurrentRequester(requester);
+    if (!requester) {
+      return;
     }
+
+    sessionStorage.setItem(
+      "developmentRequesterId",
+      String(requester.id)
+    );
+
+    setCurrentRequester(requester);
   }
 
   // ---------------------------------------------------------
-  // Lab 2 — Change Requester
+  // Change Development Requester
   // ---------------------------------------------------------
   function handleChangeRequester() {
     sessionStorage.removeItem(
@@ -146,7 +129,9 @@ export default function App() {
 
         <div className="alert alert-success">
           Current Requester:{" "}
-          <strong>{currentRequester.name}</strong>
+          <strong>
+            {currentRequester.name}
+          </strong>
         </div>
 
         <button
@@ -227,7 +212,9 @@ export default function App() {
               event.target.value
             )
           }
-          disabled={requesterState !== "ready"}
+          disabled={
+            requesterState !== "ready"
+          }
         >
           <option value="">
             Select a Requester
@@ -238,7 +225,8 @@ export default function App() {
               key={requester.id}
               value={requester.id}
             >
-              {requester.name} ({requester.email})
+              {requester.name} (
+              {requester.email})
             </option>
           ))}
         </select>
@@ -255,58 +243,6 @@ export default function App() {
       >
         Continue
       </button>
-
-      <hr className="my-4" />
-
-      {/* Lab 1 functionality retained */}
-      <button
-        type="button"
-        className="btn btn-outline-success"
-        onClick={handleCheck}
-        disabled={systemState === "loading"}
-      >
-        {systemState === "loading"
-          ? "Loading…"
-          : "Check System"}
-      </button>
-
-      {systemState === "success" && (
-        <div className="mt-4">
-          <p>
-            System Status:{" "}
-            <span className="text-success">
-              Online
-            </span>
-          </p>
-
-          <h2 className="h5">
-            Supported Request Categories
-          </h2>
-
-          <ul>
-            {categories.map((category) => (
-              <li key={category.id}>
-                {category.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {systemState === "error" && (
-        <div className="mt-4">
-          <p>
-            System Status:{" "}
-            <span className="text-danger">
-              Offline
-            </span>
-          </p>
-
-          <p className="text-danger">
-            Unable to connect to TokTickIT API
-          </p>
-        </div>
-      )}
     </main>
   );
 }

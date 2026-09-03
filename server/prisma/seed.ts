@@ -3,10 +3,7 @@ import { getPrisma } from "../src/prisma.js";
 async function main() {
   const prisma = getPrisma();
 
-  // ---------------------------------------------------------
-  // Lab 1 + Lab 2: Seed Ticket Categories
-  // Must be safe to run repeatedly without duplicates.
-  // ---------------------------------------------------------
+  // Categories
   const categories = [
     "Account and Access",
     "Hardware",
@@ -17,15 +14,17 @@ async function main() {
   for (const name of categories) {
     await prisma.category.upsert({
       where: { name },
-      update: {},
-      create: { name },
+      update: {
+        isActive: true,
+      },
+      create: {
+        name,
+        isActive: true,
+      },
     });
   }
 
-  // ---------------------------------------------------------
-  // Lab 2: Seed Development Requesters
-  // At least 4 active and 1 inactive Requester.
-  // ---------------------------------------------------------
+  // Development Requesters
   const requesters = [
     {
       name: "Alice Johnson",
@@ -63,16 +62,37 @@ async function main() {
         name: requester.name,
         isActive: requester.isActive,
       },
+      create: requester,
+    });
+  }
+
+  // Related Systems
+  const relatedSystems = [
+    "Email",
+    "Campus Wi-Fi",
+    "VPN",
+    "LEB2 App",
+    "Grade Submission App",
+    "Printer",
+    "Corporate Laptop",
+  ];
+
+  for (const name of relatedSystems) {
+    await prisma.relatedSystem.upsert({
+      where: { name },
+      update: {
+        isActive: true,
+      },
       create: {
-        name: requester.name,
-        email: requester.email,
-        isActive: requester.isActive,
+        name,
+        isActive: true,
       },
     });
   }
 
   console.log("Category seed completed.");
   console.log("Development Requester seed completed.");
+  console.log("Related System seed completed.");
 }
 
 main()

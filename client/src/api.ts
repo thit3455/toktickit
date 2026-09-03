@@ -2,7 +2,7 @@ const API_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 // ---------------------------------------------------------
-// Lab 1 Types
+// Category
 // ---------------------------------------------------------
 
 export interface Category {
@@ -10,13 +10,8 @@ export interface Category {
   name: string;
 }
 
-export interface SystemStatus {
-  online: boolean;
-  categories: Category[];
-}
-
 // ---------------------------------------------------------
-// Lab 2 Types
+// Development Requester
 // ---------------------------------------------------------
 
 export interface DevelopmentRequester {
@@ -29,48 +24,12 @@ interface RequesterResponse {
   data: DevelopmentRequester[];
 }
 
-// ---------------------------------------------------------
-// Lab 1 — Health Check + Categories
-// ---------------------------------------------------------
-
-export async function checkSystem(): Promise<SystemStatus> {
-  const healthResponse = await fetch(`${API_URL}/api/health`);
-
-  if (!healthResponse.ok) {
-    throw new Error("Unable to connect to TokTickIT API");
-  }
-
-  const health = await healthResponse.json();
-
-  if (health.status !== "ok") {
-    throw new Error("Unable to connect to TokTickIT API");
-  }
-
-  const categoriesResponse = await fetch(
-    `${API_URL}/api/categories`
-  );
-
-  if (!categoriesResponse.ok) {
-    throw new Error("Unable to connect to TokTickIT API");
-  }
-
-  const categories: Category[] =
-    await categoriesResponse.json();
-
-  return {
-    online: true,
-    categories,
-  };
-}
-
-// ---------------------------------------------------------
-// Lab 2 — Development Requesters
-// ---------------------------------------------------------
-
 export async function getRequesters(): Promise<
   DevelopmentRequester[]
 > {
-  const response = await fetch(`${API_URL}/api/requesters`);
+  const response = await fetch(
+    `${API_URL}/api/requesters`
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -79,6 +38,118 @@ export async function getRequesters(): Promise<
   }
 
   const result: RequesterResponse =
+    await response.json();
+
+  return result.data;
+}
+
+// ---------------------------------------------------------
+// Categories
+// ---------------------------------------------------------
+
+export async function getCategories(): Promise<
+  Category[]
+> {
+  const response = await fetch(
+    `${API_URL}/api/categories`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to load Categories"
+    );
+  }
+
+  return response.json();
+}
+
+// ---------------------------------------------------------
+// Related Systems
+// ---------------------------------------------------------
+
+export interface RelatedSystem {
+  id: number;
+  name: string;
+}
+
+interface RelatedSystemResponse {
+  data: RelatedSystem[];
+}
+
+export async function getRelatedSystems(): Promise<
+  RelatedSystem[]
+> {
+  const response = await fetch(
+    `${API_URL}/api/related-systems`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to load Related Systems"
+    );
+  }
+
+  const result: RelatedSystemResponse =
+    await response.json();
+
+  return result.data;
+}
+
+// ---------------------------------------------------------
+// Ticket Creation
+// ---------------------------------------------------------
+
+export type RequestedPriority =
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH";
+
+export interface CreateTicketInput {
+  requesterId: number;
+  categoryId: number;
+  relatedSystemId: number;
+  summary: string;
+  requestedPriority: RequestedPriority;
+  description: string;
+}
+
+export interface CreatedTicket {
+  id: number;
+  ticketNumber: string;
+  requesterId: number;
+  categoryId: number;
+  relatedSystemId: number;
+  summary: string;
+  requestedPriority: RequestedPriority;
+  currentStatus: "NEW";
+  createdAt: string;
+}
+
+interface CreateTicketResponse {
+  data: CreatedTicket;
+}
+
+export async function createTicket(
+  input: CreateTicketInput
+): Promise<CreatedTicket> {
+  const response = await fetch(
+    `${API_URL}/api/tickets`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(input),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to create Ticket"
+    );
+  }
+
+  const result: CreateTicketResponse =
     await response.json();
 
   return result.data;

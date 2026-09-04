@@ -96,13 +96,19 @@ export async function getRelatedSystems(): Promise<
 }
 
 // ---------------------------------------------------------
-// Ticket Creation
+// Ticket Types
 // ---------------------------------------------------------
 
 export type RequestedPriority =
   | "LOW"
   | "MEDIUM"
   | "HIGH";
+
+export type TicketStatus = "NEW";
+
+// ---------------------------------------------------------
+// Ticket Creation
+// ---------------------------------------------------------
 
 export interface CreateTicketInput {
   requesterId: number;
@@ -121,7 +127,7 @@ export interface CreatedTicket {
   relatedSystemId: number;
   summary: string;
   requestedPriority: RequestedPriority;
-  currentStatus: "NEW";
+  currentStatus: TicketStatus;
   createdAt: string;
 }
 
@@ -153,4 +159,136 @@ export async function createTicket(
     await response.json();
 
   return result.data;
+}
+
+// ---------------------------------------------------------
+// My Tickets
+// ---------------------------------------------------------
+
+export interface TicketListItem {
+  id: number;
+  ticketNumber: string;
+  requesterId: number;
+  summary: string;
+  requestedPriority: RequestedPriority;
+  currentStatus: TicketStatus;
+  createdAt: string;
+  updatedAt: string;
+
+  category: {
+    id: number;
+    name: string;
+  };
+
+  relatedSystem: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface TicketPagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface TicketListResponse {
+  data: TicketListItem[];
+  pagination: TicketPagination;
+}
+
+export interface GetMyTicketsParams {
+  requesterId: number;
+  page?: number;
+  pageSize?: 10 | 20 | 50;
+  search?: string;
+  categoryId?: number;
+  relatedSystemId?: number;
+  requestedPriority?: RequestedPriority;
+  currentStatus?: TicketStatus;
+  sortBy?: "updatedAt" | "createdAt" | "ticketNumber";
+  sortOrder?: "asc" | "desc";
+}
+
+export async function getMyTickets(
+  params: GetMyTicketsParams
+): Promise<TicketListResponse> {
+  const query = new URLSearchParams();
+
+  query.set(
+    "requesterId",
+    String(params.requesterId)
+  );
+
+  query.set(
+    "page",
+    String(params.page ?? 1)
+  );
+
+  query.set(
+    "pageSize",
+    String(params.pageSize ?? 10)
+  );
+
+  if (params.search?.trim()) {
+    query.set(
+      "search",
+      params.search.trim()
+    );
+  }
+
+  if (params.categoryId) {
+    query.set(
+      "categoryId",
+      String(params.categoryId)
+    );
+  }
+
+  if (params.relatedSystemId) {
+    query.set(
+      "relatedSystemId",
+      String(params.relatedSystemId)
+    );
+  }
+
+  if (params.requestedPriority) {
+    query.set(
+      "requestedPriority",
+      params.requestedPriority
+    );
+  }
+
+  if (params.currentStatus) {
+    query.set(
+      "currentStatus",
+      params.currentStatus
+    );
+  }
+
+  if (params.sortBy) {
+    query.set(
+      "sortBy",
+      params.sortBy
+    );
+  }
+
+  if (params.sortOrder) {
+    query.set(
+      "sortOrder",
+      params.sortOrder
+    );
+  }
+
+  const response = await fetch(
+    `${API_URL}/api/tickets?${query.toString()}`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to load My Tickets"
+    );
+  }
+
+  return response.json();
 }

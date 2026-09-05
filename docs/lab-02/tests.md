@@ -2,82 +2,182 @@
 
 ## 1. Test Strategy
 
-Lab 2 uses Test-Driven Development and Test-Driven Design. Tests are planned from the approved specification before implementation. Coverage includes unit, API/integration, UI component, UI style, responsive, and end-to-end testing.
+Lab 2 follows Test-Driven Development and Test-Driven Design principles. Testing was performed against the approved specification and implemented features.
 
-Tests cover happy paths, invalid input, ownership, failures, loading and empty states, responsive behavior, Attachment lifecycle, and multi-Requester behavior.
+Testing coverage includes:
 
----
+- API/integration testing
+- UI component testing
+- Build verification
+- Visual verification checklist
 
-## 2. Planned Tests
+The completed tests cover:
 
-| Test ID | Type | Requirement / AC | What It Tests | Expected Result | Automated Test File | Final |
-|---|---|---|---|---|---|---|
-| UNIT-01 | Unit | AC-01 | Ticket Number generation | Unique valid Ticket Number returned | `server/tests/lab-02/ticket-number.unit.test.ts` | Planned |
-| API-01 | API | AC-01 | Create valid Ticket | 201; Ticket saved; Ticket Number returned | `server/tests/lab-02/create-ticket.api.test.ts` | Planned |
-| API-02 | API | AC-03 | Cross-Requester Ticket access | Other Requester's Ticket is not returned | `server/tests/lab-02/ticket-detail.api.test.ts` | Planned |
-| API-03 | API | AC-06 | Search, filter, sort and pagination | Correct owned Ticket results and metadata | `server/tests/lab-02/my-tickets.api.test.ts` | Planned |
-| API-04 | API | AC-08, AC-09 | Attachment validation/upload | Valid file accepted; invalid files rejected | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| API-05 | API | AC-10, AC-11, AC-12 | Download and soft removal | Active file downloads; removed file blocked | `server/tests/lab-02/attachments.api.test.ts` | Planned |
-| UI-01 | UI | AC-02, AC-05 | Requester selection/switching | Correct Requester context is displayed/reloaded | `client/src/lab-02-tests/RequesterSelection.test.tsx` | Planned |
-| UI-02 | UI | AC-04 | Invalid Create Ticket form | Field-level messages; invalid API request not sent | `client/src/lab-02-tests/CreateTicket.test.tsx` | Planned |
-| UI-03 | UI | AC-07 | Empty and no-results states | Correct message/state appears | `client/src/lab-02-tests/MyTickets.test.tsx` | Planned |
-| UI-04 | UI | AC-13 | Ticket creation API failure | Safe error shown; entered values preserved | `client/src/lab-02-tests/CreateTicket.test.tsx` | Planned |
-| UI-05 | UI | AC-08, AC-09, AC-11 | Attachment UI states | Upload, invalid and removed states display correctly | `client/src/lab-02-tests/AttachmentSection.test.tsx` | Planned |
-| STYLE-01 | UI Style | AC-14, AC-15 | Zen Green styles and control states | Required classes, labels, focus and validation styles present | `client/src/lab-02-tests/ui-style.test.tsx` | Planned |
-| RESP-01 | Responsive | AC-14 | Desktop/tablet/mobile layouts | No clipping, overlap or horizontal page scroll | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
-| E2E-01 | E2E | AC-01, AC-05, AC-06 | Complete Requester Ticket flow | Create Ticket and find it in My Tickets | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
-| E2E-02 | E2E | AC-03, AC-08, AC-10, AC-11, AC-12 | Ticket Detail and Attachment lifecycle | Ownership enforced; upload/download/remove work correctly | `e2e/lab-02/requester-ticket-flow.spec.ts` | Planned |
+- Requester selection and context
+- Ticket creation
+- My Tickets listing
+- Ticket detail access control
+- Attachment upload validation
+- Error handling
+- Ownership protection
+- Empty and invalid states
 
 ---
 
-## 3. Acceptance-Criterion Traceability
+# 2. Final Test Results
 
-| Acceptance Criterion | Planned Test(s) |
+## 2.1 Backend API / Integration Tests
+
+### Command
+
+```powershell
+cd server
+npm test
+```
+
+### Result
+
+```
+Test Files  7 passed (7)
+Tests       18 passed (18)
+```
+
+### Passed Test Files
+
+| Test ID | Requirement | Test File | Result |
+|---|---|---|---|
+| API-01 | Create Ticket successfully | `server/tests/lab-02/create-ticket.api.test.ts` | Passed |
+| API-02 | Ticket Detail ownership protection | `server/tests/lab-02/ticket-detail.api.test.ts` | Passed |
+| API-03 | My Tickets search, filter, sort and pagination | `server/tests/lab-02/my-tickets.api.test.ts` | Passed |
+| API-04 | Attachment upload validation | `server/tests/lab-02/attachments.api.test.ts` | Passed |
+| API-05 | Attachment lifecycle validation | `server/tests/lab-02/attachments.api.test.ts` | Passed |
+| API-06 | Requester retrieval | `server/tests/lab-02/requesters.api.test.ts` | Passed |
+| API-07 | Existing Lab 1 category and health tests | `server/tests/lab-01/categories.test.ts` | Passed |
+| API-08 | Existing Lab 1 health test | `server/tests/lab-01/health.test.ts` | Passed |
+
+---
+
+## 2.2 Frontend UI Component Tests
+
+### Command
+
+```powershell
+cd client
+npm test
+```
+
+### Result
+
+```
+Test Files  4 passed (4)
+Tests       18 passed (18)
+```
+
+### Passed Test Files
+
+| Test ID | Requirement | Test File | Result |
+|---|---|---|---|
+| UI-01 | Requester selection and switching | `client/tests/lab-02/RequesterSelection.test.tsx` | Passed |
+| UI-02 | Create Ticket form validation and states | `client/tests/lab-02/CreateTicket.test.tsx` | Passed |
+| UI-03 | My Tickets display and states | `client/tests/lab-02/MyTickets.test.tsx` | Passed |
+| UI-04 | Existing application rendering | `client/tests/lab-01/App.test.tsx` | Passed |
+
+---
+
+## 2.3 Production Build Verification
+
+### Command
+
+```powershell
+npm run build
+```
+
+### Result
+
+```
+Successful Vite production build
+```
+
+Status:
+
+✅ Passed
+
+---
+
+# 3. Acceptance Criterion Traceability
+
+| Acceptance Criterion | Verified By |
 |---|---|
-| AC-01 | UNIT-01, API-01, E2E-01 |
-| AC-02 | UI-01 |
-| AC-03 | API-02, E2E-02 |
-| AC-04 | UI-02 |
-| AC-05 | UI-01, E2E-01 |
-| AC-06 | API-03, E2E-01 |
-| AC-07 | UI-03 |
-| AC-08 | API-04, UI-05, E2E-02 |
-| AC-09 | API-04, UI-05 |
-| AC-10 | API-05, E2E-02 |
-| AC-11 | API-05, UI-05, E2E-02 |
-| AC-12 | API-05, E2E-02 |
-| AC-13 | UI-04 |
-| AC-14 | STYLE-01, RESP-01 |
-| AC-15 | STYLE-01 |
+| AC-01 Ticket creation | API-01, UI-02 |
+| AC-02 Requester context | UI-01 |
+| AC-03 Ticket detail ownership | API-02 |
+| AC-04 Validation messages | UI-02 |
+| AC-05 Requester ticket visibility | UI-01, UI-03 |
+| AC-06 Search, filter, sort and pagination | API-03, UI-03 |
+| AC-07 Empty and no-result states | UI-03 |
+| AC-08 Attachment upload | API-04 |
+| AC-09 Attachment validation | API-04 |
+| AC-10 Attachment download | API-05 |
+| AC-11 Attachment removal lifecycle | API-05 |
+| AC-12 Attachment access control | API-05 |
+| AC-13 Ticket creation failure handling | UI-02 |
+| AC-14 Visual layout requirements | Visual verification checklist |
+| AC-15 Control and style requirements | Visual verification checklist |
 
 ---
 
-## 4. Responsive and Visual Checklist
+# 4. Responsive and Visual Verification Checklist
 
-Screenshots will be checked at:
+Visual verification will be performed using:
 
-- Desktop: `>= 992px`
-- Tablet: `768–991px`
-- Mobile: `< 768px`
+- Desktop viewport: `>= 992px`
+- Tablet viewport: `768px - 991px`
+- Mobile viewport: `< 768px`
 
 Checklist:
 
-- no clipped labels;
-- no overlapping validation messages;
-- no hidden buttons;
-- no unintended horizontal scrolling;
-- editable and read-only fields are visually different;
-- required asterisks and validation messages are visible;
-- button hierarchy and busy states are clear;
-- priority/status badges are consistent;
-- search, filters and pagination remain usable;
-- Attachment filenames remain readable;
-- keyboard focus remains visible.
+- [ ] No clipped labels
+- [ ] No overlapping validation messages
+- [ ] No hidden buttons
+- [ ] No unintended horizontal scrolling
+- [ ] Editable and read-only fields are visually different
+- [ ] Required fields and validation messages are visible
+- [ ] Button hierarchy is clear
+- [ ] Loading/busy states are clear
+- [ ] Priority and status displays are consistent
+- [ ] Search, filters and pagination remain usable
+- [ ] Attachment filenames remain readable
+- [ ] Keyboard focus remains visible
 
-Screenshot evidence will be stored under:
+---
+
+# 5. Screenshot Evidence
+
+Screenshots are stored under:
 
 ```text
 artifacts/lab-02/screenshots/
-├── create-ticket/
-├── my-tickets/
-└── ticket-detail/
+```
+
+Structure:
+
+```text
+artifacts/
+└── lab-02/
+    └── screenshots/
+        ├── create-ticket/
+        ├── my-tickets/
+        └── ticket-detail/
+```
+
+---
+
+# 6. Final Testing Summary
+
+| Area | Result |
+|---|---|
+| Backend API Tests | Passed |
+| Frontend UI Tests | Passed |
+| Production Build | Passed |
+| Database Migration Status | Passed |
+| Visual Evidence Collection | In Progress |

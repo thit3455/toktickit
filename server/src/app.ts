@@ -4,6 +4,7 @@ import express, {
 } from "express";
 
 import cors from "cors";
+import multer from "multer";
 
 import {
   Prisma,
@@ -17,6 +18,28 @@ export const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// ---------------------------------------------------------------------------
+// Lab 2 — Attachment Configuration
+// ---------------------------------------------------------------------------
+
+const MAX_ATTACHMENT_SIZE =
+  5 * 1024 * 1024;
+
+const ALLOWED_ATTACHMENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+];
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+
+  limits: {
+    fileSize: MAX_ATTACHMENT_SIZE,
+  },
+});
 
 // ---------------------------------------------------------------------------
 // Lab 1 — API Health Check
@@ -56,9 +79,9 @@ app.get(
           },
         });
 
-      return res.status(200).json(
-        categories
-      );
+      return res
+        .status(200)
+        .json(categories);
     } catch {
       return res.status(500).json({
         error:
@@ -195,8 +218,8 @@ app.get(
           : undefined;
 
       const requestedPriority =
-        typeof req.query.requestedPriority ===
-        "string"
+        typeof req.query
+          .requestedPriority === "string"
           ? req.query.requestedPriority
           : undefined;
 
@@ -212,12 +235,13 @@ app.get(
           : "updatedAt";
 
       const sortOrder =
-        typeof req.query.sortOrder === "string"
+        typeof req.query.sortOrder ===
+        "string"
           ? req.query.sortOrder
           : "desc";
 
       // -----------------------------------------------------
-      // Basic query validation
+      // Query validation
       // -----------------------------------------------------
 
       if (
@@ -225,13 +249,12 @@ app.get(
         requesterId <= 0 ||
         !Number.isInteger(page) ||
         page < 1 ||
-        ![10, 20, 50].includes(
-          pageSize
-        )
+        ![10, 20, 50].includes(pageSize)
       ) {
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -246,6 +269,7 @@ app.get(
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -262,6 +286,7 @@ app.get(
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -274,13 +299,12 @@ app.get(
           "LOW",
           "MEDIUM",
           "HIGH",
-        ].includes(
-          requestedPriority
-        )
+        ].includes(requestedPriority)
       ) {
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -294,6 +318,7 @@ app.get(
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -310,6 +335,7 @@ app.get(
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -324,6 +350,7 @@ app.get(
         return res.status(400).json({
           error: {
             code: "INVALID_QUERY",
+
             message:
               "Invalid My Tickets query parameters.",
           },
@@ -363,7 +390,7 @@ app.get(
       }
 
       // -----------------------------------------------------
-      // Build requester-owned WHERE condition
+      // Requester-owned WHERE conditions
       // -----------------------------------------------------
 
       const where: Prisma.TicketWhereInput =
@@ -371,7 +398,6 @@ app.get(
           requesterId,
         };
 
-      // Search Ticket Number or Summary
       if (search) {
         where.OR = [
           {
@@ -390,13 +416,10 @@ app.get(
         ];
       }
 
-      // Category filter
       if (categoryId !== undefined) {
-        where.categoryId =
-          categoryId;
+        where.categoryId = categoryId;
       }
 
-      // Related System filter
       if (
         relatedSystemId !== undefined
       ) {
@@ -404,13 +427,11 @@ app.get(
           relatedSystemId;
       }
 
-      // Priority filter
       if (requestedPriority) {
         where.requestedPriority =
           requestedPriority as RequestedPriority;
       }
 
-      // Status filter
       if (currentStatus) {
         where.currentStatus =
           currentStatus as TicketStatus;
@@ -420,7 +441,9 @@ app.get(
       // Sorting
       // -----------------------------------------------------
 
-      const direction =
+      const direction:
+        | "asc"
+        | "desc" =
         sortOrder === "asc"
           ? "asc"
           : "desc";
@@ -436,8 +459,7 @@ app.get(
         sortBy === "ticketNumber"
       ) {
         orderBy.push({
-          ticketNumber:
-            direction,
+          ticketNumber: direction,
         });
       } else {
         orderBy.push({
@@ -445,13 +467,12 @@ app.get(
         });
       }
 
-      // Stable secondary sort
       orderBy.push({
         id: direction,
       });
 
       // -----------------------------------------------------
-      // Fetch Tickets + count
+      // Retrieve Tickets
       // -----------------------------------------------------
 
       const [
@@ -466,8 +487,7 @@ app.get(
             ticketNumber: true,
             requesterId: true,
             summary: true,
-            requestedPriority:
-              true,
+            requestedPriority: true,
             currentStatus: true,
             createdAt: true,
             updatedAt: true,
@@ -530,6 +550,367 @@ app.get(
         },
       });
     }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Lab 2 — Requester Ticket Detail
+// Only the owning Requester may retrieve the Ticket.
+// ---------------------------------------------------------------------------
+
+app.get(
+  "/api/tickets/:id",
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(
+        req.params.id
+      );
+
+      const requesterId = Number(
+        req.query.requesterId
+      );
+
+      if (
+        !Number.isInteger(ticketId) ||
+        ticketId <= 0 ||
+        !Number.isInteger(
+          requesterId
+        ) ||
+        requesterId <= 0
+      ) {
+        return res.status(400).json({
+          error: {
+            code:
+              "INVALID_QUERY",
+
+            message:
+              "A valid Ticket ID and Requester ID are required.",
+          },
+        });
+      }
+
+      const prisma = getPrisma();
+
+      // Requester ownership enforcement
+      const ticket =
+        await prisma.ticket.findFirst(
+          {
+            where: {
+              id: ticketId,
+              requesterId,
+            },
+
+            select: {
+              id: true,
+              ticketNumber: true,
+              requesterId: true,
+              categoryId: true,
+              relatedSystemId: true,
+              summary: true,
+              description: true,
+              requestedPriority: true,
+              currentStatus: true,
+              createdAt: true,
+              updatedAt: true,
+
+              requester: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+
+              relatedSystem: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          }
+        );
+
+      if (!ticket) {
+        return res.status(404).json({
+          error: {
+            code:
+              "TICKET_NOT_FOUND",
+
+            message:
+              "Ticket was not found.",
+          },
+        });
+      }
+
+      return res.status(200).json({
+        data: ticket,
+      });
+    } catch {
+      return res.status(500).json({
+        error: {
+          code:
+            "TICKET_DETAIL_ERROR",
+
+          message:
+            "Unable to retrieve Ticket details.",
+        },
+      });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Lab 2 — Add Ticket Attachment
+// Only the owning Requester may add an attachment.
+// ---------------------------------------------------------------------------
+
+app.post(
+  "/api/tickets/:id/attachments",
+
+  (req: Request, res: Response) => {
+    upload.single("file")(
+      req,
+      res,
+
+      async (uploadError) => {
+        // ---------------------------------------------------
+        // Multer file-size error
+        // ---------------------------------------------------
+
+        if (
+          uploadError instanceof
+            multer.MulterError &&
+          uploadError.code ===
+            "LIMIT_FILE_SIZE"
+        ) {
+          return res.status(400).json({
+            error: {
+              code:
+                "ATTACHMENT_TOO_LARGE",
+
+              message:
+                "Each attachment must be 5 MB or smaller.",
+            },
+          });
+        }
+
+        // Other multipart/upload parsing error
+        if (uploadError) {
+          return res.status(400).json({
+            error: {
+              code:
+                "ATTACHMENT_UPLOAD_ERROR",
+
+              message:
+                "Unable to process attachment.",
+            },
+          });
+        }
+
+        try {
+          const ticketId = Number(
+            req.params.id
+          );
+
+          const requesterId = Number(
+            req.query.requesterId
+          );
+
+          // -------------------------------------------------
+          // Validate Ticket + Requester IDs
+          // -------------------------------------------------
+
+          if (
+            !Number.isInteger(
+              ticketId
+            ) ||
+            ticketId <= 0 ||
+            !Number.isInteger(
+              requesterId
+            ) ||
+            requesterId <= 0
+          ) {
+            return res
+              .status(400)
+              .json({
+                error: {
+                  code:
+                    "INVALID_QUERY",
+
+                  message:
+                    "A valid Ticket ID and Requester ID are required.",
+                },
+              });
+          }
+
+          const prisma =
+            getPrisma();
+
+          // -------------------------------------------------
+          // Ticket ownership check
+          // -------------------------------------------------
+
+          const ticket =
+            await prisma.ticket.findFirst(
+              {
+                where: {
+                  id: ticketId,
+                  requesterId,
+                },
+
+                select: {
+                  id: true,
+                },
+              }
+            );
+
+          if (!ticket) {
+            return res
+              .status(404)
+              .json({
+                error: {
+                  code:
+                    "TICKET_NOT_FOUND",
+
+                  message:
+                    "Ticket was not found.",
+                },
+              });
+          }
+
+          // -------------------------------------------------
+          // File required
+          // -------------------------------------------------
+
+          if (!req.file) {
+            return res
+              .status(400)
+              .json({
+                error: {
+                  code:
+                    "ATTACHMENT_REQUIRED",
+
+                  message:
+                    "An attachment file is required.",
+                },
+              });
+          }
+
+          // -------------------------------------------------
+          // Allowed file types
+          // -------------------------------------------------
+
+          if (
+            !ALLOWED_ATTACHMENT_TYPES.includes(
+              req.file.mimetype
+            )
+          ) {
+            return res
+              .status(400)
+              .json({
+                error: {
+                  code:
+                    "INVALID_ATTACHMENT_TYPE",
+
+                  message:
+                    "Only JPG/JPEG, PNG, WEBP, and PDF files are allowed.",
+                },
+              });
+          }
+
+          // -------------------------------------------------
+          // Maximum 5 active attachments
+          // -------------------------------------------------
+
+          const activeAttachmentCount =
+            await prisma.attachment.count(
+              {
+                where: {
+                  ticketId,
+                  isRemoved: false,
+                },
+              }
+            );
+
+          if (
+            activeAttachmentCount >= 5
+          ) {
+            return res
+              .status(400)
+              .json({
+                error: {
+                  code:
+                    "ATTACHMENT_LIMIT_REACHED",
+
+                  message:
+                    "A Ticket may have a maximum of 5 active attachments.",
+                },
+              });
+          }
+
+          // -------------------------------------------------
+          // Save attachment
+          // -------------------------------------------------
+
+          const attachment =
+            await prisma.attachment.create(
+              {
+                data: {
+                  ticketId,
+
+                  fileName:
+                    req.file.originalname,
+
+                  mimeType:
+                    req.file.mimetype,
+
+                  fileSize:
+                    req.file.size,
+
+                  content:
+                    req.file.buffer,
+                },
+
+                select: {
+                  id: true,
+                  ticketId: true,
+                  fileName: true,
+                  mimeType: true,
+                  fileSize: true,
+                  isRemoved: true,
+                  uploadedAt: true,
+                },
+              }
+            );
+
+          return res
+            .status(201)
+            .json({
+              data: attachment,
+            });
+        } catch {
+          return res
+            .status(500)
+            .json({
+              error: {
+                code:
+                  "ATTACHMENT_UPLOAD_ERROR",
+
+                message:
+                  "Unable to upload attachment.",
+              },
+            });
+        }
+      }
+    );
   }
 );
 
@@ -631,6 +1012,7 @@ app.post(
               id: Number(
                 requesterId
               ),
+
               isActive: true,
             },
           }
@@ -641,6 +1023,7 @@ app.post(
             id: Number(
               categoryId
             ),
+
             isActive: true,
           },
         }),
@@ -651,6 +1034,7 @@ app.post(
               id: Number(
                 relatedSystemId
               ),
+
               isActive: true,
             },
           }
@@ -683,40 +1067,34 @@ app.post(
           .slice(2)}`;
 
       const createdTicket =
-        await prisma.ticket.create(
-          {
-            data: {
-              ticketNumber:
-                temporaryNumber,
+        await prisma.ticket.create({
+          data: {
+            ticketNumber:
+              temporaryNumber,
 
-              requesterId:
-                Number(
-                  requesterId
-                ),
+            requesterId:
+              Number(requesterId),
 
-              categoryId:
-                Number(
-                  categoryId
-                ),
+            categoryId:
+              Number(categoryId),
 
-              relatedSystemId:
-                Number(
-                  relatedSystemId
-                ),
+            relatedSystemId:
+              Number(
+                relatedSystemId
+              ),
 
-              summary:
-                cleanSummary,
+            summary:
+              cleanSummary,
 
-              description:
-                cleanDescription,
+            description:
+              cleanDescription,
 
-              requestedPriority,
+            requestedPriority,
 
-              currentStatus:
-                "NEW",
-            },
-          }
-        );
+            currentStatus:
+              "NEW",
+          },
+        });
 
       // -----------------------------------------------------
       // Generate official Ticket Number

@@ -19,6 +19,7 @@ describe("Ticket Attachments", () => {
   let categoryId: number;
   let relatedSystemId: number;
   let ticketId: number;
+  let attachmentId: number;
 
   beforeAll(async () => {
     const requesterResponse =
@@ -130,6 +131,11 @@ describe("Ticket Attachments", () => {
     expect(
       response.body.data.id
     ).toBeDefined();
+
+    // Save the created attachment ID
+    // for the following tests.
+    attachmentId =
+      response.body.data.id;
   });
 
   it("blocks another Requester from uploading to the Ticket", async () => {
@@ -216,5 +222,169 @@ describe("Ticket Attachments", () => {
     expect(
       response.body.error
     ).toBeDefined();
+  });
+
+  it("lists attachment metadata for the owning Requester", async () => {
+    const response =
+      await request(app)
+        .get(
+          `/api/tickets/${ticketId}/attachments`
+        )
+        .query({
+          requesterId:
+            requesterAId,
+        });
+
+    expect(
+      response.status
+    ).toBe(200);
+
+    expect(
+      response.body.data
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id:
+            attachmentId,
+          ticketId,
+          fileName:
+            "evidence.pdf",
+          mimeType:
+            "application/pdf",
+          isRemoved:
+            false,
+        }),
+      ])
+    );
+  });
+
+  it("downloads an active attachment owned by the selected Requester", async () => {
+    const response =
+      await request(app)
+        .get(
+          `/api/attachments/${attachmentId}/download`
+        )
+        .query({
+          requesterId:
+            requesterAId,
+        });
+
+    expect(
+      response.status
+    ).toBe(200);
+
+    expect(
+      response.headers[
+        "content-type"
+      ]
+    ).toContain(
+      "application/pdf"
+    );
+
+    expect(
+      response.headers[
+        "content-disposition"
+      ]
+    ).toContain(
+      "evidence.pdf"
+    );
+  });
+
+  it("blocks another Requester from directly downloading the attachment", async () => {
+    const response =
+      await request(app)
+        .get(
+          `/api/attachments/${attachmentId}/download`
+        )
+        .query({
+          requesterId:
+            requesterBId,
+        });
+
+    expect(
+      response.status
+    ).toBe(404);
+  });
+
+  it("soft-removes an owned attachment with a reason and retains metadata", async () => {
+    const response =
+      await request(app)
+        .delete(
+          `/api/attachments/${attachmentId}`
+        )
+        .query({
+          requesterId:
+            requesterAId,
+        })
+        .send({
+          removalReason:
+            "Uploaded wrong evidence file",
+        });
+
+    expect(
+      response.status
+    ).toBe(200);
+
+    expect(
+      response.body.data
+    ).toMatchObject({
+      id:
+        attachmentId,
+      isRemoved:
+        true,
+      removalReason:
+        "Uploaded wrong evidence file",
+    });
+
+    expect(
+      response.body.data.removedAt
+    ).toBeDefined();
+
+    const listResponse =
+      await request(app)
+        .get(
+          `/api/tickets/${ticketId}/attachments`
+        )
+        .query({
+          requesterId:
+            requesterAId,
+        });
+
+    expect(
+      listResponse.status
+    ).toBe(200);
+
+    expect(
+      listResponse.body.data
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id:
+            attachmentId,
+          fileName:
+            "evidence.pdf",
+          isRemoved:
+            true,
+          removalReason:
+            "Uploaded wrong evidence file",
+        }),
+      ])
+    );
+  });
+
+  it("blocks downloading a soft-removed attachment", async () => {
+    const response =
+      await request(app)
+        .get(
+          `/api/attachments/${attachmentId}/download`
+        )
+        .query({
+          requesterId:
+            requesterAId,
+        });
+
+    expect(
+      response.status
+    ).toBe(404);
   });
 });

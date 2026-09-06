@@ -121,6 +121,29 @@ Status:
 Merged
 
 ---
+## PR #25 - Lab 2 Testing and Visual Verification
+
+Branch:
+
+feature/lab2-testing-visual
+
+Reviewer:
+
+Chanya-Grace-2546
+
+Review / Merge Evidence:
+
+The pull request contained the Lab 2 testing and visual verification work, including final test documentation, reviewer evidence, AI-use documentation, and screenshot evidence preparation.
+
+The pull request was reviewed and merged by the peer reviewer into `lab2-staging`.
+
+Approval:
+
+Approved
+
+Status:
+
+Merged
 
 # Final Review Summary
 

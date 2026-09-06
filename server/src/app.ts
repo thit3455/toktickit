@@ -915,6 +915,373 @@ app.post(
 );
 
 // ---------------------------------------------------------------------------
+// Lab 2 — List Ticket Attachments
+// Only the owning Requester may view attachment metadata.
+// Removed attachments remain visible as retained metadata.
+// ---------------------------------------------------------------------------
+
+app.get(
+  "/api/tickets/:id/attachments",
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(
+        req.params.id
+      );
+
+      const requesterId = Number(
+        req.query.requesterId
+      );
+
+      if (
+        !Number.isInteger(ticketId) ||
+        ticketId <= 0 ||
+        !Number.isInteger(requesterId) ||
+        requesterId <= 0
+      ) {
+        return res.status(400).json({
+          error: {
+            code:
+              "INVALID_QUERY",
+
+            message:
+              "A valid Ticket ID and Requester ID are required.",
+          },
+        });
+      }
+
+      const prisma = getPrisma();
+
+      const ticket =
+        await prisma.ticket.findFirst(
+          {
+            where: {
+              id: ticketId,
+              requesterId,
+            },
+
+            select: {
+              id: true,
+            },
+          }
+        );
+
+      if (!ticket) {
+        return res.status(404).json({
+          error: {
+            code:
+              "TICKET_NOT_FOUND",
+
+            message:
+              "Ticket was not found.",
+          },
+        });
+      }
+
+      const attachments =
+        await prisma.attachment.findMany(
+          {
+            where: {
+              ticketId,
+            },
+
+            select: {
+              id: true,
+              ticketId: true,
+              fileName: true,
+              mimeType: true,
+              fileSize: true,
+              isRemoved: true,
+              uploadedAt: true,
+              removedAt: true,
+              removalReason: true,
+            },
+
+            orderBy: {
+              uploadedAt: "asc",
+            },
+          }
+        );
+
+      return res.status(200).json({
+        data: attachments,
+      });
+    } catch {
+      return res.status(500).json({
+        error: {
+          code:
+            "ATTACHMENT_LIST_ERROR",
+
+          message:
+            "Unable to retrieve attachments.",
+        },
+      });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Lab 2 — Download Ticket Attachment
+// Only the owning Requester may download an active attachment.
+// Soft-removed attachments cannot be downloaded.
+// ---------------------------------------------------------------------------
+
+app.get(
+  "/api/attachments/:attachmentId/download",
+  async (req: Request, res: Response) => {
+    try {
+      const attachmentId = Number(
+        req.params.attachmentId
+      );
+
+      const requesterId = Number(
+        req.query.requesterId
+      );
+
+      if (
+        !Number.isInteger(
+          attachmentId
+        ) ||
+        attachmentId <= 0 ||
+        !Number.isInteger(requesterId) ||
+        requesterId <= 0
+      ) {
+        return res.status(400).json({
+          error: {
+            code:
+              "INVALID_QUERY",
+
+            message:
+              "A valid Attachment ID and Requester ID are required.",
+          },
+        });
+      }
+
+      const prisma = getPrisma();
+
+      const attachment =
+        await prisma.attachment.findUnique(
+          {
+            where: {
+              id: attachmentId,
+            },
+
+            select: {
+              id: true,
+              fileName: true,
+              mimeType: true,
+              content: true,
+              isRemoved: true,
+
+              ticket: {
+                select: {
+                  requesterId: true,
+                },
+              },
+            },
+          }
+        );
+
+      if (
+        !attachment ||
+        attachment.ticket.requesterId !==
+          requesterId ||
+        attachment.isRemoved
+      ) {
+        return res.status(404).json({
+          error: {
+            code:
+              "ATTACHMENT_NOT_FOUND",
+
+            message:
+              "Attachment was not found.",
+          },
+        });
+      }
+
+      res.setHeader(
+        "Content-Type",
+        attachment.mimeType
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${attachment.fileName.replace(
+          /["\r\n]/g,
+          "_"
+        )}"`
+      );
+
+      return res
+        .status(200)
+        .send(
+          Buffer.from(
+            attachment.content
+          )
+        );
+    } catch {
+      return res.status(500).json({
+        error: {
+          code:
+            "ATTACHMENT_DOWNLOAD_ERROR",
+
+          message:
+            "Unable to download attachment.",
+        },
+      });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Lab 2 — Soft Remove Ticket Attachment
+// Metadata is retained and a removal reason is required.
+// Only the owning Requester may remove the attachment.
+// ---------------------------------------------------------------------------
+
+app.delete(
+  "/api/attachments/:attachmentId",
+  async (req: Request, res: Response) => {
+    try {
+      const attachmentId = Number(
+        req.params.attachmentId
+      );
+
+      const requesterId = Number(
+        req.query.requesterId
+      );
+
+      const removalReason =
+        typeof req.body?.removalReason ===
+        "string"
+          ? req.body.removalReason.trim()
+          : "";
+
+      if (
+        !Number.isInteger(
+          attachmentId
+        ) ||
+        attachmentId <= 0 ||
+        !Number.isInteger(requesterId) ||
+        requesterId <= 0
+      ) {
+        return res.status(400).json({
+          error: {
+            code:
+              "INVALID_QUERY",
+
+            message:
+              "A valid Attachment ID and Requester ID are required.",
+          },
+        });
+      }
+
+      if (!removalReason) {
+        return res.status(400).json({
+          error: {
+            code:
+              "REMOVAL_REASON_REQUIRED",
+
+            message:
+              "A removal reason is required.",
+          },
+        });
+      }
+
+      const prisma = getPrisma();
+
+      const attachment =
+        await prisma.attachment.findUnique(
+          {
+            where: {
+              id: attachmentId,
+            },
+
+            select: {
+              id: true,
+              isRemoved: true,
+
+              ticket: {
+                select: {
+                  requesterId: true,
+                },
+              },
+            },
+          }
+        );
+
+      if (
+        !attachment ||
+        attachment.ticket.requesterId !==
+          requesterId
+      ) {
+        return res.status(404).json({
+          error: {
+            code:
+              "ATTACHMENT_NOT_FOUND",
+
+            message:
+              "Attachment was not found.",
+          },
+        });
+      }
+
+      if (attachment.isRemoved) {
+        return res.status(400).json({
+          error: {
+            code:
+              "ATTACHMENT_ALREADY_REMOVED",
+
+            message:
+              "Attachment has already been removed.",
+          },
+        });
+      }
+
+      const removedAttachment =
+        await prisma.attachment.update(
+          {
+            where: {
+              id: attachmentId,
+            },
+
+            data: {
+              isRemoved: true,
+              removedAt: new Date(),
+              removalReason,
+            },
+
+            select: {
+              id: true,
+              ticketId: true,
+              fileName: true,
+              mimeType: true,
+              fileSize: true,
+              isRemoved: true,
+              uploadedAt: true,
+              removedAt: true,
+              removalReason: true,
+            },
+          }
+        );
+
+      return res.status(200).json({
+        data: removedAttachment,
+      });
+    } catch {
+      return res.status(500).json({
+        error: {
+          code:
+            "ATTACHMENT_REMOVE_ERROR",
+
+          message:
+            "Unable to remove attachment.",
+        },
+      });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
 // Lab 2 — Create Ticket
 // ---------------------------------------------------------------------------
 

@@ -6,13 +6,20 @@ import {
   DevelopmentRequester,
   RelatedSystem,
   RequestedPriority,
+  TicketAttachment,
+  TicketDetail,
   TicketListItem,
   TicketPagination,
   createTicket,
+  downloadAttachmentFile,
   getCategories,
   getMyTickets,
   getRelatedSystems,
   getRequesters,
+  getTicketAttachments,
+  getTicketDetail,
+  removeAttachment,
+  uploadTicketAttachment,
 } from "./api.js";
 
 type RequesterState =
@@ -39,7 +46,26 @@ type TicketListState =
   | "ready"
   | "error";
 
-type Screen = "create" | "myTickets";
+type TicketDetailState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "error";
+
+type AttachmentState =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "error";
+
+type AttachmentActionState =
+  | "idle"
+  | "working";
+
+type Screen =
+  | "create"
+  | "myTickets"
+  | "ticketDetail";
 
 const MAX_ATTACHMENT_SIZE =
   5 * 1024 * 1024;
@@ -61,9 +87,9 @@ const EMPTY_PAGINATION: TicketPagination = {
 };
 
 export default function App() {
-  // ---------------------------------------------------------
-  // Requester
-  // ---------------------------------------------------------
+  // =========================================================
+  // Development Requester
+  // =========================================================
 
   const [requesters, setRequesters] =
     useState<DevelopmentRequester[]>([]);
@@ -90,9 +116,9 @@ export default function App() {
   const [screen, setScreen] =
     useState<Screen>("create");
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Reference Data
-  // ---------------------------------------------------------
+  // =========================================================
 
   const [categories, setCategories] =
     useState<Category[]>([]);
@@ -108,9 +134,9 @@ export default function App() {
   ] =
     useState<ReferenceState>("idle");
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Create Ticket
-  // ---------------------------------------------------------
+  // =========================================================
 
   const [categoryId, setCategoryId] =
     useState("");
@@ -147,6 +173,11 @@ export default function App() {
   ] = useState("");
 
   const [
+    createAttachmentWarning,
+    setCreateAttachmentWarning,
+  ] = useState("");
+
+  const [
     submitState,
     setSubmitState,
   ] =
@@ -165,9 +196,9 @@ export default function App() {
       {}
     );
 
-  // ---------------------------------------------------------
+  // =========================================================
   // My Tickets
-  // ---------------------------------------------------------
+  // =========================================================
 
   const [tickets, setTickets] =
     useState<TicketListItem[]>([]);
@@ -235,9 +266,93 @@ export default function App() {
     setReloadTicketsKey,
   ] = useState(0);
 
-  // ---------------------------------------------------------
+  // =========================================================
+  // Ticket Detail
+  // =========================================================
+
+  const [
+    selectedTicketId,
+    setSelectedTicketId,
+  ] =
+    useState<number | null>(null);
+
+  const [
+    ticketDetail,
+    setTicketDetail,
+  ] =
+    useState<TicketDetail | null>(
+      null
+    );
+
+  const [
+    ticketDetailState,
+    setTicketDetailState,
+  ] =
+    useState<TicketDetailState>(
+      "idle"
+    );
+
+  const [
+    reloadDetailKey,
+    setReloadDetailKey,
+  ] = useState(0);
+
+  // =========================================================
+  // Ticket Detail Attachments
+  // =========================================================
+
+  const [
+    ticketAttachments,
+    setTicketAttachments,
+  ] =
+    useState<TicketAttachment[]>([]);
+
+  const [
+    attachmentState,
+    setAttachmentState,
+  ] =
+    useState<AttachmentState>("idle");
+
+  const [
+    attachmentActionState,
+    setAttachmentActionState,
+  ] =
+    useState<AttachmentActionState>(
+      "idle"
+    );
+
+  const [
+    detailUploadFile,
+    setDetailUploadFile,
+  ] =
+    useState<File | null>(null);
+
+  const [
+    detailAttachmentError,
+    setDetailAttachmentError,
+  ] = useState("");
+
+  const [
+    attachmentActionMessage,
+    setAttachmentActionMessage,
+  ] = useState("");
+
+  const [
+    attachmentActionError,
+    setAttachmentActionError,
+  ] = useState("");
+
+  const [
+    removalReasons,
+    setRemovalReasons,
+  ] =
+    useState<Record<number, string>>(
+      {}
+    );
+
+  // =========================================================
   // Load Development Requesters
-  // ---------------------------------------------------------
+  // =========================================================
 
   useEffect(() => {
     async function loadRequesters() {
@@ -291,9 +406,9 @@ export default function App() {
     loadRequesters();
   }, []);
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Load Categories + Related Systems
-  // ---------------------------------------------------------
+  // =========================================================
 
   useEffect(() => {
     if (!currentRequester) {
@@ -329,9 +444,9 @@ export default function App() {
     loadReferenceData();
   }, [currentRequester]);
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Load My Tickets
-  // ---------------------------------------------------------
+  // =========================================================
 
   useEffect(() => {
     if (
@@ -341,8 +456,6 @@ export default function App() {
       return;
     }
 
-    // Important:
-    // Save the ID after checking currentRequester is not null.
     const requesterId =
       currentRequester.id;
 
@@ -423,9 +536,115 @@ export default function App() {
     reloadTicketsKey,
   ]);
 
-  // ---------------------------------------------------------
+  // =========================================================
+  // Load Ticket Detail
+  // =========================================================
+
+  useEffect(() => {
+    if (
+      !currentRequester ||
+      screen !== "ticketDetail" ||
+      selectedTicketId === null
+    ) {
+      return;
+    }
+
+    const requesterId =
+      currentRequester.id;
+
+    const ticketId =
+      selectedTicketId;
+
+    async function loadDetail() {
+      try {
+        setTicketDetailState(
+          "loading"
+        );
+
+        setTicketDetail(null);
+
+        const detail =
+          await getTicketDetail(
+            ticketId,
+            requesterId
+          );
+
+        setTicketDetail(detail);
+
+        setTicketDetailState(
+          "ready"
+        );
+      } catch {
+        setTicketDetailState(
+          "error"
+        );
+      }
+    }
+
+    loadDetail();
+  }, [
+    currentRequester,
+    screen,
+    selectedTicketId,
+    reloadDetailKey,
+  ]);
+
+  // =========================================================
+  // Load Ticket Attachments
+  // =========================================================
+
+  useEffect(() => {
+    if (
+      !currentRequester ||
+      screen !== "ticketDetail" ||
+      selectedTicketId === null
+    ) {
+      return;
+    }
+
+    const requesterId =
+      currentRequester.id;
+
+    const ticketId =
+      selectedTicketId;
+
+    async function loadAttachments() {
+      try {
+        setAttachmentState(
+          "loading"
+        );
+
+        const data =
+          await getTicketAttachments(
+            ticketId,
+            requesterId
+          );
+
+        setTicketAttachments(
+          data
+        );
+
+        setAttachmentState(
+          "ready"
+        );
+      } catch {
+        setAttachmentState(
+          "error"
+        );
+      }
+    }
+
+    loadAttachments();
+  }, [
+    currentRequester,
+    screen,
+    selectedTicketId,
+    reloadDetailKey,
+  ]);
+
+  // =========================================================
   // Requester Selection
-  // ---------------------------------------------------------
+  // =========================================================
 
   function handleContinue() {
     const requester =
@@ -464,14 +683,22 @@ export default function App() {
 
     setScreen("create");
 
+    setSelectedTicketId(null);
+
+    setTicketDetail(null);
+
+    setTicketAttachments([]);
+
     resetCreateTicketForm();
 
     resetTicketFilters();
+
+    resetDetailAttachmentState();
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Reset Create Ticket
-  // ---------------------------------------------------------
+  // =========================================================
 
   function resetCreateTicketForm() {
     setCategoryId("");
@@ -488,6 +715,8 @@ export default function App() {
 
     setAttachmentError("");
 
+    setCreateAttachmentWarning("");
+
     setCreatedTicket(null);
 
     setSubmitState("idle");
@@ -495,9 +724,54 @@ export default function App() {
     setErrors({});
   }
 
-  // ---------------------------------------------------------
-  // Attachment Validation
-  // ---------------------------------------------------------
+  // =========================================================
+  // Reset Detail Attachment State
+  // =========================================================
+
+  function resetDetailAttachmentState() {
+    setDetailUploadFile(null);
+
+    setDetailAttachmentError("");
+
+    setAttachmentActionMessage("");
+
+    setAttachmentActionError("");
+
+    setRemovalReasons({});
+
+    setAttachmentActionState(
+      "idle"
+    );
+  }
+
+  // =========================================================
+  // Shared Attachment Validation
+  // =========================================================
+
+  function validateAttachmentFile(
+    file: File
+  ): string {
+    if (
+      !ALLOWED_ATTACHMENT_TYPES.includes(
+        file.type
+      )
+    ) {
+      return "Only JPG/JPEG, PNG, WEBP, and PDF files are allowed.";
+    }
+
+    if (
+      file.size >
+      MAX_ATTACHMENT_SIZE
+    ) {
+      return "Each attachment must be 5 MB or smaller.";
+    }
+
+    return "";
+  }
+
+  // =========================================================
+  // Create Ticket Attachment Validation
+  // =========================================================
 
   function handleAttachmentChange(
     event: React.ChangeEvent<HTMLInputElement>
@@ -526,47 +800,27 @@ export default function App() {
       return;
     }
 
-    const invalidTypeFile =
-      files.find(
-        (file) =>
-          !ALLOWED_ATTACHMENT_TYPES.includes(
-            file.type
-          )
-      );
+    for (const file of files) {
+      const validationMessage =
+        validateAttachmentFile(file);
 
-    if (invalidTypeFile) {
-      setAttachments([]);
+      if (validationMessage) {
+        setAttachments([]);
 
-      setAttachmentError(
-        "Only JPG/JPEG, PNG, WEBP, and PDF files are allowed."
-      );
+        setAttachmentError(
+          validationMessage
+        );
 
-      return;
-    }
-
-    const oversizedFile =
-      files.find(
-        (file) =>
-          file.size >
-          MAX_ATTACHMENT_SIZE
-      );
-
-    if (oversizedFile) {
-      setAttachments([]);
-
-      setAttachmentError(
-        "Each attachment must be 5 MB or smaller."
-      );
-
-      return;
+        return;
+      }
     }
 
     setAttachments(files);
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Create Ticket Validation
-  // ---------------------------------------------------------
+  // =========================================================
 
   function validateForm() {
     const newErrors: Record<
@@ -621,9 +875,9 @@ export default function App() {
     );
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Submit Ticket
-  // ---------------------------------------------------------
+  // =========================================================
 
   async function handleSubmit(
     event: React.FormEvent
@@ -643,6 +897,8 @@ export default function App() {
       );
 
       setCreatedTicket(null);
+
+      setCreateAttachmentWarning("");
 
       const ticket =
         await createTicket({
@@ -669,15 +925,42 @@ export default function App() {
 
       setCreatedTicket(ticket);
 
+      // Ticket creation succeeds independently.
+      // If an attachment upload fails, preserve the
+      // created Ticket and report the attachment issue.
+      if (
+        attachments.length > 0
+      ) {
+        try {
+          for (
+            const file of attachments
+          ) {
+            await uploadTicketAttachment(
+              ticket.id,
+              currentRequester.id,
+              file
+            );
+          }
+        } catch {
+          setCreateAttachmentWarning(
+            "The Ticket was created, but one or more attachments could not be uploaded."
+          );
+        }
+      }
+
       setSubmitState("success");
+
+      setReloadTicketsKey(
+        (value) => value + 1
+      );
     } catch {
       setSubmitState("error");
     }
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // My Tickets Helpers
-  // ---------------------------------------------------------
+  // =========================================================
 
   function resetTicketFilters() {
     setSearch("");
@@ -711,6 +994,246 @@ export default function App() {
     );
   }
 
+  function openTicketDetail(
+    ticketId: number
+  ) {
+    setSelectedTicketId(
+      ticketId
+    );
+
+    setTicketDetail(null);
+
+    setTicketAttachments([]);
+
+    resetDetailAttachmentState();
+
+    setScreen("ticketDetail");
+  }
+
+  function backToMyTickets() {
+    setScreen("myTickets");
+
+    setSelectedTicketId(null);
+
+    setTicketDetail(null);
+
+    setTicketAttachments([]);
+
+    resetDetailAttachmentState();
+
+    setReloadTicketsKey(
+      (value) => value + 1
+    );
+  }
+
+  // =========================================================
+  // Ticket Detail Attachment Upload
+  // =========================================================
+
+  function handleDetailUploadFileChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file =
+      event.target.files?.[0] ??
+      null;
+
+    setDetailUploadFile(null);
+
+    setDetailAttachmentError("");
+
+    setAttachmentActionError("");
+
+    setAttachmentActionMessage("");
+
+    if (!file) {
+      return;
+    }
+
+    const activeCount =
+      ticketAttachments.filter(
+        (attachment) =>
+          !attachment.isRemoved
+      ).length;
+
+    if (
+      activeCount >=
+      MAX_ATTACHMENTS
+    ) {
+      setDetailAttachmentError(
+        "This Ticket already has the maximum of 5 active attachments."
+      );
+
+      event.target.value = "";
+
+      return;
+    }
+
+    const validationMessage =
+      validateAttachmentFile(file);
+
+    if (validationMessage) {
+      setDetailAttachmentError(
+        validationMessage
+      );
+
+      event.target.value = "";
+
+      return;
+    }
+
+    setDetailUploadFile(file);
+  }
+
+  async function handleDetailUpload() {
+    if (
+      !currentRequester ||
+      selectedTicketId === null ||
+      !detailUploadFile
+    ) {
+      setDetailAttachmentError(
+        "Select an attachment first."
+      );
+
+      return;
+    }
+
+    try {
+      setAttachmentActionState(
+        "working"
+      );
+
+      setAttachmentActionError("");
+
+      setAttachmentActionMessage("");
+
+      await uploadTicketAttachment(
+        selectedTicketId,
+        currentRequester.id,
+        detailUploadFile
+      );
+
+      setDetailUploadFile(null);
+
+      setAttachmentActionMessage(
+        "Attachment uploaded successfully."
+      );
+
+      setReloadDetailKey(
+        (value) => value + 1
+      );
+    } catch {
+      setAttachmentActionError(
+        "Unable to upload Attachment."
+      );
+    } finally {
+      setAttachmentActionState(
+        "idle"
+      );
+    }
+  }
+
+  // =========================================================
+  // Download Attachment
+  // =========================================================
+
+  async function handleDownloadAttachment(
+    attachment: TicketAttachment
+  ) {
+    if (
+      !currentRequester ||
+      attachment.isRemoved
+    ) {
+      return;
+    }
+
+    try {
+      setAttachmentActionError("");
+
+      setAttachmentActionMessage("");
+
+      await downloadAttachmentFile(
+        attachment,
+        currentRequester.id
+      );
+    } catch {
+      setAttachmentActionError(
+        "Unable to download Attachment."
+      );
+    }
+  }
+
+  // =========================================================
+  // Soft Remove Attachment
+  // =========================================================
+
+  async function handleRemoveAttachment(
+    attachment: TicketAttachment
+  ) {
+    if (!currentRequester) {
+      return;
+    }
+
+    const reason =
+      (
+        removalReasons[
+          attachment.id
+        ] ?? ""
+      ).trim();
+
+    if (!reason) {
+      setAttachmentActionError(
+        "A removal reason is required."
+      );
+
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Remove "${attachment.originalName}"? The metadata will be retained.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setAttachmentActionState(
+        "working"
+      );
+
+      setAttachmentActionError("");
+
+      setAttachmentActionMessage("");
+
+      await removeAttachment(
+        attachment.id,
+        currentRequester.id,
+        reason
+      );
+
+      setAttachmentActionMessage(
+        "Attachment removed successfully. Metadata has been retained."
+      );
+
+      setReloadDetailKey(
+        (value) => value + 1
+      );
+    } catch {
+      setAttachmentActionError(
+        "Unable to remove Attachment."
+      );
+    } finally {
+      setAttachmentActionState(
+        "idle"
+      );
+    }
+  }
+
+  // =========================================================
+  // Formatting
+  // =========================================================
+
   function formatDate(
     value: string
   ) {
@@ -719,9 +1242,31 @@ export default function App() {
     ).toLocaleString();
   }
 
-  // ---------------------------------------------------------
-  // Requester Selection Screen
-  // ---------------------------------------------------------
+  function formatBytes(
+    bytes: number
+  ) {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    if (
+      bytes <
+      1024 * 1024
+    ) {
+      return `${(
+        bytes / 1024
+      ).toFixed(1)} KB`;
+    }
+
+    return `${(
+      bytes /
+      (1024 * 1024)
+    ).toFixed(1)} MB`;
+  }
+
+  // =========================================================
+  // Development Requester Selection Screen
+  // =========================================================
 
   if (!currentRequester) {
     return (
@@ -739,15 +1284,18 @@ export default function App() {
         </h1>
 
         <h2 className="h5 mb-3">
-          Select a Development Requester
+          Select a Development
+          Requester
         </h2>
 
         <p className="text-muted">
-          Select a Development Requester to test
-          requester-specific ticket behavior.
-          This is not a login screen.
-          Authentication and role-based access
-          will be introduced in Lab 3.
+          Select a Development
+          Requester to test
+          requester-specific ticket
+          behavior. This is not a login
+          screen. Authentication and
+          role-based access will be
+          introduced in Lab 3.
         </p>
 
         {requesterState ===
@@ -845,9 +1393,9 @@ export default function App() {
     );
   }
 
-  // ---------------------------------------------------------
+  // =========================================================
   // Main Application
-  // ---------------------------------------------------------
+  // =========================================================
 
   return (
     <main
@@ -888,19 +1436,24 @@ export default function App() {
       {/* Navigation */}
 
       <nav
-        className="d-flex gap-2 mb-4"
+        className="d-flex flex-wrap gap-2 mb-4"
         aria-label="Requester navigation"
       >
         <button
           type="button"
           className={
-            screen === "myTickets"
+            screen === "myTickets" ||
+            screen === "ticketDetail"
               ? "btn btn-success"
               : "btn btn-outline-success"
           }
           onClick={() => {
             setScreen(
               "myTickets"
+            );
+
+            setSelectedTicketId(
+              null
             );
 
             setTicketPage(1);
@@ -916,20 +1469,23 @@ export default function App() {
               ? "btn btn-success"
               : "btn btn-outline-success"
           }
-          onClick={() =>
-            setScreen("create")
-          }
+          onClick={() => {
+            setScreen("create");
+
+            setSelectedTicketId(
+              null
+            );
+          }}
         >
           Create Ticket
         </button>
       </nav>
 
-      {screen ===
-      "myTickets" ? (
-        // =====================================================
-        // MY TICKETS
-        // =====================================================
+      {/* =====================================================
+          MY TICKETS
+      ====================================================== */}
 
+      {screen === "myTickets" && (
         <section>
           <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <div>
@@ -945,16 +1501,6 @@ export default function App() {
                 .
               </p>
             </div>
-
-            <button
-              type="button"
-              className="btn btn-success"
-              onClick={() =>
-                setScreen("create")
-              }
-            >
-              Create Ticket
-            </button>
           </div>
 
           {/* Search + Filters */}
@@ -1319,8 +1865,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Loading */}
-
           {ticketListState ===
             "loading" && (
             <div
@@ -1330,8 +1874,6 @@ export default function App() {
               Loading My Tickets...
             </div>
           )}
-
-          {/* Error */}
 
           {ticketListState ===
             "error" && (
@@ -1358,8 +1900,6 @@ export default function App() {
               </button>
             </div>
           )}
-
-          {/* Empty */}
 
           {ticketListState ===
             "ready" &&
@@ -1390,8 +1930,6 @@ export default function App() {
               </div>
             )}
 
-          {/* No Results */}
-
           {ticketListState ===
             "ready" &&
             tickets.length === 0 &&
@@ -1419,8 +1957,6 @@ export default function App() {
                 </button>
               </div>
             )}
-
-          {/* Ticket Table */}
 
           {ticketListState ===
             "ready" &&
@@ -1473,11 +2009,19 @@ export default function App() {
                             }
                           >
                             <td>
-                              <strong>
+                              <button
+                                type="button"
+                                className="btn btn-link p-0 fw-bold text-success"
+                                onClick={() =>
+                                  openTicketDetail(
+                                    ticket.id
+                                  )
+                                }
+                              >
                                 {
                                   ticket.ticketNumber
                                 }
-                              </strong>
+                              </button>
                             </td>
 
                             <td>
@@ -1503,15 +2047,19 @@ export default function App() {
                             </td>
 
                             <td>
-                              {
-                                ticket.requestedPriority
-                              }
+                              <span className="badge text-bg-light border">
+                                {
+                                  ticket.requestedPriority
+                                }
+                              </span>
                             </td>
 
                             <td>
-                              {
-                                ticket.currentStatus
-                              }
+                              <span className="badge text-bg-success">
+                                {
+                                  ticket.currentStatus
+                                }
+                              </span>
                             </td>
 
                             <td>
@@ -1531,8 +2079,6 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
-
-                {/* Pagination */}
 
                 <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
                   <div>
@@ -1561,8 +2107,7 @@ export default function App() {
                       type="button"
                       className="btn btn-outline-success"
                       disabled={
-                        ticketPage <=
-                        1
+                        ticketPage <= 1
                       }
                       onClick={() =>
                         setTicketPage(
@@ -1600,11 +2145,567 @@ export default function App() {
               </>
             )}
         </section>
-      ) : (
-        // =====================================================
-        // CREATE TICKET
-        // =====================================================
+      )}
 
+      {/* =====================================================
+          TICKET DETAIL
+      ====================================================== */}
+
+      {screen ===
+        "ticketDetail" && (
+        <section>
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+              <h2 className="h4 mb-1">
+                Ticket Detail
+              </h2>
+
+              <p className="text-muted mb-0">
+                Requester-owned Ticket
+                information and
+                attachments.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-outline-success"
+              onClick={
+                backToMyTickets
+              }
+            >
+              Back to My Tickets
+            </button>
+          </div>
+
+          {ticketDetailState ===
+            "loading" && (
+            <div
+              className="alert alert-info"
+              role="status"
+            >
+              Loading Ticket Detail...
+            </div>
+          )}
+
+          {ticketDetailState ===
+            "error" && (
+            <div
+              className="alert alert-danger"
+              role="alert"
+            >
+              <p className="mb-2">
+                Unable to load this
+                Ticket. It may not
+                belong to the selected
+                Requester.
+              </p>
+
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm"
+                onClick={() =>
+                  setReloadDetailKey(
+                    (value) =>
+                      value + 1
+                  )
+                }
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {ticketDetailState ===
+            "ready" &&
+            ticketDetail && (
+              <>
+                {/* Read-only Ticket Information */}
+
+                <div className="card mb-4">
+                  <div className="card-header bg-success text-white">
+                    Ticket Information
+                  </div>
+
+                  <div className="card-body">
+                    <div className="row g-3">
+                      <div className="col-md-4">
+                        <label className="form-label">
+                          Ticket Number
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.ticketNumber
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-4">
+                        <label className="form-label">
+                          Current Status
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.currentStatus
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-4">
+                        <label className="form-label">
+                          Requested Priority
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.requestedPriority
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Requester
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.requester.name
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Requester Email
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.requester.email ??
+                            ""
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Category
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.category.name
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Related System
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.relatedSystem.name
+                          }
+                        />
+                      </div>
+
+                      <div className="col-12">
+                        <label className="form-label">
+                          Ticket Summary
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={
+                            ticketDetail.summary
+                          }
+                        />
+                      </div>
+
+                      <div className="col-12">
+                        <label className="form-label">
+                          Description
+                        </label>
+
+                        <textarea
+                          className="form-control bg-light"
+                          readOnly
+                          rows={5}
+                          value={
+                            ticketDetail.description
+                          }
+                        />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Created
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={formatDate(
+                            ticketDetail.createdAt
+                          )}
+                        />
+                      </div>
+
+                      <div className="col-md-6">
+                        <label className="form-label">
+                          Last Updated
+                        </label>
+
+                        <input
+                          className="form-control bg-light"
+                          readOnly
+                          value={formatDate(
+                            ticketDetail.updatedAt
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Attachment Section */}
+
+                <div className="card">
+                  <div className="card-header bg-success text-white">
+                    Attachments
+                  </div>
+
+                  <div className="card-body">
+                    <p className="text-muted">
+                      Allowed file types:
+                      JPG/JPEG, PNG,
+                      WEBP, and PDF.
+                      Maximum 5 MB per
+                      file and maximum
+                      5 active
+                      attachments.
+                    </p>
+
+                    {attachmentActionMessage && (
+                      <div
+                        className="alert alert-success"
+                        role="status"
+                      >
+                        {
+                          attachmentActionMessage
+                        }
+                      </div>
+                    )}
+
+                    {attachmentActionError && (
+                      <div
+                        className="alert alert-danger"
+                        role="alert"
+                      >
+                        {
+                          attachmentActionError
+                        }
+                      </div>
+                    )}
+
+                    <div className="row g-2 align-items-end mb-4">
+                      <div className="col-md-9">
+                        <label
+                          className="form-label"
+                          htmlFor="detail-attachment"
+                        >
+                          Add Attachment
+                        </label>
+
+                        <input
+                          id="detail-attachment"
+                          type="file"
+                          className="form-control"
+                          accept=".jpg,.jpeg,.png,.webp,.pdf"
+                          onChange={
+                            handleDetailUploadFileChange
+                          }
+                          disabled={
+                            attachmentActionState ===
+                            "working"
+                          }
+                        />
+
+                        {detailAttachmentError && (
+                          <div
+                            className="text-danger mt-1"
+                            role="alert"
+                          >
+                            {
+                              detailAttachmentError
+                            }
+                          </div>
+                        )}
+
+                        {detailUploadFile &&
+                          !detailAttachmentError && (
+                            <div className="text-success mt-1">
+                              Selected:{" "}
+                              {
+                                detailUploadFile.name
+                              }
+                            </div>
+                          )}
+                      </div>
+
+                      <div className="col-md-3 d-grid">
+                        <button
+                          type="button"
+                          className="btn btn-success"
+                          onClick={
+                            handleDetailUpload
+                          }
+                          disabled={
+                            !detailUploadFile ||
+                            attachmentActionState ===
+                              "working"
+                          }
+                        >
+                          {attachmentActionState ===
+                          "working"
+                            ? "Working..."
+                            : "Upload Attachment"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {attachmentState ===
+                      "loading" && (
+                      <div
+                        className="alert alert-info"
+                        role="status"
+                      >
+                        Loading
+                        Attachments...
+                      </div>
+                    )}
+
+                    {attachmentState ===
+                      "error" && (
+                      <div
+                        className="alert alert-danger"
+                        role="alert"
+                      >
+                        Unable to load
+                        Attachments.
+                      </div>
+                    )}
+
+                    {attachmentState ===
+                      "ready" &&
+                      ticketAttachments.length ===
+                        0 && (
+                        <div className="alert alert-secondary">
+                          No Attachments
+                          have been added
+                          to this Ticket.
+                        </div>
+                      )}
+
+                    {attachmentState ===
+                      "ready" &&
+                      ticketAttachments.length >
+                        0 && (
+                        <div className="d-grid gap-3">
+                          {ticketAttachments.map(
+                            (
+                              attachment
+                            ) => (
+                              <div
+                                key={
+                                  attachment.id
+                                }
+                                className="border rounded p-3"
+                              >
+                                <div className="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                                  <div>
+                                    <div className="fw-semibold">
+                                      {
+                                        attachment.originalName
+                                      }
+                                    </div>
+
+                                    <div className="small text-muted">
+                                      {
+                                        attachment.mimeType
+                                      }{" "}
+                                      •{" "}
+                                      {formatBytes(
+                                        attachment.sizeBytes
+                                      )}
+                                    </div>
+
+                                    <div className="small text-muted">
+                                      Added:{" "}
+                                      {formatDate(
+                                        attachment.createdAt
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {attachment.isRemoved ? (
+                                    <span className="badge text-bg-secondary">
+                                      Removed
+                                    </span>
+                                  ) : (
+                                    <span className="badge text-bg-success">
+                                      Active
+                                    </span>
+                                  )}
+                                </div>
+
+                                {attachment.isRemoved ? (
+                                  <div className="alert alert-light border mt-3 mb-0">
+                                    <div>
+                                      <strong>
+                                        Removed
+                                      </strong>
+                                    </div>
+
+                                    {attachment.removedAt && (
+                                      <div className="small">
+                                        Removed at:{" "}
+                                        {formatDate(
+                                          attachment.removedAt
+                                        )}
+                                      </div>
+                                    )}
+
+                                    <div className="small">
+                                      Reason:{" "}
+                                      {attachment.removalReason ||
+                                        "Not available"}
+                                    </div>
+
+                                    <div className="small text-muted mt-1">
+                                      Removed
+                                      attachments
+                                      remain visible
+                                      as metadata but
+                                      cannot be
+                                      downloaded.
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="mt-3">
+                                    <div className="d-flex flex-wrap gap-2 mb-3">
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-success btn-sm"
+                                        onClick={() =>
+                                          handleDownloadAttachment(
+                                            attachment
+                                          )
+                                        }
+                                        disabled={
+                                          attachmentActionState ===
+                                          "working"
+                                        }
+                                      >
+                                        Download
+                                      </button>
+                                    </div>
+
+                                    <label
+                                      className="form-label"
+                                      htmlFor={`removal-reason-${attachment.id}`}
+                                    >
+                                      Removal
+                                      Reason{" "}
+                                      <span className="text-danger">
+                                        *
+                                      </span>
+                                    </label>
+
+                                    <div className="d-flex flex-column flex-md-row gap-2">
+                                      <input
+                                        id={`removal-reason-${attachment.id}`}
+                                        className="form-control"
+                                        placeholder="Explain why this attachment is being removed"
+                                        value={
+                                          removalReasons[
+                                            attachment
+                                              .id
+                                          ] ??
+                                          ""
+                                        }
+                                        onChange={(
+                                          event
+                                        ) =>
+                                          setRemovalReasons(
+                                            (
+                                              current
+                                            ) => ({
+                                              ...current,
+                                              [attachment.id]:
+                                                event
+                                                  .target
+                                                  .value,
+                                            })
+                                          )
+                                        }
+                                      />
+
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-danger"
+                                        onClick={() =>
+                                          handleRemoveAttachment(
+                                            attachment
+                                          )
+                                        }
+                                        disabled={
+                                          attachmentActionState ===
+                                          "working"
+                                        }
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                  </div>
+                </div>
+              </>
+            )}
+        </section>
+      )}
+
+      {/* =====================================================
+          CREATE TICKET
+      ====================================================== */}
+
+      {screen === "create" && (
         <section>
           <h2 className="h4 mb-4">
             Create Ticket
@@ -1612,7 +2713,10 @@ export default function App() {
 
           {referenceState ===
             "loading" && (
-            <div className="alert alert-info">
+            <div
+              className="alert alert-info"
+              role="status"
+            >
               Loading ticket
               reference data...
             </div>
@@ -1645,8 +2749,33 @@ export default function App() {
                     createdTicket.ticketNumber
                   }
                 </strong>
+
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-success"
+                    onClick={() =>
+                      openTicketDetail(
+                        createdTicket.id
+                      )
+                    }
+                  >
+                    View Ticket Detail
+                  </button>
+                </div>
               </div>
             )}
+
+          {createAttachmentWarning && (
+            <div
+              className="alert alert-warning"
+              role="alert"
+            >
+              {
+                createAttachmentWarning
+              }
+            </div>
+          )}
 
           {submitState ===
             "error" && (
@@ -1676,7 +2805,7 @@ export default function App() {
 
                 <input
                   id="ticket-number"
-                  className="form-control"
+                  className="form-control bg-light"
                   value={
                     createdTicket?.ticketNumber ??
                     "Generated after submission"
@@ -1695,7 +2824,7 @@ export default function App() {
 
                 <input
                   id="ticket-date"
-                  className="form-control"
+                  className="form-control bg-light"
                   value={new Date().toLocaleDateString()}
                   readOnly
                 />
@@ -1711,7 +2840,7 @@ export default function App() {
 
                 <input
                   id="requester"
-                  className="form-control"
+                  className="form-control bg-light"
                   value={
                     currentRequester.name
                   }
@@ -1856,9 +2985,7 @@ export default function App() {
                 <input
                   id="ticket-summary"
                   className="form-control"
-                  value={
-                    summary
-                  }
+                  value={summary}
                   onChange={(
                     event
                   ) =>
@@ -1867,9 +2994,7 @@ export default function App() {
                         .value
                     )
                   }
-                  maxLength={
-                    120
-                  }
+                  maxLength={120}
                 />
 
                 {errors.summary && (
@@ -1961,9 +3086,7 @@ export default function App() {
                         .value
                     )
                   }
-                  maxLength={
-                    2000
-                  }
+                  maxLength={2000}
                 />
 
                 {errors.description && (

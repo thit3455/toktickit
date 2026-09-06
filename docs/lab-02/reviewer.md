@@ -144,7 +144,31 @@ Approved
 Status:
 
 Merged
+## PR #26 - Lab 2 Final Fixes and Verification
 
+Branch:
+
+feature/lab2-final-fixes
+
+Reviewer:
+
+Chanya-Grace-2546
+
+Reviewer Comment:
+
+> All test cases are complete and fit the requirements.Approve.
+
+Developer Response:
+
+> Thank you for reviewing
+
+Approval:
+
+Approved
+
+Status:
+
+Merged
 # Final Review Summary
 
 All Lab 2 implementation pull requests were reviewed by a peer reviewer.

@@ -1,4 +1,5 @@
 import { getPrisma } from "../src/prisma.js";
+import bcrypt from "bcrypt";
 
 async function main() {
   const prisma = getPrisma();
@@ -24,47 +25,85 @@ async function main() {
     });
   }
 
-  // Development Requesters
-  const requesters = [
+
+  // Lab 3 Users
+  const defaultPassword = "Password123!";
+  const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+  const users = [
     {
       name: "Alice Johnson",
       email: "alice.johnson@toktickit.test",
+      role: "REQUESTER",
       isActive: true,
+      mustChangePassword: false,
     },
     {
       name: "Brian Smith",
       email: "brian.smith@toktickit.test",
+      role: "REQUESTER",
       isActive: true,
+      mustChangePassword: false,
     },
     {
       name: "Chloe Lee",
       email: "chloe.lee@toktickit.test",
+      role: "REQUESTER",
       isActive: true,
+      mustChangePassword: false,
     },
     {
       name: "Daniel Wong",
       email: "daniel.wong@toktickit.test",
+      role: "REQUESTER",
       isActive: true,
+      mustChangePassword: false,
     },
     {
-      name: "Inactive Requester",
-      email: "inactive.requester@toktickit.test",
+      name: "IT Staff User",
+      email: "staff@toktickit.test",
+      role: "IT_STAFF",
+      isActive: true,
+      mustChangePassword: true,
+    },
+    {
+      name: "Administrator User",
+      email: "admin@toktickit.test",
+      role: "ADMINISTRATOR",
+      isActive: true,
+      mustChangePassword: true,
+    },
+    {
+      name: "Inactive User",
+      email: "inactive@toktickit.test",
+      role: "REQUESTER",
       isActive: false,
+      mustChangePassword: true,
     },
   ];
 
-  for (const requester of requesters) {
-    await prisma.requesterUser.upsert({
+  for (const user of users) {
+    await prisma.user.upsert({
       where: {
-        email: requester.email,
+        email: user.email,
       },
       update: {
-        name: requester.name,
-        isActive: requester.isActive,
+        name: user.name,
+        role: user.role as any,
+        isActive: user.isActive,
+        mustChangePassword: user.mustChangePassword,
       },
-      create: requester,
+      create: {
+        name: user.name,
+        email: user.email,
+        passwordHash,
+        role: user.role as any,
+        isActive: user.isActive,
+        mustChangePassword: user.mustChangePassword,
+      },
     });
   }
+
 
   // Related Systems
   const relatedSystems = [
@@ -90,10 +129,12 @@ async function main() {
     });
   }
 
+
   console.log("Category seed completed.");
-  console.log("Development Requester seed completed.");
+  console.log("User seed completed.");
   console.log("Related System seed completed.");
 }
+
 
 main()
   .catch((error) => {

@@ -6,6 +6,7 @@ import express, {
 import cors from "cors";
 import multer from "multer";
 import cookieParser from "cookie-parser";
+import staffRoutes from "./staff/staff.routes.js";
 import {
   authenticateToken,
   AuthRequest,
@@ -31,6 +32,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/staff", staffRoutes);
 
 // ---------------------------------------------------------------------------
 // Lab 3 — Authentication Routes

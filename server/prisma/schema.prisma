@@ -10,53 +10,29 @@ datasource db {
 model Category {
   id        Int      @id @default(autoincrement())
   name      String   @unique
-  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-
-  tickets Ticket[]
+  isActive  Boolean  @default(true)
+  tickets   Ticket[]
 
   @@index([isActive])
-}
-
-enum UserRole {
-  REQUESTER
-  IT_STAFF
-  ADMINISTRATOR
 }
 
 model User {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   name               String
-  email              String   @unique
+  email              String    @unique
   passwordHash       String
   role               UserRole
-  isActive           Boolean  @default(true)
-  mustChangePassword Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  requestedTickets Ticket[]
-  sessions         Session[]
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  sessions           Session[]
+  assignedTickets    Ticket[]  @relation("AssignedTickets")
+  requestedTickets   Ticket[]  @relation("RequestedTickets")
 
   @@index([isActive])
   @@index([role])
-}
-
-enum RequestedPriority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum TicketStatus {
-  NEW
-  OPEN
-  IN_PROGRESS
-  WAITING_FOR_REQUESTER
-  RESOLVED
-  CLOSED
-  REOPENED
-  CANCELLED
 }
 
 model RelatedSystem {
@@ -65,8 +41,7 @@ model RelatedSystem {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  tickets Ticket[]
+  tickets   Ticket[]
 
   @@index([isActive])
 }
@@ -83,14 +58,15 @@ model Ticket {
   currentStatus     TicketStatus      @default(NEW)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
-
-  requester     User          @relation(fields: [requesterId], references: [id])
-  category      Category      @relation(fields: [categoryId], references: [id])
-  relatedSystem RelatedSystem @relation(fields: [relatedSystemId], references: [id])
-
-  attachments Attachment[]
+  assignedStaffId   Int?
+  attachments       Attachment[]
+  assignedStaff     User?             @relation("AssignedTickets", fields: [assignedStaffId], references: [id])
+  category          Category          @relation(fields: [categoryId], references: [id])
+  relatedSystem     RelatedSystem     @relation(fields: [relatedSystemId], references: [id])
+  requester         User              @relation("RequestedTickets", fields: [requesterId], references: [id])
 
   @@index([requesterId])
+  @@index([assignedStaffId])
   @@index([categoryId])
   @@index([relatedSystemId])
   @@index([currentStatus])
@@ -109,8 +85,7 @@ model Attachment {
   uploadedAt    DateTime  @default(now())
   removedAt     DateTime?
   removalReason String?
-
-  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@index([ticketId])
   @@index([isRemoved])
@@ -122,10 +97,32 @@ model Session {
   userId    Int
   expiresAt DateTime
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([sessionId])
   @@index([expiresAt])
+}
+
+enum UserRole {
+  REQUESTER
+  IT_STAFF
+  ADMINISTRATOR
+}
+
+enum RequestedPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TicketStatus {
+  NEW
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_REQUESTER
+  RESOLVED
+  CLOSED
+  REOPENED
+  CANCELLED
 }

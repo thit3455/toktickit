@@ -6,6 +6,13 @@ import express, {
 import cors from "cors";
 import multer from "multer";
 import cookieParser from "cookie-parser";
+import staffRoutes from "./staff/staff.routes.js";
+import {
+  authenticateToken,
+  AuthRequest,
+} from "./auth/auth.middleware.js";
+
+import { requireRole } from "./auth/role.middleware.js";
 
 import {
   Prisma,
@@ -25,6 +32,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/staff", staffRoutes);
 
 // ---------------------------------------------------------------------------
 // Lab 3 — Authentication Routes
@@ -198,12 +207,11 @@ app.get(
 // ---------------------------------------------------------------------------
 
 app.get(
-  "/api/tickets",
-  async (req: Request, res: Response) => {
+  "/api/tickets/:id",
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       const page = Number(
         req.query.page ?? 1
@@ -574,24 +582,19 @@ app.get(
 
 app.get(
   "/api/tickets/:id",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const ticketId = Number(
         req.params.id
       );
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       if (
-        !Number.isInteger(ticketId) ||
-        ticketId <= 0 ||
-        !Number.isInteger(
-          requesterId
-        ) ||
-        requesterId <= 0
-      ) {
+  !Number.isInteger(ticketId) ||
+  ticketId <= 0
+  ){
         return res.status(400).json({
           error: {
             code:
@@ -688,8 +691,8 @@ app.get(
 
 app.post(
   "/api/tickets/:id/attachments",
-
-  (req: Request, res: Response) => {
+  authenticateToken,
+ (req: AuthRequest, res: Response) => {
     upload.single("file")(
       req,
       res,
@@ -734,23 +737,16 @@ app.post(
             req.params.id
           );
 
-          const requesterId = Number(
-            req.query.requesterId
-          );
+          const requesterId = req.user!.userId;
 
           // -------------------------------------------------
           // Validate Ticket + Requester IDs
           // -------------------------------------------------
 
           if (
-            !Number.isInteger(
-              ticketId
-            ) ||
-            ticketId <= 0 ||
-            !Number.isInteger(
-              requesterId
-            ) ||
-            requesterId <= 0
+            !Number.isInteger(ticketId) ||
+            ticketId <= 0
+
           ) {
             return res
               .status(400)
@@ -936,22 +932,19 @@ app.post(
 
 app.get(
   "/api/tickets/:id/attachments",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const ticketId = Number(
         req.params.id
       );
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       if (
         !Number.isInteger(ticketId) ||
-        ticketId <= 0 ||
-        !Number.isInteger(requesterId) ||
-        requesterId <= 0
-      ) {
+        ticketId <= 0
+      ){
         return res.status(400).json({
           error: {
             code:
@@ -1041,24 +1034,19 @@ app.get(
 
 app.get(
   "/api/attachments/:attachmentId/download",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const attachmentId = Number(
-        req.params.attachmentId
-      );
+  req.params.attachmentId
+);
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+const requesterId = req.user!.userId;
 
-      if (
-        !Number.isInteger(
-          attachmentId
-        ) ||
-        attachmentId <= 0 ||
-        !Number.isInteger(requesterId) ||
-        requesterId <= 0
-      ) {
+     if (
+      !Number.isInteger(attachmentId) ||
+      attachmentId <= 0
+    ) {
         return res.status(400).json({
           error: {
             code:

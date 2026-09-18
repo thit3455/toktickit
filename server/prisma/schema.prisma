@@ -36,6 +36,7 @@ model User {
   updatedAt          DateTime @updatedAt
 
   requestedTickets Ticket[]
+  sessions         Session[]
 
   @@index([isActive])
   @@index([role])
@@ -113,4 +114,18 @@ model Attachment {
 
   @@index([ticketId])
   @@index([isRemoved])
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  sessionId String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
 }

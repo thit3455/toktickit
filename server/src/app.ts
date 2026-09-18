@@ -5,6 +5,7 @@ import express, {
 
 import cors from "cors";
 import multer from "multer";
+import cookieParser from "cookie-parser";
 
 import {
   Prisma,
@@ -13,11 +14,23 @@ import {
 } from "@prisma/client";
 
 import { getPrisma } from "./prisma.js";
+import authRoutes from "./auth/auth.routes.js";
 
 export const app = express();
 
 app.use(cors());
+
+app.use(cookieParser());
+
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+
+// ---------------------------------------------------------------------------
+// Lab 3 — Authentication Routes
+// ---------------------------------------------------------------------------
+
+app.use("/api/auth", authRoutes);
 
 // ---------------------------------------------------------------------------
 // Lab 2 — Attachment Configuration
@@ -101,7 +114,7 @@ app.get(
   async (_req: Request, res: Response) => {
     try {
       const requesters =
-        await getPrisma().requesterUser.findMany(
+        await getPrisma().user.findMany(
           {
             where: {
               isActive: true,
@@ -364,11 +377,12 @@ app.get(
       // -----------------------------------------------------
 
       const requester =
-        await prisma.requesterUser.findFirst(
+        await prisma.user.findFirst(
           {
             where: {
               id: requesterId,
               isActive: true,
+              role: "REQUESTER",
             },
 
             select: {
@@ -1373,7 +1387,7 @@ app.post(
         category,
         relatedSystem,
       ] = await Promise.all([
-        prisma.requesterUser.findFirst(
+        prisma.user.findFirst(
           {
             where: {
               id: Number(
@@ -1381,6 +1395,7 @@ app.post(
               ),
 
               isActive: true,
+              role: "REQUESTER",
             },
           }
         ),

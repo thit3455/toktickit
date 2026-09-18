@@ -7,103 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  isActive  Boolean  @default(true)
-  tickets   Ticket[]
-
-  @@index([isActive])
-}
-
-model User {
-  id                 Int       @id @default(autoincrement())
-  name               String
-  email              String    @unique
-  passwordHash       String
-  role               UserRole
-  isActive           Boolean   @default(true)
-  mustChangePassword Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  sessions           Session[]
-  assignedTickets    Ticket[]  @relation("AssignedTickets")
-  requestedTickets   Ticket[]  @relation("RequestedTickets")
-
-  @@index([isActive])
-  @@index([role])
-}
-
-model RelatedSystem {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tickets   Ticket[]
-
-  @@index([isActive])
-}
-
-model Ticket {
-  id                Int               @id @default(autoincrement())
-  ticketNumber      String            @unique
-  requesterId       Int
-  categoryId        Int
-  relatedSystemId   Int
-  summary           String
-  description       String
-  requestedPriority RequestedPriority
-  currentStatus     TicketStatus      @default(NEW)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  assignedStaffId   Int?
-  attachments       Attachment[]
-  assignedStaff     User?             @relation("AssignedTickets", fields: [assignedStaffId], references: [id])
-  category          Category          @relation(fields: [categoryId], references: [id])
-  relatedSystem     RelatedSystem     @relation(fields: [relatedSystemId], references: [id])
-  requester         User              @relation("RequestedTickets", fields: [requesterId], references: [id])
-
-  @@index([requesterId])
-  @@index([assignedStaffId])
-  @@index([categoryId])
-  @@index([relatedSystemId])
-  @@index([currentStatus])
-  @@index([createdAt])
-  @@index([updatedAt])
-}
-
-model Attachment {
-  id            Int       @id @default(autoincrement())
-  ticketId      Int
-  fileName      String
-  mimeType      String
-  fileSize      Int
-  content       Bytes
-  isRemoved     Boolean   @default(false)
-  uploadedAt    DateTime  @default(now())
-  removedAt     DateTime?
-  removalReason String?
-  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
-  @@index([ticketId])
-  @@index([isRemoved])
-}
-
-model Session {
-  id        Int      @id @default(autoincrement())
-  sessionId String   @unique
-  userId    Int
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([sessionId])
-  @@index([expiresAt])
-}
-
 enum UserRole {
   REQUESTER
   IT_STAFF
@@ -125,4 +28,142 @@ enum TicketStatus {
   CLOSED
   REOPENED
   CANCELLED
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+
+  tickets Ticket[]
+
+  @@index([isActive])
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  email              String   @unique
+  passwordHash       String
+  role               UserRole
+  isActive           Boolean  @default(true)
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  sessions Session[]
+
+  requestedTickets Ticket[] @relation("RequestedTickets")
+  assignedTickets  Ticket[] @relation("AssignedTickets")
+
+  comments      TicketComment[]
+  internalNotes TicketInternalNote[]
+
+  @@index([isActive])
+  @@index([role])
+}
+
+model RelatedSystem {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tickets Ticket[]
+
+  @@index([isActive])
+}
+
+model Ticket {
+  id                Int               @id @default(autoincrement())
+  ticketNumber      String            @unique
+  requesterId       Int
+  assignedStaffId   Int?
+  categoryId        Int
+  relatedSystemId   Int
+  summary           String
+  description       String
+  requestedPriority RequestedPriority
+  currentStatus     TicketStatus      @default(NEW)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  requester     User          @relation("RequestedTickets", fields: [requesterId], references: [id])
+  assignedStaff User?         @relation("AssignedTickets", fields: [assignedStaffId], references: [id])
+  category      Category      @relation(fields: [categoryId], references: [id])
+  relatedSystem RelatedSystem @relation(fields: [relatedSystemId], references: [id])
+
+  attachments   Attachment[]
+  comments      TicketComment[]
+  internalNotes TicketInternalNote[]
+
+  @@index([requesterId])
+  @@index([assignedStaffId])
+  @@index([categoryId])
+  @@index([relatedSystemId])
+  @@index([currentStatus])
+  @@index([createdAt])
+  @@index([updatedAt])
+}
+
+model Attachment {
+  id            Int       @id @default(autoincrement())
+  ticketId      Int
+  fileName      String
+  mimeType      String
+  fileSize      Int
+  content       Bytes
+  isRemoved     Boolean   @default(false)
+  uploadedAt    DateTime  @default(now())
+  removedAt     DateTime?
+  removalReason String?
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([isRemoved])
+}
+
+model TicketComment {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  userId    Int
+  message   String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@index([userId])
+}
+
+model TicketInternalNote {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  userId    Int
+  message   String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@index([userId])
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  sessionId String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
 }

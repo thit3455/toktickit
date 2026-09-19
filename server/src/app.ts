@@ -1289,16 +1289,17 @@ app.delete(
 
 app.post(
   "/api/tickets",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const {
-        requesterId,
         categoryId,
         relatedSystemId,
         summary,
         requestedPriority,
         description,
       } = req.body;
+      const requesterId = req.user!.userId;
 
       const cleanSummary =
         typeof summary === "string"
@@ -1465,7 +1466,7 @@ app.post(
               "NEW",
           },
         });
-
+        
       // -----------------------------------------------------
       // Generate official Ticket Number
       // -----------------------------------------------------
@@ -1519,6 +1520,8 @@ app.post(
             ticket.createdAt,
         },
       });
+      
+
     } catch {
       return res.status(500).json({
         error: {
@@ -1527,6 +1530,111 @@ app.post(
 
           message:
             "Unable to create Ticket.",
+        },
+      });
+    }
+  }
+);
+// ---------------------------------------------------------------------------
+// Lab 3 Issue 5 — Public Ticket Comments
+// ---------------------------------------------------------------------------
+
+// Create public comment
+app.post(
+  "/api/tickets/:id/comments",
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      const { message } = req.body;
+
+      if (!message || typeof message !== "string" || !message.trim()) {
+        return res.status(400).json({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Comment message is required.",
+          },
+        });
+      }
+
+      const prisma = getPrisma();
+
+      const ticket = await prisma.ticket.findUnique({
+        where: {
+          id: ticketId,
+        },
+      });
+
+      if (!ticket) {
+        return res.status(404).json({
+          error: {
+            code: "TICKET_NOT_FOUND",
+            message: "Ticket not found.",
+          },
+        });
+      }
+
+      const comment = await prisma.ticketComment.create({
+        data: {
+          ticketId,
+          userId: req.user!.userId,
+          message: message.trim(),
+        },
+      });
+
+      return res.status(201).json({
+        data: comment,
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        error: {
+          code: "COMMENT_CREATE_ERROR",
+          message: "Unable to create comment.",
+        },
+      });
+    }
+  }
+);
+
+
+// Get public comments
+app.get(
+  "/api/tickets/:id/comments",
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+
+      const prisma = getPrisma();
+
+      const comments = await prisma.ticketComment.findMany({
+        where: {
+          ticketId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+
+      return res.status(200).json({
+        data: comments,
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        error: {
+          code: "COMMENT_LIST_ERROR",
+          message: "Unable to retrieve comments.",
         },
       });
     }

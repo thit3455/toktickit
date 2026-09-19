@@ -87,12 +87,15 @@ async function main() {
       where: {
         email: user.email,
       },
+
       update: {
         name: user.name,
+        passwordHash, // ✅ FIXED
         role: user.role as any,
         isActive: user.isActive,
         mustChangePassword: user.mustChangePassword,
       },
+
       create: {
         name: user.name,
         email: user.email,
@@ -119,9 +122,11 @@ async function main() {
   for (const name of relatedSystems) {
     await prisma.relatedSystem.upsert({
       where: { name },
+
       update: {
         isActive: true,
       },
+
       create: {
         name,
         isActive: true,

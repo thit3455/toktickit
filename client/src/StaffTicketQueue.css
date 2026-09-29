@@ -1,0 +1,21 @@
+.staff-queue { min-width: 0; }
+.staff-queue-search { min-width: 0; }
+.staff-queue-table { width: 100%; table-layout: fixed; }
+.staff-queue-table th, .staff-queue-table td { overflow-wrap: anywhere; }
+.staff-queue-table .badge { white-space: normal; line-height: 1.4; max-width: 100%; }
+.staff-queue .staff-queue-badge--red { background-color: #fce8e6; color: #8c2020; border-color: #efb9b5 !important; }
+.staff-queue .staff-queue-badge--amber { background-color: #fff0cc; color: #854600; border-color: #e8ce91 !important; }
+.staff-queue .staff-queue-badge--green { background-color: #dff2e5; color: #175c35; border-color: #a3cfbb !important; }
+.staff-queue .staff-queue-badge--blue { background-color: #e0efff; color: #184f85; border-color: #b6d4f2 !important; }
+.staff-queue .staff-queue-badge--orange { background-color: #ffe6d1; color: #873d0b; border-color: #edc19d !important; }
+.staff-queue .staff-queue-badge--gray { background-color: #eceff1; color: #414b53; border-color: #cbd2d8 !important; }
+.staff-queue-table th:nth-child(3) { width: 18%; }
+/* A single table becomes labelled cards on tablet and mobile. */
+@media (max-width: 1199.98px) {
+  .staff-queue-table, .staff-queue-table tbody { display: block; }
+  .staff-queue-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .staff-queue-table tr { display: block; border: 1px solid #a3cfbb; border-radius: .75rem; margin-bottom: 1rem; padding: .5rem; }
+  .staff-queue-table td { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: .75rem; border: 0; padding: .5rem; align-items: start; }
+  .staff-queue-table td::before { content: attr(data-label); font-weight: 600; color: #146c43; }
+  .staff-queue-table td > * { min-width: 0; justify-self: start; }
+}

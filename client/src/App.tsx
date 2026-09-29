@@ -1,3 +1,6 @@
+import { StaffTicketQueue } from "./StaffTicketQueue";
+import { LoginScreen } from "./LoginScreen.js";
+import { TicketDiscussion } from "./TicketDiscussion.js";
 import { useEffect, useState } from "react";
 
 import {
@@ -18,8 +21,18 @@ import {
   getRequesters,
   getTicketAttachments,
   getTicketDetail,
+  getStaffTicketDetail,
+  claimStaffTicket,
+  getActiveStaffUsers,
+  reassignStaffTicket,
+  ActiveStaffUser,
+  updateStaffTicketPriority,
+  updateStaffTicketStatus,
   removeAttachment,
   uploadTicketAttachment,
+  LoginResponse,
+  login,
+  changePassword,
 } from "./api.js";
 
 type RequesterState =
@@ -27,6 +40,11 @@ type RequesterState =
   | "ready"
   | "empty"
   | "error";
+
+type UserRole =
+  | "REQUESTER"
+  | "IT_STAFF"
+  | "ADMINISTRATOR";
 
 type ReferenceState =
   | "idle"
@@ -65,7 +83,8 @@ type AttachmentActionState =
 type Screen =
   | "create"
   | "myTickets"
-  | "ticketDetail";
+  | "ticketDetail"
+  | "staffQueue";
 
 const MAX_ATTACHMENT_SIZE =
   5 * 1024 * 1024;
@@ -87,6 +106,44 @@ const EMPTY_PAGINATION: TicketPagination = {
 };
 
 export default function App() {
+
+  // =========================================================
+// Authentication
+// =========================================================
+
+const [currentUser, setCurrentUser] =
+  useState<{
+    id: number;
+    name: string;
+    email: string;
+    role: UserRole;
+    mustChangePassword: boolean;
+  } | null>(null);
+
+
+const [loginEmail, setLoginEmail] =
+  useState("");
+
+const [loginPassword, setLoginPassword] =
+  useState("");
+
+const [loginError, setLoginError] =
+  useState("");
+
+const [currentPassword, setCurrentPassword] =
+  useState("");
+
+const [newPassword, setNewPassword] =
+  useState("");
+
+const [confirmPassword, setConfirmPassword] =
+  useState("");
+
+const [passwordChangeError, setPasswordChangeError] =
+  useState("");
+
+const [passwordChangeBusy, setPasswordChangeBusy] =
+  useState(false);
   // =========================================================
   // Development Requester
   // =========================================================
@@ -115,6 +172,25 @@ export default function App() {
 
   const [screen, setScreen] =
     useState<Screen>("create");
+
+    // =========================================================
+  // IT Staff Ticket Queue
+  // =========================================================
+
+const [staffActionStatus, setStaffActionStatus] =
+  useState("");
+
+const [staffActionPriority, setStaffActionPriority] =
+  useState("");
+
+const [staffActionMessage, setStaffActionMessage] = useState("");
+const [staffActionBusy, setStaffActionBusy] = useState(false);
+const [activeStaffUsers, setActiveStaffUsers] = useState<ActiveStaffUser[]>([]);
+const [staffUsersState, setStaffUsersState] = useState<"loading" | "ready" | "error">("loading");
+const [staffUsersError, setStaffUsersError] = useState("");
+const [staffUsersRetry, setStaffUsersRetry] = useState(0);
+const [reassignTo, setReassignTo] = useState("");
+
 
   // =========================================================
   // Reference Data
@@ -355,7 +431,11 @@ export default function App() {
   // =========================================================
 
   useEffect(() => {
-    async function loadRequesters() {
+  if (!currentUser) {
+    return;
+  }
+
+  async function loadRequesters() {
       try {
         const data =
           await getRequesters();
@@ -404,7 +484,7 @@ export default function App() {
     }
 
     loadRequesters();
-  }, []);
+  }, [currentUser]);
 
   // =========================================================
   // Load Categories + Related Systems
@@ -535,14 +615,30 @@ export default function App() {
     sortOrder,
     reloadTicketsKey,
   ]);
-
   // =========================================================
   // Load Ticket Detail
   // =========================================================
 
   useEffect(() => {
+    if (screen !== "ticketDetail" || currentUser?.role !== "IT_STAFF" || selectedTicketId === null) return;
+    let active = true;
+    setReassignTo("");
+    setStaffUsersState("loading");
+    setStaffUsersError("");
+    getActiveStaffUsers().then(users => {
+      if (active) { setActiveStaffUsers(users); setStaffUsersState("ready"); }
+    }).catch(error => {
+      if (active) {
+        setActiveStaffUsers([]);
+        setStaffUsersState("error");
+        setStaffUsersError(error instanceof Error ? error.message : "Unable to load active IT Staff.");
+      }
+    });
+    return () => { active = false; };
+  }, [screen, currentUser?.role, selectedTicketId, staffUsersRetry]);
+
+  useEffect(() => {
     if (
-      !currentRequester ||
       screen !== "ticketDetail" ||
       selectedTicketId === null
     ) {
@@ -550,7 +646,7 @@ export default function App() {
     }
 
     const requesterId =
-      currentRequester.id;
+      currentRequester?.id ?? 0;
 
     const ticketId =
       selectedTicketId;
@@ -563,13 +659,24 @@ export default function App() {
 
         setTicketDetail(null);
 
-        const detail =
-          await getTicketDetail(
-            ticketId,
-            requesterId
-          );
+        let detail;
+
+      if (currentUser?.role === "IT_STAFF") {
+    detail =
+      await getStaffTicketDetail(
+        ticketId
+    );
+} else {
+  detail =
+    await getTicketDetail(
+      ticketId,
+      requesterId ?? 0
+    );
+}
 
         setTicketDetail(detail);
+        setStaffActionPriority(detail.itPriority ?? "MEDIUM");
+        setStaffActionStatus(detail.currentStatus);
 
         setTicketDetailState(
           "ready"
@@ -584,18 +691,17 @@ export default function App() {
     loadDetail();
   }, [
     currentRequester,
+    currentUser?.role,
     screen,
     selectedTicketId,
     reloadDetailKey,
   ]);
-
   // =========================================================
   // Load Ticket Attachments
   // =========================================================
 
   useEffect(() => {
     if (
-      !currentRequester ||
       screen !== "ticketDetail" ||
       selectedTicketId === null
     ) {
@@ -603,7 +709,7 @@ export default function App() {
     }
 
     const requesterId =
-      currentRequester.id;
+      currentRequester?.id ?? 0;
 
     const ticketId =
       selectedTicketId;
@@ -641,6 +747,20 @@ export default function App() {
     selectedTicketId,
     reloadDetailKey,
   ]);
+
+  // =========================================================
+// Role Routing
+// =========================================================
+
+useEffect(() => {
+  if (
+    currentUser?.role === "IT_STAFF"
+  ) {
+    setScreen("staffQueue");
+  }
+}, [
+  currentUser,
+]);
 
   // =========================================================
   // Requester Selection
@@ -997,6 +1117,8 @@ export default function App() {
   function openTicketDetail(
     ticketId: number
   ) {
+    setStaffActionMessage("");
+    setReassignTo("");
     setSelectedTicketId(
       ticketId
     );
@@ -1025,6 +1147,90 @@ export default function App() {
       (value) => value + 1
     );
   }
+  async function handleClaimTicket() {
+  if (!ticketDetail || ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null || staffActionBusy) return;
+  setStaffActionBusy(true);
+  setStaffActionMessage("");
+  try {
+    const result = await claimStaffTicket(ticketDetail.id);
+    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
+    setStaffActionMessage("Ticket claimed successfully.");
+  } catch (error) {
+    setStaffActionMessage(error instanceof Error ? error.message : "Unable to claim ticket. Please try again.");
+    // Another staff member may have claimed it since this detail was loaded.
+    try { setTicketDetail(await getStaffTicketDetail(ticketDetail.id)); } catch { /* Keep the existing error visible. */ }
+  } finally { setStaffActionBusy(false); }
+}
+
+async function handleReassignTicket() {
+  if (!ticketDetail || !reassignTo || staffActionBusy) return;
+  setStaffActionBusy(true);
+  setStaffActionMessage("");
+  try {
+    const result = await reassignStaffTicket(ticketDetail.id, Number(reassignTo));
+    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
+    setReassignTo("");
+    setStaffActionMessage(`Ticket reassigned to ${result.data.assignedStaff.name} successfully.`);
+  } catch (error) {
+    setStaffActionMessage(error instanceof Error ? error.message : "Unable to reassign ticket. Please try again.");
+  } finally { setStaffActionBusy(false); }
+}
+
+async function handleStaffUpdate(kind: "priority" | "status") {
+  if (!ticketDetail || staffActionBusy) return;
+  setStaffActionBusy(true);
+  setStaffActionMessage("");
+  try {
+    const result = kind === "priority"
+      ? await updateStaffTicketPriority(ticketDetail.id, staffActionPriority)
+      : await updateStaffTicketStatus(ticketDetail.id, staffActionStatus);
+    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
+    setStaffActionMessage(kind === "priority" ? "IT priority updated successfully." : "Ticket status updated successfully.");
+  } catch (error) {
+    setStaffActionMessage(error instanceof Error ? error.message : "Unable to update ticket. Please try again.");
+  } finally { setStaffActionBusy(false); }
+}
+
+
+async function handleUpdateStatus(
+  status: string
+) {
+ if (!selectedTicketId || !status) {
+    return;
+  }
+
+  try {
+    await updateStaffTicketStatus(
+      selectedTicketId,
+      status
+    );
+
+    setReloadDetailKey(
+      (value) => value + 1
+    );
+
+  } catch {
+    console.error(
+      "Unable to update status"
+    );
+  }
+}
+
+
+
+  function backToStaffQueue() {
+  setScreen("staffQueue");
+
+  setSelectedTicketId(null);
+
+  setTicketDetail(null);
+
+  setTicketAttachments([]);
+
+  resetDetailAttachmentState();
+
+
+}
 
   // =========================================================
   // Ticket Detail Attachment Upload
@@ -1086,7 +1292,6 @@ export default function App() {
 
   async function handleDetailUpload() {
     if (
-      !currentRequester ||
       selectedTicketId === null ||
       !detailUploadFile
     ) {
@@ -1108,7 +1313,7 @@ export default function App() {
 
       await uploadTicketAttachment(
         selectedTicketId,
-        currentRequester.id,
+        currentRequester?.id ?? 0,
         detailUploadFile
       );
 
@@ -1140,7 +1345,6 @@ export default function App() {
     attachment: TicketAttachment
   ) {
     if (
-      !currentRequester ||
       attachment.isRemoved
     ) {
       return;
@@ -1153,7 +1357,7 @@ export default function App() {
 
       await downloadAttachmentFile(
         attachment,
-        currentRequester.id
+        currentRequester?.id ?? 0
       );
     } catch {
       setAttachmentActionError(
@@ -1263,12 +1467,145 @@ export default function App() {
       (1024 * 1024)
     ).toFixed(1)} MB`;
   }
-
   // =========================================================
-  // Development Requester Selection Screen
-  // =========================================================
+// Authentication Gate
+// =========================================================
 
-  if (!currentRequester) {
+if (!currentUser) {
+  return <LoginScreen onLogin={setCurrentUser} />;
+}
+if (currentUser.mustChangePassword) {
+  return (
+    <main
+      className="container py-5"
+      style={{ maxWidth: 520 }}
+    >
+      <h1 className="h3 mb-2">
+        Change Password
+      </h1>
+
+      <p className="text-muted mb-4">
+        You are using an initial password.
+        Please change it before continuing.
+      </p>
+
+      <div className="mb-3">
+        <label className="form-label">
+          Current Password
+        </label>
+
+        <input
+          type="password"
+          className="form-control"
+          value={currentPassword}
+          onChange={(e) =>
+            setCurrentPassword(e.target.value)
+          }
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">
+          New Password
+        </label>
+
+        <input
+          type="password"
+          className="form-control"
+          value={newPassword}
+          onChange={(e) =>
+            setNewPassword(e.target.value)
+          }
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">
+          Confirm New Password
+        </label>
+
+        <input
+          type="password"
+          className="form-control"
+          value={confirmPassword}
+          onChange={(e) =>
+            setConfirmPassword(e.target.value)
+          }
+        />
+      </div>
+
+      {passwordChangeError && (
+        <div
+          className="alert alert-danger"
+          role="alert"
+        >
+          {passwordChangeError}
+        </div>
+      )}
+
+      <button
+        type="button"
+        className="btn btn-success"
+        disabled={passwordChangeBusy}
+        onClick={async () => {
+          setPasswordChangeError("");
+
+          if (newPassword.length < 8) {
+            setPasswordChangeError(
+              "New password must be at least 8 characters."
+            );
+            return;
+          }
+
+          if (
+            newPassword !== confirmPassword
+          ) {
+            setPasswordChangeError(
+              "New passwords do not match."
+            );
+            return;
+          }
+
+          try {
+            setPasswordChangeBusy(true);
+
+            await changePassword(
+              currentPassword,
+              newPassword
+            );
+
+            setCurrentUser({
+              ...currentUser,
+              mustChangePassword: false,
+            });
+
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+          } catch (error) {
+            setPasswordChangeError(
+              error instanceof Error
+                ? error.message
+                : "Unable to change password."
+            );
+          } finally {
+            setPasswordChangeBusy(false);
+          }
+        }}
+      >
+        {passwordChangeBusy
+          ? "Changing..."
+          : "Change Password"}
+      </button>
+    </main>
+  );
+}
+
+
+// Development Requester Selection Screen
+if (!currentRequester &&
+  currentUser?.role !== "IT_STAFF"
+) {
     return (
       <main
         className="container py-5"
@@ -1412,25 +1749,27 @@ export default function App() {
             TokTickIT
           </h1>
 
+          {currentUser?.role !== "IT_STAFF" && (
           <p className="mb-0">
-            Current Requester:{" "}
-            <strong>
-              {
-                currentRequester.name
-              }
-            </strong>
+              <strong>
+                {currentUser?.name ?? ""}
+               </strong>{" "}
+               (
+               {currentUser?.role ?? ""}
+                )
           </p>
+          )}
         </div>
 
-        <button
+       {currentUser?.role === "REQUESTER" && (
+       <button
           type="button"
           className="btn btn-outline-success"
-          onClick={
-            handleChangeRequester
-          }
-        >
-          Change Requester
-        </button>
+          onClick={handleChangeRequester}
+  >
+      Change Requester
+  </button>
+  )}
       </div>
 
       {/* Navigation */}
@@ -1439,6 +1778,7 @@ export default function App() {
         className="d-flex flex-wrap gap-2 mb-4"
         aria-label="Requester navigation"
       >
+        {currentUser?.role === "REQUESTER" && (
         <button
           type="button"
           className={
@@ -1461,7 +1801,8 @@ export default function App() {
         >
           My Tickets
         </button>
-
+        )}
+        {currentUser?.role === "REQUESTER" && (
         <button
           type="button"
           className={
@@ -1479,6 +1820,28 @@ export default function App() {
         >
           Create Ticket
         </button>
+        )}
+        {currentUser?.role === "IT_STAFF" && (
+         <div>
+         <button
+              type="button"
+              className={
+                screen === "staffQueue"
+                  ? "btn btn-success"
+                  : "btn btn-outline-success"
+              }
+              onClick={() => {
+                setScreen(
+                  "staffQueue"
+                );
+              }}
+            >
+              IT Staff Queue
+            </button>
+            <p className="text-success mt-2 mb-0">IT Staff - {currentUser.name}</p>
+         </div>
+        )}
+
       </nav>
 
       {/* =====================================================
@@ -1496,7 +1859,7 @@ export default function App() {
               <p className="text-muted mb-0">
                 Tickets belonging to{" "}
                 {
-                  currentRequester.name
+                  currentRequester?.name ?? ""
                 }
                 .
               </p>
@@ -2160,21 +2523,27 @@ export default function App() {
                 Ticket Detail
               </h2>
 
-              <p className="text-muted mb-0">
-                Requester-owned Ticket
-                information and
-                attachments.
-              </p>
+             <p className="text-muted mb-0">
+              {currentUser?.role === "IT_STAFF"
+                  ? "IT Staff ticket information and actions."
+                  : "Requester-owned Ticket information and attachments."}
+            </p>
             </div>
 
             <button
               type="button"
               className="btn btn-outline-success"
               onClick={
-                backToMyTickets
+                currentUser?.role === "IT_STAFF"
+                  ? backToStaffQueue
+                   : backToMyTickets
               }
             >
-              Back to My Tickets
+              {
+                 currentUser?.role === "IT_STAFF"
+                    ? "Back to IT Staff Queue"
+                    : "Back to My Tickets"
+              }
             </button>
           </div>
 
@@ -2387,6 +2756,160 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* =====================================================
+    IT STAFF ACTIONS
+====================================================== */}
+
+{currentUser?.role === "IT_STAFF" &&
+ ticketDetail && (
+  <section className="card mb-4">
+
+    <div className="card-header bg-success text-white">
+      IT Staff Actions
+    </div>
+
+    <div className="card-body">
+
+      {staffActionMessage && <p className="alert alert-info" role="status">{staffActionMessage}</p>}
+      <p>Current IT Priority: <strong>{ticketDetail.itPriority ?? "MEDIUM"}</strong></p>
+      <p>Current Ticket Status: <strong>{ticketDetail.currentStatus}</strong></p>
+
+      <p>
+        Assigned Staff:
+        {" "}
+        {
+          ticketDetail.assignedStaff?.name
+          ?? "Unassigned"
+        }
+      </p>
+
+      {!ticketDetail.assignedStaff && ticketDetail.assignedStaffId == null && <button
+        type="button"
+        className="btn btn-success"
+        onClick={handleClaimTicket}
+        disabled={staffActionBusy}
+      >
+        Claim Ticket
+
+      </button>}
+
+      {(ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null) && <section className="mt-3 mb-4" aria-labelledby="reassign-ticket-title">
+        <h3 id="reassign-ticket-title" className="h6">Reassign Ticket</h3>
+        {staffUsersState === "loading" && <p role="status">Loading active IT Staff...</p>}
+        {staffUsersState === "error" && <div className="alert alert-danger" role="alert">
+          {staffUsersError} <button type="button" className="btn btn-outline-success btn-sm" onClick={() => setStaffUsersRetry(value => value + 1)}>Retry staff list</button>
+        </div>}
+        <label className="form-label" htmlFor="reassign-staff">Reassign to</label>
+        <div className="d-flex flex-column flex-sm-row gap-2">
+          <select id="reassign-staff" className="form-select" value={reassignTo} disabled={staffActionBusy || staffUsersState !== "ready"} onChange={event => setReassignTo(event.target.value)}>
+            <option value="">Select an active IT Staff member</option>
+            {activeStaffUsers.filter(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)).map(staff => <option key={staff.id} value={staff.id}>{staff.name} ({staff.email})</option>)}
+          </select>
+          <button type="button" className="btn btn-success flex-shrink-0" disabled={staffActionBusy || staffUsersState !== "ready" || !reassignTo} onClick={handleReassignTicket}>Reassign Ticket</button>
+        </div>
+        {staffUsersState === "ready" && !activeStaffUsers.some(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)) && <p className="text-muted mt-2">No other active IT Staff members are available.</p>}
+      </section>}
+
+    <div className="mt-3">
+  <label className="form-label" htmlFor="staff-it-priority">
+    IT Priority
+  </label>
+
+  <select
+    className="form-select"
+    id="staff-it-priority"
+    disabled={staffActionBusy}
+    value={staffActionPriority}
+    onChange={(e) =>
+      setStaffActionPriority(e.target.value)
+    }
+  >
+    <option value="">
+      Select IT Priority
+    </option>
+
+    <option value="LOW">
+      LOW
+    </option>
+
+    <option value="MEDIUM">
+      MEDIUM
+    </option>
+
+    <option value="HIGH">
+      HIGH
+    </option>
+
+    <option value="URGENT">
+      URGENT
+    </option>
+  </select>
+
+  <button
+    type="button"
+    className="btn btn-success mt-3"
+    disabled={!staffActionPriority || staffActionBusy}
+    onClick={() => handleStaffUpdate("priority")}
+  >
+    Update IT Priority
+  </button>
+</div>
+
+  <label className="form-label" htmlFor="staff-ticket-status">
+    Status
+  </label>
+
+  <select
+    className="form-select"
+    id="staff-ticket-status"
+    disabled={staffActionBusy}
+    value={staffActionStatus}
+    onChange={(e) =>
+      setStaffActionStatus(e.target.value)
+    }
+  >
+    <option value="">
+      Select Status
+    </option>
+    {["NEW", "CANCELLED"].includes(staffActionStatus) && <option value={staffActionStatus}>{staffActionStatus}</option>}
+    <option value="REOPENED">REOPENED</option>
+
+    <option value="OPEN">
+      OPEN
+    </option>
+
+    <option value="IN_PROGRESS">
+      IN_PROGRESS
+    </option>
+
+    <option value="WAITING_FOR_REQUESTER">
+      WAITING_FOR_REQUESTER
+    </option>
+
+    <option value="RESOLVED">
+      RESOLVED
+    </option>
+
+    <option value="CLOSED">
+      CLOSED
+    </option>
+
+  </select>
+<button
+  type="button"
+  className="btn btn-success mt-3"
+  disabled={!staffActionStatus || staffActionBusy}
+  onClick={() => handleStaffUpdate("status")}
+>
+  Update Status
+</button>
+</div>
+
+  </section>
+)}
+
+                <TicketDiscussion key={ticketDetail.id} ticketId={ticketDetail.id} staff={!currentRequester} />
 
                 {/* Attachment Section */}
 
@@ -2701,10 +3224,18 @@ export default function App() {
         </section>
       )}
 
+
+
+
+          {/* =====================================================
+              IT STAFF TICKET QUEUE
+          ====================================================== */}
+
+          {screen === "staffQueue" && <StaffTicketQueue onOpen={openTicketDetail} />}
+
       {/* =====================================================
           CREATE TICKET
       ====================================================== */}
-
       {screen === "create" && (
         <section>
           <h2 className="h4 mb-4">
@@ -2842,7 +3373,7 @@ export default function App() {
                   id="requester"
                   className="form-control bg-light"
                   value={
-                    currentRequester.name
+                    currentRequester?.name ?? ""
                   }
                   readOnly
                 />

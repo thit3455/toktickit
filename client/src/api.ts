@@ -1,6 +1,14 @@
 const API_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
+async function staffActionResult(response: Response, fallback: string) {
+  if (response.status === 401) throw new Error("Your session has expired. Refresh the page and log in again.");
+  const result = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(result?.error?.message ?? fallback);
+  if (!result?.data) throw new Error("The server returned an unexpected response. Please try again.");
+  return result;
+}
+
 // ---------------------------------------------------------
 // Category
 // ---------------------------------------------------------
@@ -304,6 +312,7 @@ export async function getMyTickets(
 
 export interface TicketDetail {
   id: number;
+  assignedStaffId?: number | null;
   ticketNumber: string;
   requesterId: number;
   categoryId: number;
@@ -311,7 +320,8 @@ export interface TicketDetail {
   summary: string;
   description: string;
   requestedPriority: RequestedPriority;
-  currentStatus: TicketStatus;
+  itPriority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+   currentStatus: TicketStatus;
   createdAt: string;
   updatedAt: string;
 
@@ -330,6 +340,11 @@ export interface TicketDetail {
     id: number;
     name: string;
   };
+  assignedStaff?: {
+  id: number;
+  name: string;
+  email: string;
+} | null;
 }
 
 interface TicketDetailResponse {
@@ -441,7 +456,8 @@ export async function getTicketAttachments(
   );
 
   const response = await fetch(
-    `${API_URL}/api/tickets/${ticketId}/attachments?${query.toString()}`
+    `${API_URL}/api/tickets/${ticketId}/attachments?${query.toString()}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
@@ -490,6 +506,7 @@ export async function uploadTicketAttachment(
     {
       method: "POST",
       body: formData,
+      credentials: "include",
     }
   );
 
@@ -533,7 +550,8 @@ export async function downloadAttachment(
   );
 
   const response = await fetch(
-    `${API_URL}/api/attachments/${attachmentId}/download?${query.toString()}`
+    `${API_URL}/api/attachments/${attachmentId}/download?${query.toString()}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
@@ -618,6 +636,7 @@ export async function removeAttachment(
     `${API_URL}/api/attachments/${attachmentId}?${query.toString()}`,
     {
       method: "DELETE",
+      credentials: "include",
       headers: {
         "Content-Type":
           "application/json",
@@ -651,4 +670,366 @@ export async function removeAttachment(
     await response.json();
 
   return mapAttachment(result.data);
+}
+// ---------------------------------------------------------
+// IT Staff Ticket Queue
+// ---------------------------------------------------------
+
+export interface StaffTicket {
+  id: number;
+  ticketNumber: string;
+  summary: string;
+  requestedPriority: RequestedPriority;
+  itPriority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  currentStatus: string;
+  createdAt: string;
+  updatedAt: string;
+
+  requester: {
+    id: number;
+    name: string;
+    email: string;
+  };
+
+  assignedStaff?: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+
+  category: {
+    id: number;
+    name: string;
+  };
+
+  relatedSystem: {
+    id: number;
+    name: string;
+  };
+}
+
+
+export interface StaffTicketPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+
+export interface StaffTicketQueueResponse {
+  data: StaffTicket[];
+
+  pagination: StaffTicketPagination;
+}
+
+
+export interface GetStaffTicketsParams {
+  search?: string;
+
+  status?: string;
+
+  priority?: RequestedPriority;
+  itPriority?: StaffTicket["itPriority"];
+
+  assigned?: boolean;
+
+  page?: number;
+
+  limit?: number;
+
+  sort?: string;
+
+  order?: "asc" | "desc";
+}
+
+export class StaffQueueError extends Error {
+  constructor(public status: number) {
+    super(status === 403 ? "You do not have permission to view the IT Staff queue." : status === 401 ? "Your session has expired. Please log in again." : "Unable to load the ticket queue. Please try again.");
+  }
+}
+
+
+export async function getStaffTickets(
+  params: GetStaffTicketsParams = {},
+  signal?: AbortSignal
+): Promise<StaffTicketQueueResponse> {
+
+  const query =
+    new URLSearchParams();
+
+
+  if (params.search) {
+    query.set(
+      "search",
+      params.search
+    );
+  }
+
+
+  if (params.status) {
+    query.set(
+      "status",
+      params.status
+    );
+  }
+
+
+  if (params.priority) {
+    query.set(
+      "priority",
+      params.priority
+    );
+  }
+
+  if (params.itPriority) query.set("itPriority", params.itPriority);
+
+
+  if (params.assigned !== undefined) {
+    query.set(
+      "assigned",
+      String(params.assigned)
+    );
+  }
+
+
+  query.set(
+    "page",
+    String(params.page ?? 1)
+  );
+
+
+  query.set(
+    "limit",
+    String(params.limit ?? 10)
+  );
+
+
+  if (params.sort) {
+    query.set(
+      "sort",
+      params.sort
+    );
+  }
+
+
+  if (params.order) {
+    query.set(
+      "order",
+      params.order
+    );
+  }
+
+
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets?${query.toString()}`,
+    {
+      credentials: "include",
+      signal,
+    }
+  );
+
+
+  if (!response.ok) {
+
+    throw new StaffQueueError(response.status);
+  }
+
+
+  return response.json();
+}
+
+// ---------------------------------------------------------
+// IT Staff Ticket Detail
+// ---------------------------------------------------------
+
+export async function getStaffTicketDetail(
+  ticketId: number
+): Promise<TicketDetail> {
+
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to load Staff Ticket Detail"
+    );
+  }
+
+  const result = await response.json();
+
+  return result.data;
+}
+// ---------------------------------------------------------
+// IT Staff Ticket Actions
+// ---------------------------------------------------------
+
+export async function claimStaffTicket(
+  ticketId: number
+) {
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}/assign`,
+    {
+      method: "PATCH",
+      credentials: "include",
+    }
+  );
+
+  return staffActionResult(response, "Unable to claim ticket. Please try again.");
+}
+
+export interface ActiveStaffUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export async function getActiveStaffUsers(): Promise<ActiveStaffUser[]> {
+  const response = await fetch(`${API_URL}/api/staff/users`, { credentials: "include" });
+  const result = await staffActionResult(response, "Unable to load active IT Staff. Please try again.");
+  return result.data;
+}
+
+export async function reassignStaffTicket(ticketId: number, assignedStaffId: number) {
+  const response = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ assignedStaffId }),
+  });
+  return staffActionResult(response, "Unable to reassign ticket. Please try again.");
+}
+
+
+export async function updateStaffTicketStatus(
+  ticketId: number,
+  currentStatus: string
+) {
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}/status`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentStatus,
+      }),
+    }
+  );
+
+  return staffActionResult(response, "Unable to update ticket status. Please try again.");
+}
+
+export async function updateStaffTicketPriority(
+  ticketId: number,
+  itPriority: string
+) {
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}/priority`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        itPriority,
+      }),
+    }
+  );
+
+  return staffActionResult(response, "Unable to update IT priority. Please try again.");
+}
+
+// ---------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------
+
+export interface LoginResponse {
+  data: {
+    sessionId: string;
+
+    user: {
+      id: number;
+      name: string;
+      email: string;
+      role:
+        | "REQUESTER"
+        | "IT_STAFF"
+        | "ADMINISTRATOR";
+
+      mustChangePassword: boolean;
+    };
+  };
+}
+
+
+export async function login(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
+
+  const response = await fetch(
+    `${API_URL}/api/auth/login`,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      credentials:
+        "include",
+
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }
+  );
+
+
+  if (!response.ok) {
+    throw new Error(
+      "Invalid email or password"
+    );
+  }
+
+
+  return response.json();
+}
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/api/auth/change-password`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const result = await response.json();
+
+    throw new Error(
+      result?.error?.message ??
+        "Unable to change password"
+    );
+  }
 }

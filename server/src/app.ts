@@ -1,3 +1,4 @@
+import { discussionRoutes } from "./discussion.routes.js";
 import express, {
   Request,
   Response,
@@ -25,7 +26,12 @@ import authRoutes from "./auth/auth.routes.js";
 
 export const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 
@@ -773,7 +779,7 @@ app.post(
               {
                 where: {
                   id: ticketId,
-                  requesterId,
+                  ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
                 },
 
                 select: {
@@ -963,7 +969,7 @@ app.get(
           {
             where: {
               id: ticketId,
-              requesterId,
+              ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
             },
 
             select: {
@@ -1085,8 +1091,7 @@ const requesterId = req.user!.userId;
 
       if (
         !attachment ||
-        attachment.ticket.requesterId !==
-          requesterId ||
+        (req.user!.role === "REQUESTER" && attachment.ticket.requesterId !== requesterId) ||
         attachment.isRemoved
       ) {
         return res.status(404).json({
@@ -1142,15 +1147,14 @@ const requesterId = req.user!.userId;
 
 app.delete(
   "/api/attachments/:attachmentId",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const attachmentId = Number(
         req.params.attachmentId
       );
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       const removalReason =
         typeof req.body?.removalReason ===
@@ -1539,106 +1543,6 @@ app.post(
 // Lab 3 Issue 5 — Public Ticket Comments
 // ---------------------------------------------------------------------------
 
-// Create public comment
-app.post(
-  "/api/tickets/:id/comments",
-  authenticateToken,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const ticketId = Number(req.params.id);
-      const { message } = req.body;
-
-      if (!message || typeof message !== "string" || !message.trim()) {
-        return res.status(400).json({
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "Comment message is required.",
-          },
-        });
-      }
-
-      const prisma = getPrisma();
-
-      const ticket = await prisma.ticket.findUnique({
-        where: {
-          id: ticketId,
-        },
-      });
-
-      if (!ticket) {
-        return res.status(404).json({
-          error: {
-            code: "TICKET_NOT_FOUND",
-            message: "Ticket not found.",
-          },
-        });
-      }
-
-      const comment = await prisma.ticketComment.create({
-        data: {
-          ticketId,
-          userId: req.user!.userId,
-          message: message.trim(),
-        },
-      });
-
-      return res.status(201).json({
-        data: comment,
-      });
-
-    } catch (error) {
-      return res.status(500).json({
-        error: {
-          code: "COMMENT_CREATE_ERROR",
-          message: "Unable to create comment.",
-        },
-      });
-    }
-  }
-);
-
-
-// Get public comments
-app.get(
-  "/api/tickets/:id/comments",
-  authenticateToken,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const ticketId = Number(req.params.id);
-
-      const prisma = getPrisma();
-
-      const comments = await prisma.ticketComment.findMany({
-        where: {
-          ticketId,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              role: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "asc",
-        },
-      });
-
-      return res.status(200).json({
-        data: comments,
-      });
-
-    } catch (error) {
-      return res.status(500).json({
-        error: {
-          code: "COMMENT_LIST_ERROR",
-          message: "Unable to retrieve comments.",
-        },
-      });
-    }
-  }
-);
+app.use("/api", discussionRoutes);
 
 export default app;

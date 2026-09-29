@@ -17,8 +17,6 @@ export async function authenticateToken(
   try {
     const sessionId =
       req.cookies?.toktickit_session;
-      console.log("COOKIES:", req.cookies);
-      console.log("SESSION ID:", sessionId);
      
 
     if (!sessionId) {

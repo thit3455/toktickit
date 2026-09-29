@@ -19,6 +19,13 @@ enum RequestedPriority {
   HIGH
 }
 
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 enum TicketStatus {
   NEW
   OPEN
@@ -86,6 +93,7 @@ model Ticket {
   summary           String
   description       String
   requestedPriority RequestedPriority
+  itPriority        TicketPriority    @default(MEDIUM)
   currentStatus     TicketStatus      @default(NEW)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt

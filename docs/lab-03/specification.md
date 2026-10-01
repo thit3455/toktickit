@@ -110,6 +110,8 @@ Requesters can create Public Comments.
 FR-12:
 Requesters can indicate that a problem appears resolved.
 
+The authenticated owner may save a server-generated `requesterResolvedAt` timestamp. The indication is idempotent and does not change `currentStatus`, including when the ticket is already RESOLVED or CLOSED. IT Staff remain responsible for formal resolution and closure. Existing Lab 2 ticket details remain read-only; this action, Public Comments and the existing attachment operations are the permitted Requester detail actions.
+
 
 ### IT Staff
 

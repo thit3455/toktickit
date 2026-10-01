@@ -82,6 +82,11 @@ export async function authenticateToken(
     }
 
 
+    const passwordRoute = req.baseUrl === "/api/auth" && ["/me", "/change-password", "/logout"].includes(req.path);
+    if (session.user.mustChangePassword && !passwordRoute) {
+      return res.status(403).json({ error: { code: "PASSWORD_CHANGE_REQUIRED", message: "Change your initial password before continuing." } });
+    }
+
     req.user = {
       userId: session.user.id,
       role: session.user.role,

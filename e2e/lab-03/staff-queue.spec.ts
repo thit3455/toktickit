@@ -14,6 +14,7 @@ test('queue is usable without horizontal overflow and opens staff detail', async
   const queries: URLSearchParams[] = [];
   await page.route('**/api/**', async route => {
     const url = new URL(route.request().url());
+    if (url.pathname === '/api/auth/me') { await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: { message: 'Authentication required.' } }) }); return; }
     let body: unknown = { data: [] };
     if (url.pathname === '/api/auth/login') body = { data: { user: { id: 2, name: 'Zig', email: 'staff@example.test', role: 'IT_STAFF', mustChangePassword: false } } };
     else if (url.pathname === '/api/staff/tickets') {

@@ -1,173 +1,73 @@
-import { afterEach, describe, it, expect, vi } from "vitest";
-import {
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react";
-
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import App from "../../src/App.js";
 import * as api from "../../src/api.js";
-
-describe("Development Requester Selection", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-    sessionStorage.clear();
+describe("Authenticated Requester identity replaces selection", () => {
+  const user = { id: 1, name: "Alice Johnson", email: "alice@example.test", role: "REQUESTER" as const, mustChangePassword: false };
+  beforeEach(() => {
+    vi.spyOn(api, "getCategories").mockResolvedValue([]);
+    vi.spyOn(api, "getRelatedSystems").mockResolvedValue([]);
   });
-
-  it("shows the Requester selection screen", () => {
-    vi.spyOn(api, "getRequesters").mockImplementation(
-      () => new Promise(() => {})
-    );
-
+  afterEach(() => { vi.restoreAllMocks(); sessionStorage.clear(); });
+  it("uses the same initial-password screen for Requesters and opens tickets after changing", async () => {
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ ...user, mustChangePassword: true });
+    const change = vi.spyOn(api, "changePassword").mockResolvedValue();
     render(<App />);
-
-    expect(
-      screen.getByRole("heading", {
-        name: "Select a Development Requester",
-      })
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByText(/This is not a login screen/i)
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("combobox", {
-        name: /Development Requester/i,
-      })
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    ).toBeDisabled();
+    await screen.findByRole("heading", { name: "Change Password" });
+    expect(screen.queryByRole("button", { name: "My Tickets" })).toBeNull();
+    fireEvent.change(screen.getByLabelText("Current Password"), { target: { value: "Password123!" } });
+    fireEvent.change(screen.getByLabelText("New Password"), { target: { value: "NewRequester123!" } });
+    fireEvent.change(screen.getByLabelText("Confirm New Password"), { target: { value: "different" } });
+    fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("New passwords do not match.");
+    expect(change).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("Confirm New Password"), { target: { value: "NewRequester123!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
+    await screen.findByRole("heading", { name: "Create Ticket" });
+    expect(change).toHaveBeenCalledWith("Password123!", "NewRequester123!");
   });
-
-  it("shows a loading state while Requesters are loading", () => {
-    vi.spyOn(api, "getRequesters").mockImplementation(
-      () => new Promise(() => {})
-    );
-
+  it("shows session loading", () => {
+    vi.spyOn(api, "getCurrentUser").mockImplementation(() => new Promise(() => {}));
     render(<App />);
-
-    expect(
-      screen.getByText(/Loading Development Requesters/i)
-    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading session");
   });
-
-  it("shows an empty state when no active Requesters exist", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([]);
-
+  it("requires login without a session", async () => {
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue(null);
     render(<App />);
-
-    expect(
-      await screen.findByText(
-        /No active Development Requesters are available/i
-      )
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "TokTickIT Login" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Development Requester")).toBeNull();
   });
-
-  it("shows a safe failure state when the API fails", async () => {
-    vi.spyOn(api, "getRequesters").mockRejectedValue(
-      new Error("API failure")
-    );
-
+  it("ignores stored identity and shows authenticated name and role", async () => {
+    sessionStorage.setItem("developmentRequesterId", "999");
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue(user);
     render(<App />);
-
-    expect(
-      await screen.findByText(
-        /Unable to load Development Requesters/i
-      )
-    ).toBeInTheDocument();
+    await screen.findByRole("heading", { name: "Create Ticket" });
+    expect(screen.getByText("Alice Johnson")).toBeInTheDocument();
+    expect(screen.getByText(/REQUESTER/)).toBeInTheDocument();
+    for (const name of ["Change Requester", "IT Staff Queue", "Claim Ticket", "User Management"]) expect(screen.queryByRole("button", { name })).toBeNull();
+    expect(screen.queryByText("Internal Notes")).toBeNull();
   });
-
-  it("selects a Requester and allows changing Requester", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-      {
-        id: 2,
-        name: "Brian Smith",
-        email: "brian.smith@toktickit.test",
-      },
-    ]);
-
+  it("logs out and clears protected screens", async () => {
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue(user);
+    const signout = vi.spyOn(api, "logout").mockResolvedValue();
     render(<App />);
-
-    const requesterSelect = await screen.findByRole(
-      "combobox",
-      {
-        name: /Development Requester/i,
-      }
-    );
-
-    fireEvent.change(requesterSelect, {
-      target: { value: "1" },
-    });
-
-    const continueButton = screen.getByRole("button", {
-      name: /Continue/i,
-    });
-
-    expect(continueButton).toBeEnabled();
-
-    fireEvent.click(continueButton);
-
-    expect(
-      screen.getByText(/Current Requester:/i)
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByText("Alice Johnson")
-    ).toBeInTheDocument();
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Change Requester/i,
-      })
-    );
-
-    expect(
-      screen.getByRole("heading", {
-        name: "Select a Development Requester",
-      })
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Logout" }));
+    await screen.findByRole("heading", { name: "TokTickIT Login" });
+    expect(signout).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "My Tickets" })).toBeNull();
   });
-
-  it("stores the selected Requester for the current browser session", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
-
+  it("shows a safe session failure", async () => {
+    vi.spyOn(api, "getCurrentUser").mockRejectedValue(new Error("private database detail"));
     render(<App />);
-
-    const requesterSelect = await screen.findByRole(
-      "combobox",
-      {
-        name: /Development Requester/i,
-      }
-    );
-
-    fireEvent.change(requesterSelect, {
-      target: { value: "1" },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
-
-    expect(
-      sessionStorage.getItem("developmentRequesterId")
-    ).toBe("1");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to restore your session");
+    expect(screen.queryByText(/private database/)).toBeNull();
+  });
+  it("shows logout failure without claiming success", async () => {
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue(user);
+    vi.spyOn(api, "logout").mockRejectedValue(new Error("offline"));
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "Logout" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to log out");
+    expect(screen.getByRole("heading", { name: "Create Ticket" })).toBeInTheDocument();
   });
 });

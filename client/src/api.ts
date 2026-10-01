@@ -1,6 +1,15 @@
 const API_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
+export class RequesterApiError extends Error {
+  constructor(public status: number, fallback: string) {
+    super(status === 401 ? "Your session has expired. Please log in again." :
+      status === 403 ? "You do not have permission to perform this action." :
+      status === 404 ? "The requested item was not found." :
+      status === 409 ? "This item has changed. Refresh and try again." : fallback);
+  }
+}
+
 async function staffActionResult(response: Response, fallback: string) {
   if (response.status === 401) throw new Error("Your session has expired. Refresh the page and log in again.");
   const result = await response.json().catch(() => null);
@@ -16,39 +25,6 @@ async function staffActionResult(response: Response, fallback: string) {
 export interface Category {
   id: number;
   name: string;
-}
-
-// ---------------------------------------------------------
-// Development Requester
-// ---------------------------------------------------------
-
-export interface DevelopmentRequester {
-  id: number;
-  name: string;
-  email: string;
-}
-
-interface RequesterResponse {
-  data: DevelopmentRequester[];
-}
-
-export async function getRequesters(): Promise<
-  DevelopmentRequester[]
-> {
-  const response = await fetch(
-    `${API_URL}/api/requesters`
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      "Unable to load Development Requesters"
-    );
-  }
-
-  const result: RequesterResponse =
-    await response.json();
-
-  return result.data;
 }
 
 // ---------------------------------------------------------
@@ -112,14 +88,13 @@ export type RequestedPriority =
   | "MEDIUM"
   | "HIGH";
 
-export type TicketStatus = "NEW";
+export type TicketStatus = "NEW" | "OPEN" | "IN_PROGRESS" | "WAITING_FOR_REQUESTER" | "RESOLVED" | "CLOSED" | "REOPENED" | "CANCELLED";
 
 // ---------------------------------------------------------
 // Ticket Creation
 // ---------------------------------------------------------
 
 export interface CreateTicketInput {
-  requesterId: number;
   categoryId: number;
   relatedSystemId: number;
   summary: string;
@@ -152,6 +127,7 @@ export async function createTicket(
     `${API_URL}/api/tickets`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -160,7 +136,7 @@ export async function createTicket(
   );
 
   if (!response.ok) {
-    throw new Error(
+    throw new RequesterApiError(response.status,
       "Unable to create Ticket"
     );
   }
@@ -209,7 +185,6 @@ export interface TicketListResponse {
 }
 
 export interface GetMyTicketsParams {
-  requesterId: number;
   page?: number;
   pageSize?: 10 | 20 | 50;
   search?: string;
@@ -229,10 +204,6 @@ export async function getMyTickets(
 ): Promise<TicketListResponse> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(params.requesterId)
-  );
 
   query.set(
     "page",
@@ -294,11 +265,12 @@ export async function getMyTickets(
   }
 
   const response = await fetch(
-    `${API_URL}/api/tickets?${query.toString()}`
+    `${API_URL}/api/tickets?${query.toString()}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
-    throw new Error(
+    throw new RequesterApiError(response.status,
       "Unable to load My Tickets"
     );
   }
@@ -311,6 +283,7 @@ export async function getMyTickets(
 // ---------------------------------------------------------
 
 export interface TicketDetail {
+  requesterResolvedAt?: string | null;
   id: number;
   assignedStaffId?: number | null;
   ticketNumber: string;
@@ -357,16 +330,14 @@ export async function getTicketDetail(
 ): Promise<TicketDetail> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
-    `${API_URL}/api/tickets/${ticketId}?${query.toString()}`
+    `${API_URL}/api/tickets/${ticketId}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
+    if ([401, 403].includes(response.status)) throw new RequesterApiError(response.status, "Unable to load Ticket Detail");
     if (response.status === 404) {
       throw new Error(
         "Ticket not found or access denied"
@@ -450,10 +421,6 @@ export async function getTicketAttachments(
 ): Promise<TicketAttachment[]> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
     `${API_URL}/api/tickets/${ticketId}/attachments?${query.toString()}`,
@@ -489,10 +456,6 @@ export async function uploadTicketAttachment(
 ): Promise<TicketAttachment> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const formData = new FormData();
 
@@ -544,10 +507,6 @@ export async function downloadAttachment(
 ): Promise<Blob> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
     `${API_URL}/api/attachments/${attachmentId}/download?${query.toString()}`,
@@ -627,10 +586,6 @@ export async function removeAttachment(
   const query =
     new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
     `${API_URL}/api/attachments/${attachmentId}?${query.toString()}`,
@@ -1032,4 +987,25 @@ export async function changePassword(
         "Unable to change password"
     );
   }
+}
+
+export async function getCurrentUser(): Promise<LoginResponse["data"]["user"] | null> {
+  const response = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" });
+  if (response.status === 401) return null;
+  if (!response.ok) throw new Error("Unable to restore session.");
+  return (await response.json()).data;
+}
+
+export async function logout(): Promise<void> {
+  const response = await fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" });
+  if (!response.ok) throw new Error("Unable to log out.");
+}
+
+export async function indicateResolution(ticketId: number): Promise<Pick<TicketDetail, "id" | "requesterResolvedAt" | "currentStatus" | "updatedAt">> {
+  const response = await fetch(`${API_URL}/api/tickets/${ticketId}/resolution-indication`, { method: "PATCH", credentials: "include" });
+  if (response.status === 401) throw new Error("Your session has expired. Please log in again.");
+  if (response.status === 403) throw new Error("You do not have permission to perform this action.");
+  if (response.status === 404) throw new Error("Ticket was not found.");
+  if (!response.ok) throw new Error("Unable to save resolution indication. Please try again.");
+  return (await response.json()).data;
 }

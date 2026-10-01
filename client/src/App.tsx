@@ -1,4 +1,5 @@
 import { StaffTicketQueue } from "./StaffTicketQueue";
+import "./Requester.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
 import { useEffect, useState } from "react";
@@ -6,7 +7,6 @@ import { useEffect, useState } from "react";
 import {
   Category,
   CreatedTicket,
-  DevelopmentRequester,
   RelatedSystem,
   RequestedPriority,
   TicketAttachment,
@@ -18,7 +18,6 @@ import {
   getCategories,
   getMyTickets,
   getRelatedSystems,
-  getRequesters,
   getTicketAttachments,
   getTicketDetail,
   getStaffTicketDetail,
@@ -30,16 +29,13 @@ import {
   updateStaffTicketStatus,
   removeAttachment,
   uploadTicketAttachment,
-  LoginResponse,
-  login,
+  TicketStatus,
+  getCurrentUser,
+  logout,
+  indicateResolution,
   changePassword,
 } from "./api.js";
 
-type RequesterState =
-  | "loading"
-  | "ready"
-  | "empty"
-  | "error";
 
 type UserRole =
   | "REQUESTER"
@@ -105,6 +101,15 @@ const EMPTY_PAGINATION: TicketPagination = {
   totalPages: 0,
 };
 
+function requesterFailure(error: unknown, fallback: string) {
+  const status = (error as { status?: number } | null)?.status;
+  if (status === 401) return "Your session has expired. Please log out and log in again.";
+  if (status === 403) return "You do not have permission to perform this action.";
+  if (status === 404) return "The requested item was not found.";
+  if (status === 409) return "This item has changed. Refresh and try again.";
+  return fallback;
+}
+
 export default function App() {
 
   // =========================================================
@@ -121,15 +126,6 @@ const [currentUser, setCurrentUser] =
   } | null>(null);
 
 
-const [loginEmail, setLoginEmail] =
-  useState("");
-
-const [loginPassword, setLoginPassword] =
-  useState("");
-
-const [loginError, setLoginError] =
-  useState("");
-
 const [currentPassword, setCurrentPassword] =
   useState("");
 
@@ -145,30 +141,16 @@ const [passwordChangeError, setPasswordChangeError] =
 const [passwordChangeBusy, setPasswordChangeBusy] =
   useState(false);
   // =========================================================
-  // Development Requester
-  // =========================================================
-
-  const [requesters, setRequesters] =
-    useState<DevelopmentRequester[]>([]);
-
-  const [
-    selectedRequesterId,
-    setSelectedRequesterId,
-  ] = useState("");
-
-  const [
-    currentRequester,
-    setCurrentRequester,
-  ] =
-    useState<DevelopmentRequester | null>(
-      null
-    );
-
-  const [
-    requesterState,
-    setRequesterState,
-  ] =
-    useState<RequesterState>("loading");
+  const currentRequester = currentUser?.role === "REQUESTER" ? currentUser : null;
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState("");
+  const [logoutBusy, setLogoutBusy] = useState(false);
+  const [resolutionBusy, setResolutionBusy] = useState(false);
+  const [resolutionMessage, setResolutionMessage] = useState("");
+  const [resolutionError, setResolutionError] = useState("");
+  const [listError, setListError] = useState("");
+  const [detailError, setDetailError] = useState("");
+  const [createError, setCreateError] = useState("");
 
   const [screen, setScreen] =
     useState<Screen>("create");
@@ -323,7 +305,7 @@ const [reassignTo, setReassignTo] = useState("");
   const [
     filterStatus,
     setFilterStatus,
-  ] = useState<"" | "NEW">("");
+  ] = useState<"" | TicketStatus>("");
 
   const [sortBy, setSortBy] =
     useState<
@@ -427,66 +409,15 @@ const [reassignTo, setReassignTo] = useState("");
     );
 
   // =========================================================
-  // Load Development Requesters
-  // =========================================================
-
+  // Restore only the server-authenticated identity.
   useEffect(() => {
-  if (!currentUser) {
-    return;
-  }
+    let active = true;
+    getCurrentUser().then(user => { if (active) setCurrentUser(user); })
+      .catch(() => { if (active) setAuthError("Unable to restore your session. Please log in again."); })
+      .finally(() => { if (active) setAuthLoading(false); });
+    return () => { active = false; };
+  }, []);
 
-  async function loadRequesters() {
-      try {
-        const data =
-          await getRequesters();
-
-        setRequesters(data);
-
-        if (data.length === 0) {
-          setRequesterState("empty");
-          return;
-        }
-
-        setRequesterState("ready");
-
-        const storedId =
-          sessionStorage.getItem(
-            "developmentRequesterId"
-          );
-
-        if (!storedId) {
-          return;
-        }
-
-        const storedRequester =
-          data.find(
-            (requester) =>
-              requester.id ===
-              Number(storedId)
-          );
-
-        if (storedRequester) {
-          setSelectedRequesterId(
-            storedId
-          );
-
-          setCurrentRequester(
-            storedRequester
-          );
-        } else {
-          sessionStorage.removeItem(
-            "developmentRequesterId"
-          );
-        }
-      } catch {
-        setRequesterState("error");
-      }
-    }
-
-    loadRequesters();
-  }, [currentUser]);
-
-  // =========================================================
   // Load Categories + Related Systems
   // =========================================================
 
@@ -539,6 +470,7 @@ const [reassignTo, setReassignTo] = useState("");
     const requesterId =
       currentRequester.id;
 
+    let active = true;
     async function loadTickets() {
       try {
         setTicketListState(
@@ -547,8 +479,6 @@ const [reassignTo, setReassignTo] = useState("");
 
         const result =
           await getMyTickets({
-            requesterId,
-
             page: ticketPage,
 
             pageSize,
@@ -584,6 +514,7 @@ const [reassignTo, setReassignTo] = useState("");
             sortOrder,
           });
 
+        if (!active) return;
         setTickets(result.data);
 
         setPagination(
@@ -593,7 +524,9 @@ const [reassignTo, setReassignTo] = useState("");
         setTicketListState(
           "ready"
         );
-      } catch {
+      } catch (error) {
+        if (!active) return;
+        setListError(requesterFailure(error, "Unable to load My Tickets."));
         setTicketListState(
           "error"
         );
@@ -601,6 +534,7 @@ const [reassignTo, setReassignTo] = useState("");
     }
 
     loadTickets();
+    return () => { active = false; };
   }, [
     currentRequester,
     screen,
@@ -651,6 +585,8 @@ const [reassignTo, setReassignTo] = useState("");
     const ticketId =
       selectedTicketId;
 
+    setResolutionMessage(""); setResolutionError("");
+    let active = true;
     async function loadDetail() {
       try {
         setTicketDetailState(
@@ -674,6 +610,7 @@ const [reassignTo, setReassignTo] = useState("");
     );
 }
 
+        if (!active) return;
         setTicketDetail(detail);
         setStaffActionPriority(detail.itPriority ?? "MEDIUM");
         setStaffActionStatus(detail.currentStatus);
@@ -681,7 +618,9 @@ const [reassignTo, setReassignTo] = useState("");
         setTicketDetailState(
           "ready"
         );
-      } catch {
+      } catch (error) {
+        if (!active) return;
+        setDetailError(requesterFailure(error, "Unable to load this Ticket. It may be unavailable or your session may have expired."));
         setTicketDetailState(
           "error"
         );
@@ -689,6 +628,7 @@ const [reassignTo, setReassignTo] = useState("");
     }
 
     loadDetail();
+    return () => { active = false; };
   }, [
     currentRequester,
     currentUser?.role,
@@ -714,6 +654,7 @@ const [reassignTo, setReassignTo] = useState("");
     const ticketId =
       selectedTicketId;
 
+    let active = true;
     async function loadAttachments() {
       try {
         setAttachmentState(
@@ -726,6 +667,7 @@ const [reassignTo, setReassignTo] = useState("");
             requesterId
           );
 
+        if (!active) return;
         setTicketAttachments(
           data
         );
@@ -734,6 +676,7 @@ const [reassignTo, setReassignTo] = useState("");
           "ready"
         );
       } catch {
+        if (!active) return;
         setAttachmentState(
           "error"
         );
@@ -741,6 +684,7 @@ const [reassignTo, setReassignTo] = useState("");
     }
 
     loadAttachments();
+    return () => { active = false; };
   }, [
     currentRequester,
     screen,
@@ -757,64 +701,12 @@ useEffect(() => {
     currentUser?.role === "IT_STAFF"
   ) {
     setScreen("staffQueue");
+  } else if (currentUser?.role === "REQUESTER") {
+    setScreen("create");
   }
 }, [
   currentUser,
 ]);
-
-  // =========================================================
-  // Requester Selection
-  // =========================================================
-
-  function handleContinue() {
-    const requester =
-      requesters.find(
-        (item) =>
-          item.id ===
-          Number(
-            selectedRequesterId
-          )
-      );
-
-    if (!requester) {
-      return;
-    }
-
-    sessionStorage.setItem(
-      "developmentRequesterId",
-      String(requester.id)
-    );
-
-    setCurrentRequester(
-      requester
-    );
-
-    setScreen("create");
-  }
-
-  function handleChangeRequester() {
-    sessionStorage.removeItem(
-      "developmentRequesterId"
-    );
-
-    setCurrentRequester(null);
-
-    setSelectedRequesterId("");
-
-    setScreen("create");
-
-    setSelectedTicketId(null);
-
-    setTicketDetail(null);
-
-    setTicketAttachments([]);
-
-    resetCreateTicketForm();
-
-    resetTicketFilters();
-
-    resetDetailAttachmentState();
-  }
 
   // =========================================================
   // Reset Create Ticket
@@ -1022,9 +914,6 @@ useEffect(() => {
 
       const ticket =
         await createTicket({
-          requesterId:
-            currentRequester.id,
-
           categoryId:
             Number(categoryId),
 
@@ -1073,7 +962,8 @@ useEffect(() => {
       setReloadTicketsKey(
         (value) => value + 1
       );
-    } catch {
+    } catch (error) {
+      setCreateError(requesterFailure(error, "Unable to create Ticket."));
       setSubmitState("error");
     }
   }
@@ -1471,8 +1361,9 @@ async function handleUpdateStatus(
 // Authentication Gate
 // =========================================================
 
+if (authLoading) return <main className="container py-5" role="status">Loading session...</main>;
 if (!currentUser) {
-  return <LoginScreen onLogin={setCurrentUser} />;
+  return <><LoginScreen onLogin={user => { setAuthError(""); setCurrentUser(user); }} />{authError && <p role="alert">{authError}</p>}</>;
 }
 if (currentUser.mustChangePassword) {
   return (
@@ -1490,11 +1381,12 @@ if (currentUser.mustChangePassword) {
       </p>
 
       <div className="mb-3">
-        <label className="form-label">
+        <label className="form-label" htmlFor="current-password">
           Current Password
         </label>
 
         <input
+          id="current-password"
           type="password"
           className="form-control"
           value={currentPassword}
@@ -1505,11 +1397,12 @@ if (currentUser.mustChangePassword) {
       </div>
 
       <div className="mb-3">
-        <label className="form-label">
+        <label className="form-label" htmlFor="new-password">
           New Password
         </label>
 
         <input
+          id="new-password"
           type="password"
           className="form-control"
           value={newPassword}
@@ -1520,11 +1413,12 @@ if (currentUser.mustChangePassword) {
       </div>
 
       <div className="mb-3">
-        <label className="form-label">
+        <label className="form-label" htmlFor="confirm-password">
           Confirm New Password
         </label>
 
         <input
+          id="confirm-password"
           type="password"
           className="form-control"
           value={confirmPassword}
@@ -1602,135 +1496,6 @@ if (currentUser.mustChangePassword) {
 }
 
 
-// Development Requester Selection Screen
-if (!currentRequester &&
-  currentUser?.role !== "IT_STAFF"
-) {
-    return (
-      <main
-        className="container py-5"
-        style={{
-          maxWidth: 640,
-        }}
-      >
-        <h1 className="h3 mb-4">
-          TokTickIT{" "}
-          <span className="text-success">
-            IT Service Desk
-          </span>
-        </h1>
-
-        <h2 className="h5 mb-3">
-          Select a Development
-          Requester
-        </h2>
-
-        <p className="text-muted">
-          Select a Development
-          Requester to test
-          requester-specific ticket
-          behavior. This is not a login
-          screen. Authentication and
-          role-based access will be
-          introduced in Lab 3.
-        </p>
-
-        {requesterState ===
-          "loading" && (
-          <p aria-live="polite">
-            Loading Development
-            Requesters...
-          </p>
-        )}
-
-        {requesterState ===
-          "empty" && (
-          <div
-            className="alert alert-warning"
-            role="status"
-          >
-            No active Development
-            Requesters are available.
-          </div>
-        )}
-
-        {requesterState ===
-          "error" && (
-          <div
-            className="alert alert-danger"
-            role="alert"
-          >
-            Unable to load Development
-            Requesters.
-          </div>
-        )}
-
-        <div className="mb-3">
-          <label
-            htmlFor="development-requester"
-            className="form-label"
-          >
-            Development Requester
-          </label>
-
-          <select
-            id="development-requester"
-            className="form-select"
-            value={
-              selectedRequesterId
-            }
-            onChange={(event) =>
-              setSelectedRequesterId(
-                event.target.value
-              )
-            }
-            disabled={
-              requesterState !==
-              "ready"
-            }
-          >
-            <option value="">
-              Select a Requester
-            </option>
-
-            {requesters.map(
-              (requester) => (
-                <option
-                  key={
-                    requester.id
-                  }
-                  value={
-                    requester.id
-                  }
-                >
-                  {requester.name} (
-                  {requester.email})
-                </option>
-              )
-            )}
-          </select>
-        </div>
-
-        <button
-          type="button"
-          className="btn btn-success"
-          onClick={
-            handleContinue
-          }
-          disabled={
-            requesterState !==
-              "ready" ||
-            selectedRequesterId ===
-              ""
-          }
-        >
-          Continue
-        </button>
-      </main>
-    );
-  }
-
-  // =========================================================
   // Main Application
   // =========================================================
 
@@ -1738,6 +1503,7 @@ if (!currentRequester &&
     <main
       className="container py-5"
       style={{
+        overflowWrap: "anywhere",
         maxWidth: 1100,
       }}
     >
@@ -1761,15 +1527,17 @@ if (!currentRequester &&
           )}
         </div>
 
-       {currentUser?.role === "REQUESTER" && (
-       <button
-          type="button"
-          className="btn btn-outline-success"
-          onClick={handleChangeRequester}
-  >
-      Change Requester
-  </button>
-  )}
+       <button type="button" className="btn btn-outline-success" disabled={logoutBusy} onClick={async () => {
+         setLogoutBusy(true); setAuthError("");
+         try {
+           await logout();
+           setCurrentUser(null); setScreen("create"); setSelectedTicketId(null);
+           setTicketDetail(null); setTickets([]); setTicketAttachments([]);
+           resetCreateTicketForm(); resetTicketFilters(); resetDetailAttachmentState();
+         } catch { setAuthError("Unable to log out. Please try again."); }
+         finally { setLogoutBusy(false); }
+       }}>{logoutBusy ? "Logging out..." : "Logout"}</button>
+       {authError && <p role="alert" className="text-danger">{authError}</p>}
       </div>
 
       {/* Navigation */}
@@ -2068,7 +1836,7 @@ if (!currentRequester &&
                         event.target
                           .value as
                           | ""
-                          | "NEW"
+                          | TicketStatus
                       );
 
                       setTicketPage(
@@ -2083,6 +1851,7 @@ if (!currentRequester &&
                     <option value="NEW">
                       New
                     </option>
+                    {(["OPEN", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "RESOLVED", "CLOSED", "REOPENED", "CANCELLED"] as const).map(status => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}
                   </select>
                 </div>
 
@@ -2245,8 +2014,7 @@ if (!currentRequester &&
               role="alert"
             >
               <p className="mb-2">
-                Unable to load My
-                Tickets.
+                {listError}
               </p>
 
               <button
@@ -2325,7 +2093,7 @@ if (!currentRequester &&
             "ready" &&
             tickets.length > 0 && (
               <>
-                <div className="table-responsive">
+                <div className="table-responsive requester-tickets">
                   <table className="table table-bordered table-hover align-middle">
                     <thead>
                       <tr>
@@ -2371,7 +2139,7 @@ if (!currentRequester &&
                               ticket.id
                             }
                           >
-                            <td>
+                            <td data-label="Ticket Number">
                               <button
                                 type="button"
                                 className="btn btn-link p-0 fw-bold text-success"
@@ -2387,13 +2155,13 @@ if (!currentRequester &&
                               </button>
                             </td>
 
-                            <td>
+                            <td data-label="Summary">
                               {
                                 ticket.summary
                               }
                             </td>
 
-                            <td>
+                            <td data-label="Category">
                               {
                                 ticket
                                   .category
@@ -2401,7 +2169,7 @@ if (!currentRequester &&
                               }
                             </td>
 
-                            <td>
+                            <td data-label="Related System">
                               {
                                 ticket
                                   .relatedSystem
@@ -2409,7 +2177,7 @@ if (!currentRequester &&
                               }
                             </td>
 
-                            <td>
+                            <td data-label="Priority">
                               <span className="badge text-bg-light border">
                                 {
                                   ticket.requestedPriority
@@ -2417,7 +2185,7 @@ if (!currentRequester &&
                               </span>
                             </td>
 
-                            <td>
+                            <td data-label="Status">
                               <span className="badge text-bg-success">
                                 {
                                   ticket.currentStatus
@@ -2425,13 +2193,13 @@ if (!currentRequester &&
                               </span>
                             </td>
 
-                            <td>
+                            <td data-label="Created">
                               {formatDate(
                                 ticket.createdAt
                               )}
                             </td>
 
-                            <td>
+                            <td data-label="Updated">
                               {formatDate(
                                 ticket.updatedAt
                               )}
@@ -2564,10 +2332,7 @@ if (!currentRequester &&
               role="alert"
             >
               <p className="mb-2">
-                Unable to load this
-                Ticket. It may not
-                belong to the selected
-                Requester.
+                {detailError}
               </p>
 
               <button
@@ -2775,6 +2540,14 @@ if (!currentRequester &&
       <p>Current IT Priority: <strong>{ticketDetail.itPriority ?? "MEDIUM"}</strong></p>
       <p>Current Ticket Status: <strong>{ticketDetail.currentStatus}</strong></p>
 
+      {ticketDetail.requesterResolvedAt && (
+        <section className="alert alert-success" aria-label="Requester resolution indication">
+          <h4 className="h6">Requester: Problem Appears Resolved</h4>
+          <p className="mb-1">Recorded on <time dateTime={ticketDetail.requesterResolvedAt}>{formatDate(ticketDetail.requesterResolvedAt)}</time>.</p>
+          <p className="mb-0">This indication does not change the ticket status. IT Staff can use Update Status to formally resolve or close the ticket.</p>
+        </section>
+      )}
+
       <p>
         Assigned Staff:
         {" "}
@@ -2909,7 +2682,25 @@ if (!currentRequester &&
   </section>
 )}
 
-                <TicketDiscussion key={ticketDetail.id} ticketId={ticketDetail.id} staff={!currentRequester} />
+                {currentRequester && <section className="card mb-3" aria-label="Resolution indication">
+                  <div className="card-body">
+                    <h3 className="h5">Problem Appears Resolved</h3>
+                    <p>This tells IT Staff the problem appears resolved. IT Staff remain responsible for formally resolving or closing the ticket.</p>
+                    {ticketDetail.requesterResolvedAt ? <p role="status">You indicated that the problem appears resolved on {formatDate(ticketDetail.requesterResolvedAt)}.</p> :
+                      <button className="btn btn-success" disabled={resolutionBusy} onClick={async () => {
+                        setResolutionBusy(true); setResolutionMessage(""); setResolutionError("");
+                        try {
+                          const saved = await indicateResolution(ticketDetail.id);
+                          setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous);
+                          setResolutionMessage("Resolution indication saved. Ticket status has not changed.");
+                        } catch (error) { setResolutionError(error instanceof Error ? error.message : "Unable to save resolution indication."); }
+                        finally { setResolutionBusy(false); }
+                      }}>{resolutionBusy ? "Saving..." : "Problem Appears Resolved"}</button>}
+                    {resolutionMessage && <p role="status" className="text-success mt-2">{resolutionMessage}</p>}
+                    {resolutionError && <p role="alert" className="text-danger mt-2">{resolutionError}</p>}
+                  </div>
+                </section>}
+                <TicketDiscussion key={ticketDetail.id} ticketId={ticketDetail.id} staff={currentUser.role === "IT_STAFF" || currentUser.role === "ADMINISTRATOR"} />
 
                 {/* Attachment Section */}
 
@@ -3236,7 +3027,7 @@ if (!currentRequester &&
       {/* =====================================================
           CREATE TICKET
       ====================================================== */}
-      {screen === "create" && (
+      {currentUser.role === "REQUESTER" && screen === "create" && (
         <section>
           <h2 className="h4 mb-4">
             Create Ticket
@@ -3314,7 +3105,7 @@ if (!currentRequester &&
               className="alert alert-danger"
               role="alert"
             >
-              Unable to create Ticket.
+              {createError}{" "}
               Your entered values have
               been preserved.
             </div>

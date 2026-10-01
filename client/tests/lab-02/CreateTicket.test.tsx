@@ -27,14 +27,8 @@ describe("Create Ticket", () => {
   // Test 1 — Required Create Ticket fields
   // ---------------------------------------------------------
 
-  it("shows the required Create Ticket fields after selecting a Requester", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
+  it("shows the required Create Ticket fields after authentication", async () => {
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.spyOn(api, "getCategories").mockResolvedValue([
       {
@@ -52,22 +46,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
-    const requesterSelect =
-      await screen.findByRole("combobox", {
-        name: /Development Requester/i,
-      });
-
-    fireEvent.change(requesterSelect, {
-      target: {
-        value: "1",
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     expect(
       screen.getByRole("heading", {
@@ -111,13 +90,7 @@ describe("Create Ticket", () => {
   // ---------------------------------------------------------
 
   it("shows field-level validation when required fields are missing", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.spyOn(api, "getCategories").mockResolvedValue([
       {
@@ -138,22 +111,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
-    const requesterSelect =
-      await screen.findByRole("combobox", {
-        name: /Development Requester/i,
-      });
-
-    fireEvent.change(requesterSelect, {
-      target: {
-        value: "1",
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     const submitButton =
       await screen.findByRole("button", {
@@ -200,13 +158,7 @@ describe("Create Ticket", () => {
   // ---------------------------------------------------------
 
   it("creates a Ticket successfully and displays the official Ticket Number", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.spyOn(api, "getCategories").mockResolvedValue([
       {
@@ -239,22 +191,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
-    const requesterSelect =
-      await screen.findByRole("combobox", {
-        name: /Development Requester/i,
-      });
-
-    fireEvent.change(requesterSelect, {
-      target: {
-        value: "1",
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     fireEvent.change(
       await screen.findByLabelText(/Category/i),
@@ -326,7 +263,6 @@ describe("Create Ticket", () => {
     expect(
       createTicketSpy
     ).toHaveBeenCalledWith({
-      requesterId: 1,
       categoryId: 1,
       relatedSystemId: 1,
       summary:
@@ -342,13 +278,7 @@ describe("Create Ticket", () => {
   // ---------------------------------------------------------
 
   it("disables the Submit button while the Ticket is being created", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.spyOn(api, "getCategories").mockResolvedValue([
       {
@@ -380,22 +310,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
-    const requesterSelect =
-      await screen.findByRole("combobox", {
-        name: /Development Requester/i,
-      });
-
-    fireEvent.change(requesterSelect, {
-      target: {
-        value: "1",
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     fireEvent.change(
       await screen.findByLabelText(/Category/i),
@@ -491,13 +406,7 @@ describe("Create Ticket", () => {
   // ---------------------------------------------------------
 
   it("shows an API error and preserves entered values when Ticket creation fails", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.spyOn(api, "getCategories").mockResolvedValue([
       {
@@ -520,22 +429,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
-    const requesterSelect =
-      await screen.findByRole("combobox", {
-        name: /Development Requester/i,
-      });
-
-    fireEvent.change(requesterSelect, {
-      target: {
-        value: "1",
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     const categorySelect =
       await screen.findByLabelText(/Category/i);
@@ -640,13 +534,7 @@ describe("Create Ticket", () => {
   // ---------------------------------------------------------
 
   it("rejects an unsupported attachment type before Ticket submission", async () => {
-    vi.spyOn(api, "getRequesters").mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email: "alice.johnson@toktickit.test",
-      },
-    ]);
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.spyOn(api, "getCategories").mockResolvedValue([
       {
@@ -667,22 +555,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
-    const requesterSelect =
-      await screen.findByRole("combobox", {
-        name: /Development Requester/i,
-      });
-
-    fireEvent.change(requesterSelect, {
-      target: {
-        value: "1",
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Continue/i,
-      })
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     const attachmentInput =
       await screen.findByLabelText(

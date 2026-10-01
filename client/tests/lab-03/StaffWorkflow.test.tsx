@@ -15,7 +15,7 @@ const ticket = {
 beforeEach(() => {
   vi.resetAllMocks(); sessionStorage.clear();
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [] }) }));
-  vi.mocked(api.getRequesters).mockResolvedValue([]);
+  vi.mocked(api.getCurrentUser).mockResolvedValue(null);
   vi.mocked(api.getCategories).mockResolvedValue([]);
   vi.mocked(api.getRelatedSystems).mockResolvedValue([]);
   vi.mocked(api.getStaffTickets).mockResolvedValue({ data: [ticket], pagination: { page: 1, limit: 10, total: 1, totalPages: 1 } });
@@ -34,7 +34,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 async function openAsStaff(id: number) {
   vi.mocked(api.login).mockResolvedValue({ data: { sessionId: "test", user: { id, name: `Staff ${id}`, email: `staff${id}@example.test`, role: "IT_STAFF", mustChangePassword: false } } });
   const view = render(<App />);
-  fireEvent.change(screen.getByRole("textbox"), { target: { value: `staff${id}@example.test` } });
+  fireEvent.change(await screen.findByRole("textbox"), { target: { value: `staff${id}@example.test` } });
   fireEvent.change(view.container.querySelector('input[type="password"]')!, { target: { value: "TestPassword123!" } });
   fireEvent.click(screen.getByRole("button", { name: "Login" }));
   await screen.findByRole("heading", { name: "IT Staff Ticket Queue" });
@@ -44,6 +44,42 @@ async function openAsStaff(id: number) {
 }
 
 describe("IT Staff app workflow", () => {
+  it("shows the saved requester indication and timestamp without automatically changing status", async () => {
+    const timestamp = "2026-10-01T08:30:00Z";
+    vi.mocked(api.getStaffTicketDetail).mockResolvedValue({ ...ticket, requesterResolvedAt: timestamp });
+    await openAsStaff(10);
+    const notice = screen.getByRole("region", { name: "Requester resolution indication" });
+    expect(notice).toHaveTextContent("Requester: Problem Appears Resolved");
+    expect(notice.querySelector("time")).toHaveAttribute("datetime", timestamp);
+    expect(notice).toHaveTextContent(new Date(timestamp).toLocaleString());
+    expect(screen.getByText("Current Ticket Status:")).toHaveTextContent("NEW");
+    expect(api.updateStaffTicketStatus).not.toHaveBeenCalled();
+    expect(api.indicateResolution).not.toHaveBeenCalled();
+    for (const currentStatus of ["RESOLVED", "CLOSED"]) {
+      vi.mocked(api.updateStaffTicketStatus).mockResolvedValueOnce({ data: { currentStatus } });
+      fireEvent.change(screen.getByRole("option", { name: currentStatus }).closest("select")!, { target: { value: currentStatus } });
+      fireEvent.click(screen.getByRole("button", { name: "Update Status" }));
+      await waitFor(() => expect(screen.getByText("Current Ticket Status:")).toHaveTextContent(currentStatus));
+      expect(api.updateStaffTicketStatus).toHaveBeenLastCalledWith(101, currentStatus);
+    }
+  });
+  it.each([null, undefined])("hides the indication when its timestamp is %s", async requesterResolvedAt => {
+    vi.mocked(api.getStaffTicketDetail).mockResolvedValue({ ...ticket, requesterResolvedAt });
+    await openAsStaff(10);
+    expect(screen.queryByRole("region", { name: "Requester resolution indication" })).toBeNull();
+  });
+  it("does not carry the indication into another ticket", async () => {
+    const otherTicket = { ...ticket, id: 102, ticketNumber: "STAFF-102", requesterResolvedAt: null };
+    vi.mocked(api.getStaffTickets).mockResolvedValue({ data: [ticket, otherTicket], pagination: { page: 1, limit: 10, total: 2, totalPages: 1 } });
+    vi.mocked(api.getStaffTicketDetail).mockImplementation(async id => id === 101 ? { ...ticket, requesterResolvedAt: "2026-10-01T08:30:00Z" } : otherTicket);
+    await openAsStaff(10);
+    expect(screen.getByRole("region", { name: "Requester resolution indication" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back to IT Staff Queue" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Open STAFF-102" }));
+    await screen.findByDisplayValue("STAFF-102");
+    expect(api.getStaffTicketDetail).toHaveBeenLastCalledWith(102);
+    expect(screen.queryByRole("region", { name: "Requester resolution indication" })).toBeNull();
+  });
   it("renders reassignment for an owned ticket, saves the selected owner and reloads it in detail and queue", async () => {
     const michael = { id: 20, name: "Michael Brown", email: "michael@example.test" };
     const zig = { id: 10, name: "Zig", email: "zig@example.test" };

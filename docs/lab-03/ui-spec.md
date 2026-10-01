@@ -1,5 +1,13 @@
 # TokTickIT Lab 3 UI Specification
 
+## Implemented Requester behavior — 2026-10-01
+
+The application restores identity from the server session and shows the authenticated name/role with Logout. Development Requester selection and Change Requester are removed. Requester navigation exposes Create Ticket and My Tickets only.
+
+Ticket Detail retains read-only ticket fields and existing attachments, adds Public Comments and an owner-only Problem Appears Resolved action with saving, success, failure and persisted timestamp feedback. The action does not change ticket status. Internal Notes, IT Staff operations and Administrator user controls are absent from the Requester UI.
+
+My Tickets uses the existing Zen Green table on desktop and labelled cards below 992px. Create, list, detail, comments, attachments and validation were checked in desktop Chromium, tablet WebKit and mobile Chromium.
+
 ## 1. Design System
 
 Lab 3 continues the Zen Green design language from Lab 2.

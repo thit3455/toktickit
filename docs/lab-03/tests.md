@@ -1,5 +1,9 @@
 # TokTickIT Lab 3 Test Plan
 
+## Requester regression evidence — 2026-10-01
+
+See [Requester verification](requester-verification.md) for implementation scope, commands, exact changed files, results and evidence. Existing Lab 1/2 Requester tests now use authenticated fixtures rather than the retired Development Requester selector. Their form, ticket, validation, search/filter/sort/pagination and attachment assertions remain exercised. Dedicated Lab 3 tests extend these with tampering, Public Comments, note denial, resolution persistence, logout replay and safe failures.
+
 ## 1. Test Strategy
 
 Lab 3 testing validates authentication, authorization, migration, IT Staff workflow, Administrator management, UI behavior, and regression from Lab 2.

@@ -20,7 +20,7 @@ import {
   getCategories,
   getMyTickets,
   getRelatedSystems,
-  getRequesters,
+  getCurrentUser,
   getTicketAttachments,
   getTicketDetail,
   removeAttachment,
@@ -28,7 +28,7 @@ import {
 } from "../../src/api.js";
 
 vi.mock("../../src/api.js", () => ({
-  getRequesters: vi.fn(),
+  getCurrentUser: vi.fn(),
   getCategories: vi.fn(),
   getRelatedSystems: vi.fn(),
   createTicket: vi.fn(),
@@ -104,22 +104,7 @@ const activeAttachment = {
 async function openTicketDetail() {
   render(<App />);
 
-  const selector =
-    await screen.findByLabelText(
-      "Development Requester"
-    );
-
-  fireEvent.change(selector, {
-    target: {
-      value: "1",
-    },
-  });
-
-  fireEvent.click(
-    screen.getByRole("button", {
-      name: "Continue",
-    })
-  );
+  await screen.findByRole("heading", { name: "Create Ticket" });
 
   await screen.findByRole("heading", {
     name: "Create Ticket",
@@ -153,10 +138,8 @@ describe("Attachment Section", () => {
     sessionStorage.clear();
 
     vi.mocked(
-      getRequesters
-    ).mockResolvedValue([
-      requester,
-    ]);
+      getCurrentUser
+    ).mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     vi.mocked(
       getCategories

@@ -120,51 +120,6 @@ app.get(
 );
 
 // ---------------------------------------------------------------------------
-// Lab 2 — Development Requester List
-// This is NOT authentication.
-// ---------------------------------------------------------------------------
-
-app.get(
-  "/api/requesters",
-  async (_req: Request, res: Response) => {
-    try {
-      const requesters =
-        await getPrisma().user.findMany(
-          {
-            where: {
-              isActive: true,
-            },
-
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-
-            orderBy: {
-              id: "asc",
-            },
-          }
-        );
-
-      return res.status(200).json({
-        data: requesters,
-      });
-    } catch {
-      return res.status(500).json({
-        error: {
-          code:
-            "REQUESTER_LOAD_ERROR",
-
-          message:
-            "Unable to retrieve Development Requesters.",
-        },
-      });
-    }
-  }
-);
-
-// ---------------------------------------------------------------------------
 // Lab 2 — Related System List
 // ---------------------------------------------------------------------------
 
@@ -213,8 +168,9 @@ app.get(
 // ---------------------------------------------------------------------------
 
 app.get(
-  "/api/tickets/:id",
+  ["/api/tickets", "/api/tickets/my"],
   authenticateToken,
+  requireRole("REQUESTER"),
   async (req: AuthRequest, res: Response) => {
     try {
       const requesterId = req.user!.userId;
@@ -340,7 +296,7 @@ app.get(
 
       if (
         currentStatus &&
-        currentStatus !== "NEW"
+        !Object.values(TicketStatus).includes(currentStatus as TicketStatus)
       ) {
         return res.status(400).json({
           error: {
@@ -412,7 +368,7 @@ app.get(
               "REQUESTER_NOT_FOUND",
 
             message:
-              "Development Requester was not found.",
+              "Requester was not found.",
           },
         });
       }
@@ -620,7 +576,7 @@ app.get(
           {
             where: {
               id: ticketId,
-              requesterId,
+              ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
             },
 
             select: {
@@ -631,6 +587,7 @@ app.get(
               relatedSystemId: true,
               summary: true,
               description: true,
+              requesterResolvedAt: true,
               requestedPriority: true,
               currentStatus: true,
               createdAt: true,
@@ -1294,6 +1251,7 @@ app.delete(
 app.post(
   "/api/tickets",
   authenticateToken,
+  requireRole("REQUESTER"),
   async (req: AuthRequest, res: Response) => {
     try {
       const {
@@ -1315,6 +1273,10 @@ app.post(
         "string"
           ? description.trim()
           : "";
+
+      if (![categoryId, relatedSystemId].every(value => (typeof value === "number" || typeof value === "string") && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647)) {
+        return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request contains invalid data." } });
+      }
 
       // -----------------------------------------------------
       // Required-field validation
@@ -1542,6 +1504,22 @@ app.post(
 // ---------------------------------------------------------------------------
 // Lab 3 Issue 5 — Public Ticket Comments
 // ---------------------------------------------------------------------------
+
+app.patch("/api/tickets/:id/resolution-indication", authenticateToken, requireRole("REQUESTER"), async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: { code: "INVALID_QUERY", message: "A valid Ticket ID is required." } });
+  try {
+    const prisma = getPrisma();
+    const where = { id, requesterId: req.user!.userId };
+    // Idempotent: preserve the first indication timestamp. Never mutate status.
+    await prisma.ticket.updateMany({ where: { ...where, requesterResolvedAt: null }, data: { requesterResolvedAt: new Date() } });
+    const data = await prisma.ticket.findFirst({ where, select: { id: true, requesterResolvedAt: true, currentStatus: true, updatedAt: true } });
+    if (!data) return res.status(404).json({ error: { code: "TICKET_NOT_FOUND", message: "Ticket was not found." } });
+    return res.json({ data });
+  } catch {
+    return res.status(500).json({ error: { code: "RESOLUTION_INDICATION_ERROR", message: "Unable to save resolution indication." } });
+  }
+});
 
 app.use("/api", discussionRoutes);
 

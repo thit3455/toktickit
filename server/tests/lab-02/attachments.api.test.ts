@@ -1,3 +1,4 @@
+import { requesterFixture } from "../helpers/requester.js";
 import {
   afterAll,
   beforeAll,
@@ -13,6 +14,7 @@ import { getPrisma } from "../../src/prisma.js";
 
 describe("Ticket Attachments", () => {
   const prisma = getPrisma();
+  let fixture: Awaited<ReturnType<typeof requesterFixture>>;
 
   let requesterAId: number;
   let requesterBId: number;
@@ -22,19 +24,11 @@ describe("Ticket Attachments", () => {
   let attachmentId: number;
 
   beforeAll(async () => {
-    const requesterResponse =
-      await request(app).get(
-        "/api/requesters"
-      );
-
-    requesterAId =
-      requesterResponse.body.data[0].id;
-
-    requesterBId =
-      requesterResponse.body.data[1].id;
-
+    fixture = await requesterFixture();
+    requesterAId = fixture.users[0].id;
+    requesterBId = fixture.users[1].id;
     const categoryResponse =
-      await request(app).get(
+      await fixture.agents[0].get(
         "/api/categories"
       );
 
@@ -42,7 +36,7 @@ describe("Ticket Attachments", () => {
       categoryResponse.body[0].id;
 
     const systemResponse =
-      await request(app).get(
+      await fixture.agents[0].get(
         "/api/related-systems"
       );
 
@@ -50,7 +44,7 @@ describe("Ticket Attachments", () => {
       systemResponse.body.data[0].id;
 
     const createResponse =
-      await request(app)
+      await fixture.agents[0]
         .post("/api/tickets")
         .send({
           requesterId:
@@ -86,11 +80,12 @@ describe("Ticket Attachments", () => {
         },
       });
     }
+    await fixture?.cleanup();
   });
 
   it("uploads a valid attachment to an owned Ticket", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .post(
           `/api/tickets/${ticketId}/attachments`
         )
@@ -140,13 +135,13 @@ describe("Ticket Attachments", () => {
 
   it("blocks another Requester from uploading to the Ticket", async () => {
     const response =
-      await request(app)
+      await fixture.agents[1]
         .post(
           `/api/tickets/${ticketId}/attachments`
         )
         .query({
           requesterId:
-            requesterBId,
+            requesterAId,
         })
         .attach(
           "file",
@@ -173,7 +168,7 @@ describe("Ticket Attachments", () => {
 
   it("rejects an unsupported attachment type", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .post(
           `/api/tickets/${ticketId}/attachments`
         )
@@ -206,7 +201,7 @@ describe("Ticket Attachments", () => {
 
   it("requires an attachment file", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .post(
           `/api/tickets/${ticketId}/attachments`
         )
@@ -226,7 +221,7 @@ describe("Ticket Attachments", () => {
 
   it("lists attachment metadata for the owning Requester", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .get(
           `/api/tickets/${ticketId}/attachments`
         )
@@ -260,7 +255,7 @@ describe("Ticket Attachments", () => {
 
   it("downloads an active attachment owned by the selected Requester", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .get(
           `/api/attachments/${attachmentId}/download`
         )
@@ -292,13 +287,13 @@ describe("Ticket Attachments", () => {
 
   it("blocks another Requester from directly downloading the attachment", async () => {
     const response =
-      await request(app)
+      await fixture.agents[1]
         .get(
           `/api/attachments/${attachmentId}/download`
         )
         .query({
           requesterId:
-            requesterBId,
+            requesterAId,
         });
 
     expect(
@@ -308,7 +303,7 @@ describe("Ticket Attachments", () => {
 
   it("soft-removes an owned attachment with a reason and retains metadata", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .delete(
           `/api/attachments/${attachmentId}`
         )
@@ -341,7 +336,7 @@ describe("Ticket Attachments", () => {
     ).toBeDefined();
 
     const listResponse =
-      await request(app)
+      await fixture.agents[0]
         .get(
           `/api/tickets/${ticketId}/attachments`
         )
@@ -374,7 +369,7 @@ describe("Ticket Attachments", () => {
 
   it("blocks downloading a soft-removed attachment", async () => {
     const response =
-      await request(app)
+      await fixture.agents[0]
         .get(
           `/api/attachments/${attachmentId}/download`
         )

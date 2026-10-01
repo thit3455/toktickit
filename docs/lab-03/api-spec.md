@@ -234,6 +234,8 @@ requesterId = authenticated user
 
 ### GET /api/tickets/my
 
+The existing `GET /api/tickets` path is also supported. Both paths require an authenticated REQUESTER and always use the session user ID. Client-supplied `requesterId` is ignored. Existing search, category/system/priority/status filters, sorting and pagination remain supported; status accepts all current Prisma TicketStatus values.
+
 Purpose:
 
 Retrieve tickets owned by the authenticated Requester.
@@ -290,7 +292,7 @@ Request:
 
 ```json
 {
-  "content": "The issue is still happening."
+  "message": "The issue is still happening."
 }
 ```
 
@@ -298,6 +300,8 @@ Validation:
 
 - Empty content rejected.
 - Whitespace-only content rejected.
+
+The existing `message` field is trimmed and limited to 10,000 characters, allowing detailed troubleshooting updates while bounding each stored comment. Author and creation time come from the backend. Comments are append-only; there are no edit/delete endpoints. Only the owning Requester, IT Staff or Administrator may read or create comments. Another Requester's ticket and a nonexistent ticket produce the same safe 404 response.
 
 ---
 
@@ -312,6 +316,10 @@ Retrieve Public Comments.
 ## 4.5 Problem Appears Resolved
 
 ### PATCH /api/tickets/:id/resolution-indication
+
+Requires an authenticated REQUESTER who owns the ticket. No body is required; supplied identity, timestamp or status fields cannot change the operation. Success is `{ data: { id, requesterResolvedAt, currentStatus, updatedAt } }`. The first server-generated indication timestamp persists; repeats return the same timestamp. All current statuses are accepted and none is changed by this action.
+
+Errors: 400 invalid ticket ID, 401 unauthenticated, 403 incorrect role or initial password change required, 404 missing/unowned ticket (identical response), 500 safe server failure. Ticket Detail returns nullable `requesterResolvedAt` so reopening or refreshing preserves the indication.
 
 Purpose:
 
@@ -520,6 +528,8 @@ Request:
 ```
 
 Requester access is forbidden.
+
+Requester GET/POST requests receive the same 403 without note content regardless of whether a valid ticket ID exists. The implemented request field is `message`, using the same 1–10,000 trimmed-character limit as Public Comments.
 
 ---
 

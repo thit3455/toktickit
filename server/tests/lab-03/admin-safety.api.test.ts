@@ -18,8 +18,14 @@ describe("Administrator safety in an isolated database schema", () => {
   let actor: ReturnType<typeof request.agent>;
   let snapshot: Awaited<ReturnType<typeof administratorStates>>;
   const password = "IsolatedAdmin123!";
-  function administratorStates() {
-    return existing.user.findMany({ where: { role: "ADMINISTRATOR" }, select: { id: true, role: true, isActive: true, updatedAt: true }, orderBy: { id: "asc" } });
+  function administratorStates(ids?: number[]) {
+    // Seed/development accounts use toktickit.test. Parallel suites create and
+    // remove disposable example.test Administrators; those are not this suite's data.
+    // Re-read captured IDs without a role filter so a demotion/deletion still fails.
+    return existing.user.findMany({
+      where: ids ? { id: { in: ids } } : { role: "ADMINISTRATOR", email: { endsWith: "@toktickit.test", mode: "insensitive" } },
+      select: { id: true, role: true, isActive: true, updatedAt: true }, orderBy: { id: "asc" },
+    });
   }
   beforeAll(async () => {
     if (!process.env.DATABASE_URL) process.loadEnvFile(".env");
@@ -48,7 +54,7 @@ describe("Administrator safety in an isolated database schema", () => {
   });
   afterAll(async () => {
     try {
-      if (snapshot) expect(await administratorStates()).toEqual(snapshot);
+      if (snapshot) expect(await administratorStates(snapshot.map(user => user.id))).toEqual(snapshot);
     } finally {
       await isolated?.$disconnect();
       if (schemaCreated && /^admin_safety_[a-f0-9]{32}$/.test(schema)) await existing.$executeRawUnsafe(`DROP SCHEMA "${schema}" CASCADE`);

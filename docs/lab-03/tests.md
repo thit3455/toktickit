@@ -1,5 +1,9 @@
 # TokTickIT Lab 3 Test Plan
 
+## Administrator verification — 2026-10-02
+
+See [Administrator verification](admin-verification.md) for commands, exact results, evidence and limitations. `server/tests/lab-03/admin.api.test.ts` adds 53 database/API tests. `AdminUserManagement.test.tsx` and `AdminApi.test.tsx` add 28 frontend tests. `e2e/lab-03/admin-users.spec.ts` runs the real account lifecycle on desktop, tablet and mobile. Final full-suite results: 149 backend, 99 frontend and 12 browser tests passed; zero failed. Both TypeScript/build commands passed. Requester and IT Staff regression suites are included.
+
 ## Requester regression evidence — 2026-10-01
 
 See [Requester verification](requester-verification.md) for implementation scope, commands, exact changed files, results and evidence. Existing Lab 1/2 Requester tests now use authenticated fixtures rather than the retired Development Requester selector. Their form, ticket, validation, search/filter/sort/pagination and attachment assertions remain exercised. Dedicated Lab 3 tests extend these with tampering, Public Comments, note denial, resolution persistence, logout replay and safe failures.

@@ -8,6 +8,7 @@ import cors from "cors";
 import multer from "multer";
 import cookieParser from "cookie-parser";
 import staffRoutes from "./staff/staff.routes.js";
+import adminRoutes from "./admin/admin.routes.js";
 import {
   authenticateToken,
   AuthRequest,
@@ -40,6 +41,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 app.use("/api/staff", staffRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ---------------------------------------------------------------------------
 // Lab 3 — Authentication Routes

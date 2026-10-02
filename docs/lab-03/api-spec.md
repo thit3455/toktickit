@@ -580,6 +580,10 @@ Supports:
 - Search by email;
 - Optional role filter.
 
+Query parameters: `search` (case-insensitive name/email substring, maximum 200 characters), `role` (`REQUESTER`, `IT_STAFF`, `ADMINISTRATOR`), and `active` (`true` or `false`). Omitted/empty filters include all values. Filters combine with AND; results are sorted by name then ID. Response: `{ "data": [...] }`.
+
+All four Administrator endpoints require an active authenticated `ADMINISTRATOR` who has completed their initial password change. Responses expose only `id`, `name`, `email`, `role`, `isActive`, and `mustChangePassword`; never password hashes or session records. Unauthenticated requests return 401, unauthorized roles return 403.
+
 ---
 
 ## 6.2 Create User
@@ -607,6 +611,8 @@ Validation:
 - Role must be valid.
 - Password must be stored securely.
 
+Required fields are `name`, `email`, `role`, and `password`; optional `isActive` defaults to `true`. Names are trimmed (1–120 characters). Emails are trimmed/lowercased, must contain a non-whitespace local part, `@`, and a dotted domain (maximum 254 characters), and are checked case-insensitively for duplicates. Passwords require at least 8 characters and at most 72 UTF-8 bytes, and are bcrypt-hashed. New accounts have `mustChangePassword: true`. Unsupported fields are rejected. Success returns 201 with `{ "data": user }`.
+
 ---
 
 ## 6.3 Update User
@@ -623,6 +629,10 @@ Editable:
 - email;
 - role;
 - activation state.
+
+PATCH accepts a nonempty subset of `name`, `email`, `role`, and boolean `isActive`. Unsupported fields (including password, hash, ID, and password-change flag) return 400. Successful updates return 200 with `{ "data": user }`.
+
+Self-deactivation is rejected (409 `SELF_DEACTIVATION`). Removing the last active Administrator by role or activation is rejected (409 `LAST_ADMINISTRATOR`). Self-role changes are allowed when another active Administrator remains. These checks and writes share a serializable transaction, with bounded retries for serialization conflicts. Role changes and deactivation revoke affected sessions.
 
 ---
 
@@ -641,6 +651,10 @@ mustChangePassword = true
 ```
 
 The user must change password at next login.
+
+Request body: `{ "password": "newInitialPassword" }`, using the same password validation as creation. Success returns 200 with `{ "data": user }` and revokes all target sessions, including the current session when resetting one's own password.
+
+Administrator validation failures return 400 with optional field messages; missing IDs return 404; duplicate email and protected-account conflicts return 409. Exhausted serialization retries return a safe 409; unexpected failures return a generic 500 without database details. No user deletion endpoint is provided.
 
 ---
 

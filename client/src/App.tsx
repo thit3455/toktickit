@@ -1,4 +1,5 @@
 import { StaffTicketQueue } from "./StaffTicketQueue";
+import { AdminUserManagement } from "./AdminUserManagement";
 import "./Requester.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
@@ -80,7 +81,8 @@ type Screen =
   | "create"
   | "myTickets"
   | "ticketDetail"
-  | "staffQueue";
+  | "staffQueue"
+  | "adminUsers";
 
 const MAX_ATTACHMENT_SIZE =
   5 * 1024 * 1024;
@@ -703,6 +705,8 @@ useEffect(() => {
     setScreen("staffQueue");
   } else if (currentUser?.role === "REQUESTER") {
     setScreen("create");
+  } else if (currentUser?.role === "ADMINISTRATOR") {
+    setScreen("adminUsers");
   }
 }, [
   currentUser,
@@ -1544,7 +1548,7 @@ if (currentUser.mustChangePassword) {
 
       <nav
         className="d-flex flex-wrap gap-2 mb-4"
-        aria-label="Requester navigation"
+        aria-label={currentUser.role === "ADMINISTRATOR" ? "Administrator navigation" : "Requester navigation"}
       >
         {currentUser?.role === "REQUESTER" && (
         <button
@@ -1610,7 +1614,14 @@ if (currentUser.mustChangePassword) {
          </div>
         )}
 
+        {currentUser.role === "ADMINISTRATOR" && <button type="button" className="btn btn-success" onClick={() => setScreen("adminUsers")}>User Management</button>}
       </nav>
+
+      {currentUser.role === "ADMINISTRATOR" && screen === "adminUsers" && <AdminUserManagement
+        currentUserId={currentUser.id}
+        onSelfChange={user => setCurrentUser(previous => previous ? { ...previous, ...user } : previous)}
+        onSessionEnded={() => { setCurrentUser(null); setScreen("create"); }}
+      />}
 
       {/* =====================================================
           MY TICKETS

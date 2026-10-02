@@ -1,6 +1,50 @@
 const API_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
+export type AccountRole = "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
+export interface ManagedUser {
+  id: number; name: string; email: string; role: AccountRole; isActive: boolean; mustChangePassword: boolean;
+}
+export interface AccountInput { name: string; email: string; role: AccountRole; isActive: boolean; password?: string }
+export class AdminApiError extends Error {
+  constructor(public status: number, message: string, public fields: Record<string, string> = {}) { super(message); }
+}
+async function adminRequest(path: string, options: RequestInit = {}) {
+  let response: Response;
+  try { response = await fetch(`${API_URL}/api/admin/users${path}`, { ...options, credentials: "include" }); }
+  catch { throw new AdminApiError(0, "Unable to reach the server. Please try again."); }
+  const result = await response.json().catch(() => null);
+  if (!response.ok) {
+    const conflicts: Record<string, string> = {
+      DUPLICATE_EMAIL: "An account with this email already exists.",
+      SELF_DEACTIVATION: "You cannot deactivate your own account.",
+      LAST_ADMINISTRATOR: "At least one active Administrator must remain.",
+    };
+    const message = response.status === 401 ? "Your session has expired. Please log out and log in again." :
+      response.status === 403 ? "Administrator access is required." :
+      response.status === 404 ? "User was not found. Refresh the list." :
+      response.status === 409 ? conflicts[result?.error?.code] ?? "Another account change occurred. Refresh and try again." :
+      response.status === 400 ? "Check the highlighted fields and try again." : "Unable to complete user management request. Please try again.";
+    throw new AdminApiError(response.status, message, [400, 409].includes(response.status) ? result?.error?.fields ?? {} : {});
+  }
+  if (!result || !("data" in result)) throw new AdminApiError(500, "The server returned an unexpected response. Please try again.");
+  return result.data;
+}
+export async function getAdminUsers(filters: { search?: string; role?: string; active?: string } = {}, signal?: AbortSignal): Promise<ManagedUser[]> {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
+  return adminRequest(`?${query}`, { signal });
+}
+export async function createAdminUser(input: AccountInput): Promise<ManagedUser> {
+  return adminRequest("", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+export async function updateAdminUser(id: number, input: Omit<AccountInput, "password">): Promise<ManagedUser> {
+  return adminRequest(`/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+export async function setAdminInitialPassword(id: number, password: string): Promise<ManagedUser> {
+  return adminRequest(`/${id}/password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
+}
+
 export class RequesterApiError extends Error {
   constructor(public status: number, fallback: string) {
     super(status === 401 ? "Your session has expired. Please log in again." :

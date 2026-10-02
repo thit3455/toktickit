@@ -176,6 +176,12 @@ Internal Notes must be visually separated from Public Comments.
 
 ## 8. Administrator User Management
 
+Implemented in the existing authenticated shell, showing the Administrator's name, role, Logout and User Management navigation. The screen uses a compact Zen Green user table (Name, Email, Role, Status, Action) beside a shared create/edit/password panel, approximately 60/40 on desktop. Below 992px the panel stacks beneath the list; below 576px the same table becomes labelled compact records. Long names/emails wrap. Administrator styles are scoped and do not alter Requester or IT Staff screens. Opening an editor focuses its heading so keyboard and mobile users can reach it directly.
+
+Search submits a name/email term; role and Active/Inactive filters apply immediately. Clear filters restores the list. Create, Edit and Set Initial Password use a shared inline editor with associated field validation, saving feedback and success messages. Account status is changed in the create/edit form. Self-deactivation is disabled in the editor and also rejected by the API; last-Administrator conflicts are explained by the API response. Self-role changes and self-password resets return to Login because the session is revoked.
+
+Loading, empty list, no matching results, retryable API failure, expired session and forbidden states are distinct. Forbidden/expired responses hide account data and management controls. User deletion and IT Staff operational controls are absent. Screenshots and verification are recorded in [Administrator verification](admin-verification.md).
+
 Purpose:
 
 Manage user accounts.

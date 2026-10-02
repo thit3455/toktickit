@@ -1,0 +1,47 @@
+.admin-management { min-width: 0; }
+.admin-management .admin-workspace { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1.25rem; align-items: start; }
+.admin-management .admin-users-panel, .admin-management .admin-editor-panel { min-width: 0; }
+.admin-management .admin-panel-toolbar { display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding: 1rem; border-bottom: 1px solid #d5e5dc; background: #f1f8f4; border-radius: .375rem .375rem 0 0; }
+.admin-management .admin-search-form { padding: 1rem; border-bottom: 1px solid #d5e5dc; }
+.admin-management .form-label { font-size: .875rem; font-weight: 600; margin-bottom: .35rem; }
+.admin-management .admin-editor-panel label:has(+ [required])::after { content: " *"; color: #a12622; }
+.admin-management .admin-users-table { width: 100%; table-layout: fixed; font-size: .8125rem; }
+.admin-management .admin-users-table th { color: #28533e; background: #f1f8f4; font-weight: 600; }
+.admin-management .admin-users-table th, .admin-management .admin-users-table td { padding: .75rem .5rem; border-bottom: 1px solid #e1e9e4; vertical-align: top; overflow-wrap: anywhere; }
+.admin-management .admin-users-table th:nth-child(2) { width: 32%; }
+.admin-management .admin-users-table th:nth-child(4) { width: 13%; }
+.admin-management .admin-users-table tbody tr:last-child td { border-bottom: 0; }
+.admin-management .admin-users-table .badge { white-space: normal; line-height: 1.45; max-width: 100%; font-size: .6875rem; }
+.admin-management .admin-selected-user { background: #f1f8f4; }
+.admin-management .admin-row-actions { display: flex; flex-wrap: wrap; gap: .25rem; align-items: start; }
+.admin-management .admin-row-actions .btn { font-size: .75rem; }
+.admin-management .admin-sort-button { display: inline-flex; align-items: center; gap: .35rem; min-height: 36px; border: 0; background: transparent; color: inherit; font: inherit; padding: .25rem 0; text-align: left; cursor: pointer; }
+.admin-management .admin-sort-icon { flex-shrink: 0; color: #6b8174; }
+.admin-management .admin-sort-icon.is-active { color: #146c43; stroke-width: 2.5; }
+.admin-management .admin-pagination { padding: 1rem; border-top: 1px solid #d5e5dc; text-align: center; }
+.admin-management .admin-page-buttons, .admin-management .admin-page-item { display: flex; align-items: center; justify-content: center; gap: .3rem; flex-wrap: wrap; }
+.admin-management .admin-page-ellipsis { padding: 0 .25rem; color: #527662; }
+.admin-management .admin-editor-panel { position: sticky; top: 1rem; scroll-margin-top: 1rem; }
+.admin-management .admin-editor-panel .card-header { padding: 1rem; margin: 0; }
+.admin-management .admin-editor-placeholder { padding: 1.5rem; border-style: dashed; background: #f8fbf9; }
+.admin-management .admin-list-feedback { margin: 1rem; }
+.admin-management :focus-visible { outline: 3px solid #146c43; outline-offset: 3px; }
+@media (max-width: 991.98px) {
+  .admin-management .admin-workspace { grid-template-columns: minmax(0, 1fr); }
+  .admin-management .admin-editor-panel { position: static; }
+}
+@media (max-width: 575.98px) {
+  .admin-management .admin-users-table, .admin-management .admin-users-table tbody { display: block; }
+  .admin-management .admin-users-table thead { display: block; background: #f1f8f4; }
+  .admin-management .admin-users-table thead tr { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .admin-management .admin-users-table thead th { width: auto; padding: .25rem 0; border: 0; }
+  .admin-management .admin-users-table thead th:nth-child(2), .admin-management .admin-users-table thead th:nth-child(4) { width: auto; }
+  .admin-management .admin-users-table thead th:nth-child(5) { display: none; }
+  .admin-management .admin-users-table tr { display: block; padding: .65rem 1rem; border-bottom: 1px solid #d5e5dc; }
+  .admin-management .admin-users-table td { display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: .5rem; border: 0; padding: .3rem 0; }
+  .admin-management .admin-users-table td::before { content: attr(data-label); color: #28533e; font-weight: 600; }
+  .admin-management .admin-users-table td > * { min-width: 0; justify-self: start; }
+  .admin-management .admin-row-actions { gap: .75rem; }
+}
+
+.admin-management .admin-users-table td[data-label="Email"] { font-size: .875rem; }

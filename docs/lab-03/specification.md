@@ -344,6 +344,8 @@ Lab 3 is complete when:
 
 ## 11. Assumptions and Decisions
 
+Administrator implementation follows FR-19 through FR-24 and BR-10/BR-11. An Administrator may change their own role if another active Administrator remains; self-deactivation is always rejected. Deactivation, role changes and initial-password resets revoke the affected user's existing sessions. Account creation and password reset require a password change before application access. Existing user/ticket data and the Prisma schema are preserved. See [Administrator verification](admin-verification.md) for tested scope and source limitations.
+
 - Session cookie authentication is selected.
 - One user can have only one role.
 - Deactivation is used instead of deleting users.

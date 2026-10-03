@@ -1455,6 +1455,11 @@ if (currentUser.mustChangePassword) {
             return;
           }
 
+          if (new TextEncoder().encode(newPassword).length > 72) {
+            setPasswordChangeError("New password must be at most 72 UTF-8 bytes.");
+            return;
+          }
+
           if (
             newPassword !== confirmPassword
           ) {

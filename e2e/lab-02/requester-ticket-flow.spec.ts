@@ -34,6 +34,8 @@ test.describe("Authenticated Requester regression", () => {
     await expect(page.getByText("Browser Requester", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Change Requester" })).toHaveCount(0);
     await noOverflow(page);
+    await expect(page.locator("#category")).toBeEnabled();
+    await expect(page.getByText("Loading ticket reference data...")).toHaveCount(0);
     await page.screenshot({ path: testInfo.outputPath("requester-create.png"), fullPage: true });
     await page.locator("#category").selectOption({ index: 1 });
     await page.locator("#related-system").selectOption({ index: 1 });

@@ -26,6 +26,30 @@ describe("Authenticated Requester identity replaces selection", () => {
     await screen.findByRole("heading", { name: "Create Ticket" });
     expect(change).toHaveBeenCalledWith("Password123!", "NewRequester123!");
   });
+  it.each([
+    ["7 characters", "a".repeat(7), false],
+    ["8 characters", "a".repeat(8), true],
+    ["72 bytes", "a".repeat(72), true],
+    ["73 bytes", "a".repeat(73), false],
+    ["72 multibyte bytes", "é".repeat(36), true],
+    ["73 multibyte bytes", "é".repeat(36) + "a", false],
+  ])("validates password boundary: %s", async (_label, password, valid) => {
+    vi.spyOn(api, "getCurrentUser").mockResolvedValue({ ...user, mustChangePassword: true });
+    const change = vi.spyOn(api, "changePassword").mockResolvedValue();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Change Password" });
+    fireEvent.change(screen.getByLabelText("Current Password"), { target: { value: "Password123!" } });
+    fireEvent.change(screen.getByLabelText("New Password"), { target: { value: password } });
+    fireEvent.change(screen.getByLabelText("Confirm New Password"), { target: { value: password } });
+    fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
+    if (valid) {
+      await screen.findByRole("heading", { name: "Create Ticket" });
+      expect(change).toHaveBeenCalledWith("Password123!", password);
+    } else {
+      expect(change).not.toHaveBeenCalled();
+      expect(screen.getByRole("alert")).toHaveTextContent(String(password).length < 8 ? "at least 8 characters" : "at most 72 UTF-8 bytes");
+    }
+  });
   it("shows session loading", () => {
     vi.spyOn(api, "getCurrentUser").mockImplementation(() => new Promise(() => {}));
     render(<App />);

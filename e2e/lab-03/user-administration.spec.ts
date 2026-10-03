@@ -104,6 +104,8 @@ test.describe("Administrator User Management with real API", () => {
     await expect(card).toBeVisible();
     await page.getByRole("button", { name: `Set initial password for ${managedEmail}`, exact: true }).click();
     await page.getByLabel("Initial password", { exact: true }).fill("ResetBrowser123!");
+    await noOverflow(page);
+    await page.screenshot({ path: testInfo.outputPath("admin-set-password.png"), fullPage: true });
     await page.getByRole("button", { name: "Set Initial Password", exact: true }).click();
     await expect(page.getByText("Initial password set. Existing sessions have been signed out.")).toBeVisible();
     await page.getByRole("button", { name: "Logout", exact: true }).click();

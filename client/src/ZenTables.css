@@ -1,0 +1,61 @@
+/* Shared presentation for the existing responsive Lab 3 tables. */
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #212529;
+  border-radius: .5rem;
+  font-size: .875rem;
+  --bs-table-border-color: #212529;
+}
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) th,
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) td {
+  border-color: #212529;
+  padding: .5rem;
+}
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) th { font-weight: 600; }
+.admin-management .admin-users-table td[data-label="Name"] { overflow-wrap: normal; }
+:is(.requester-tickets, .staff-queue, .admin-management) th,
+:is(.requester-tickets, .staff-queue, .admin-management) td::before,
+:is(.requester-tickets, .staff-queue, .admin-management) .form-label {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) thead,
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) thead th {
+  --bs-table-bg: #d1e7dd;
+  --bs-table-color: #0f5132;
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) thead th:first-child { border-top-left-radius: .5rem; }
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) thead th:last-child { border-top-right-radius: .5rem; }
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) tbody tr:last-child td:first-child { border-bottom-left-radius: .5rem; }
+:is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) tbody tr:last-child td:last-child { border-bottom-right-radius: .5rem; }
+.admin-management .admin-users-table { table-layout: auto; }
+.admin-management .admin-users-table th { overflow-wrap: normal; word-break: normal; }
+.admin-management .admin-users-table .badge,
+.admin-management .admin-sort-button { overflow-wrap: normal; word-break: normal; }
+.admin-management .admin-users-table td[data-label="Role"] .badge { white-space: nowrap; }
+.admin-management .admin-row-actions { flex-wrap: nowrap; gap: .25rem; }
+.admin-management .admin-row-actions .btn { white-space: nowrap; padding: .25rem .4rem; transition: none; }
+.admin-management .admin-row-actions .btn:not(:disabled):is(:hover, :focus-visible, :active) {
+  color: #fff;
+  background-color: #198754;
+  border-color: #198754;
+}
+.staff-queue .staff-queue-table { border-color: #212529; --bs-table-border-color: #212529; }
+.staff-queue .staff-queue-table th,
+.staff-queue .staff-queue-table td { border-color: #212529; }
+@media (min-width: 1200px) {
+  .staff-queue .staff-queue-table tbody td { border-top: 1px solid #212529; }
+}
+/* Long data may wrap, but labels retain whole words. Keep existing card breakpoints. */
+@media (max-width: 1199.98px) {
+  .staff-queue .staff-queue-table { border: 0; }
+  .staff-queue-table tr { border-radius: .5rem; border-color: #212529; }
+}
+@media (max-width: 991px) {
+  .table-responsive.requester-tickets table { border: 0; }
+  .requester-tickets tr { border-color: #212529; }
+}

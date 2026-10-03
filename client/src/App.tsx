@@ -1,6 +1,7 @@
 import { StaffTicketQueue } from "./StaffTicketQueue";
 import { AdminUserManagement } from "./AdminUserManagement";
 import "./Requester.css";
+import "./ZenTables.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
 import { useEffect, useState } from "react";

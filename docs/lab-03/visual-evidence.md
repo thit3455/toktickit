@@ -2,6 +2,14 @@
 
 ## Source and method
 
+### Latest table consistency audit - 2026-10-03
+
+The prior Requester desktop image was stale: it showed a white header and split Priority/Status labels. Shared `client/src/ZenTables.css` now gives Requester, Staff and Administrator tables the same pale-green header, dark-green header text, dark borders, .5rem corners, .875rem base table typography and .5rem cell padding. Labels wrap between words; long data can still wrap. Admin Edit/Set Password remain compact and side by side. Existing card breakpoints are preserved.
+
+Verification: complete frontend suite **125 passed, 0 failed, 0 skipped**; complete Playwright suite **33 passed, 0 failed, 0 skipped** (27 Lab 3 checks plus 6 Requester regression checks); frontend build/type check **PASS**. Command: `npm.cmd exec -- playwright test --workers=1 --output=test-results/table-audit-final`. No backend, business logic or test-data definitions changed.
+
+Refreshed 15 submitted images: `requester/requester-list-{desktop,tablet,mobile}.png`, `staff-queue/staff-queue-{desktop,tablet,mobile}.png`, and `user-management/admin-{edit,validation,set-password}-{desktop,tablet,mobile}.png`. These replace earlier captures in place. The rest of this inventory remains unchanged. Current desktop/tablet/mobile table screenshots were inspected for whole-word labels, visible actions, consistent headers/corners, overlap and overflow; all three layouts pass. Earlier capture history below is retained for provenance and is superseded for these 15 images. Final-main verification and final PDF readability remain separate pending submission checks.
+
 Lab 3 PDF page 16 requires four screenshot directories; page 18, Answer Part 9, requires desktop/tablet/mobile screenshots and a completed visual checklist. This review covers the four requested areas, with observations rather than automatic visual approval based on file existence.
 
 Capture command: `npm.cmd exec -- playwright test --workers=1`.
@@ -41,9 +49,9 @@ Capture sources: `authentication.spec.ts` produces login and change-password ima
 
 | PDF check | Result | Observed evidence / limit |
 |---|---|---|
-| Design consistency | PASS for captured states | Green headers/actions, pale borders and consistent form spacing. Change Password is simpler than Login but retains green action styling. |
+| Design consistency | PASS for captured states | Green headers/actions, consistent dark table borders/corners and cell spacing. Change Password is simpler than Login but retains green action styling. |
 | Role navigation | PASS for captured states | Staff shell shows Staff queue; Admin shell shows User Management; role/name and Logout remain visible. Authentication screens omit operational navigation. |
-| Status/priority/role badges | PASS with observation | Queue MEDIUM/NEW pills are readable; Admin role/Active badges are readable. Desktop ADMINISTRATOR badge wraps its final letter onto a second line in the Create validation image; no overlap, but visually awkward. |
+| Status/priority/role badges | PASS | Queue MEDIUM/NEW pills and Admin role/Active badges are readable. Refreshed images show the ADMINISTRATOR badge intact without the previous mid-word wrap. |
 | Editable/read-only fields | PASS for captured states | Staff ticket information uses muted read-only fields, while assignment/priority/status use editable controls. Admin edit controls remain visually distinct. |
 | Validation placement | PASS | Password mismatch sits below confirmation; Admin field errors are adjacent to affected inputs. No overlap observed on any device. |
 | Focus | PASS for inspected controls | Tab traversal Email → Password → Login shows visible focus rings on all three profiles. The previous uncertainty was resolved by capturing settled keyboard focus. Change-password confirmation and Admin editor controls also show visible outlines. This does not certify every control in the application. |
@@ -58,7 +66,7 @@ Capture sources: `authentication.spec.ts` produces login and change-password ima
 | Login keyboard focus | PASS | Nine inspected keyboard states across desktop/tablet/mobile; no application fix needed. |
 | Administrator Set Password evidence | PASS | Three dedicated panel images. Account, masked password, validation guidance, next-login change requirement and Save/Cancel are visible. Panel stacks on smaller screens. |
 | Required current Requester evidence | PASS | Nine current Create/List/Detail images reviewed and preserved under `requester/`; no extra legacy screenshots copied. Loaded create forms, list actions, resolution indication, comments and attachment controls are represented. |
-| Review all submitted screenshots | PASS with observation | All 39 reviewed. No page overflow or overlapping controls observed. Long values are partially visible within normal single-line input viewports; complete values remain available. Desktop Requester Priority/Status headers and an Admin role badge wrap awkwardly without hiding actions. No application styling was changed. |
+| Review all submitted screenshots | PASS with observation | All 39 reviewed across the evidence work, with affected table captures refreshed after CSS fixes. No page overflow or overlapping controls observed. Long values are partially visible within normal single-line input viewports; complete values remain available. The prior Priority/Status and Admin role mid-word wrapping is resolved. |
 | Final checklist documentation | PASS | Inventory, commands, results and limitations recorded here. |
 
 The required screenshot collection is present, including all four PDF-mandated directories and current Requester views. **Gap #5: PASS with observation.** The PDF requires a clipping review, not simultaneous display of every long input value. The observed native input viewport behavior does not truncate data, hide required actions or cause page overflow.

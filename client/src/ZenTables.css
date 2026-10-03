@@ -33,6 +33,8 @@
 :is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) tbody tr:last-child td:first-child { border-bottom-left-radius: .5rem; }
 :is(.requester-tickets table, .staff-queue-table, .admin-management .admin-users-table) tbody tr:last-child td:last-child { border-bottom-right-radius: .5rem; }
 .admin-management .admin-users-table { table-layout: auto; }
+.admin-management .admin-users-table tbody tr,
+.admin-management .admin-users-table tbody td { background-color: #fff; }
 .admin-management .admin-users-table th { overflow-wrap: normal; word-break: normal; }
 .admin-management .admin-users-table .badge,
 .admin-management .admin-sort-button { overflow-wrap: normal; word-break: normal; }
@@ -51,6 +53,15 @@
   .staff-queue .staff-queue-table tbody td { border-top: 1px solid #212529; }
 }
 /* Long data may wrap, but labels retain whole words. Keep existing card breakpoints. */
+@media (min-width: 992px) {
+  .requester-tickets th:nth-child(2) { width: 23%; }
+  .requester-tickets th:nth-child(3) { width: 11%; }
+  .requester-tickets td[data-label="Category"] {
+    min-width: 6rem;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
 @media (max-width: 1199.98px) {
   .staff-queue .staff-queue-table { border: 0; }
   .staff-queue-table tr { border-radius: .5rem; border-color: #212529; }

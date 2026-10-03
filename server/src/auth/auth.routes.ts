@@ -248,15 +248,12 @@ router.post(
       }
 
 
+      if (Buffer.byteLength(newPassword, "utf8") > 72) {
+        return res.status(400).json({ error: { code: "WEAK_PASSWORD", message: "Password must be at most 72 UTF-8 bytes." } });
+      }
+
       const prisma = getPrisma();
-
-
-      const user =
-        await prisma.user.findUnique({
-          where: {
-            id: req.user!.userId,
-          },
-        });
+      const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
 
 
       if (!user) {

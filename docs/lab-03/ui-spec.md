@@ -233,6 +233,8 @@ Mobile:
 
 ## 10. UI Completion Checklist
 
+Current screenshot inventory and completed visual review: [Lab 3 responsive visual evidence](visual-evidence.md). All 39 submitted screenshots have been reviewed; keyboard focus passes across desktop/tablet/mobile. Single-line input viewports are PASS with observation, not a responsive failure. Gap #5 is resolved. Final PDF rendering/readability and Part 3 final-main test output remain submission checks; the list below is the design checklist.
+
 Before release verify:
 
 - Consistent Zen Green appearance

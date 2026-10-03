@@ -1,6 +1,7 @@
 import { StaffTicketQueue } from "./StaffTicketQueue";
 import { AdminUserManagement } from "./AdminUserManagement";
 import "./Requester.css";
+import "./ZenTables.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
 import { useEffect, useState } from "react";
@@ -1452,6 +1453,11 @@ if (currentUser.mustChangePassword) {
             setPasswordChangeError(
               "New password must be at least 8 characters."
             );
+            return;
+          }
+
+          if (new TextEncoder().encode(newPassword).length > 72) {
+            setPasswordChangeError("New password must be at most 72 UTF-8 bytes.");
             return;
           }
 

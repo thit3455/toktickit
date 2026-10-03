@@ -351,3 +351,19 @@ Administrator implementation follows FR-19 through FR-24 and BR-10/BR-11. An Adm
 - Deactivation is used instead of deleting users.
 - Existing Lab 2 ticket and attachment data will be preserved.
 - Passwords will be stored using secure hashing.
+
+### Migrated Requester initial passwords
+
+The historical migration maps Lab 2 RequesterUser records to User by email and remaps Ticket requester IDs. Its unusable password marker is repaired by the additive migration `20261003090000_repair_migrated_requester_passwords`; historical migration files remain unchanged.
+
+For this Lab development database, migrated REQUESTER accounts with exactly the historical marker receive a bcrypt hash of the existing development initial password `Password123!` and `mustChangePassword: true`. No plaintext password is stored in the database. The repair preserves valid passwords, activation state, identity, timestamps and Ticket ownership; inactive accounts remain unable to log in. Reapplying the repair cannot reset a password already repaired or changed by a user. The seed retains its existing `update: {}` behavior.
+
+Apply this forward migration through the project's normal Prisma migration deployment process. It is not a general password reset or a production credential provisioning policy. During verification it was applied only to a disposable test schema, not the development schema.
+
+Acceptance evidence: `server/tests/lab-03/auth.api.test.ts` replays repository migration SQL against isolated Lab 2 records, verifies ownership/attachment preservation, and exercises the real authentication API. Initial login returns 200; normal Ticket access is blocked with 403 PASSWORD_CHANGE_REQUIRED until password change. A subsequent login with the new password and owned-Ticket access succeed, while the old initial password is rejected.
+
+### Pre-merge compliance verification
+
+The five identified evidence gaps are resolved: migration regression, dedicated authentication browser tests, real-API Staff workflow, required E2E filenames and responsive screenshots/checklist. Change-password validation enforces the same 72 UTF-8 byte maximum as Administrator password validation; automated tests cover 7/8-character and 72/73-byte boundaries including multibyte input. Inactive-account feedback is safely displayed by Login.
+
+Latest verification passed 125 frontend, 163 backend and 33 E2E tests (321 total, 0 failed, 0 skipped); both build/type checks passed. See [tests](tests.md) and [visual evidence](visual-evidence.md). Results apply to the pre-merge working tree on `lab3-staging`, not final `main`. Part 3 final-main test output and final PDF readability must be checked after those artifacts exist. Normal single-line input viewport clipping is PASS with observation, not an unresolved UI requirement.

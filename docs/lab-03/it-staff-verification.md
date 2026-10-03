@@ -1,6 +1,14 @@
 # IT Staff verification — 2026-09-26
 
-## Latest review verification (2026-09-29)
+## Latest pre-merge verification - 2026-10-03
+
+Complete results: **125 frontend, 163 backend and 33 E2E tests passed; 321 total, 0 failed, 0 skipped**. Both build/type checks passed. All legacy Requester regressions pass; the failures recorded below are historical and resolved. See [tests](tests.md) for exact commands and [Administrator verification](admin-verification.md) for per-suite counts.
+
+`e2e/lab-03/staff-ticket-flow.spec.ts` passes on desktop/tablet/mobile using real APIs: login, queue, detail, claim, reassign, IT Priority, Status, Public Comment, Internal Note, reload and persistence. The supplemental `staff-queue.spec.ts` still uses controlled responses. Required E2E filenames are present, and [visual evidence](visual-evidence.md) reviews all 39 submitted screenshots. Gap #5 is PASS with observation for normal single-line input viewports.
+
+These results apply to the pre-merge `lab3-staging` working tree, not final `main`. Part 3 final-main output and final PDF readability remain submission checks. Earlier counts and absent-browser-evidence statements below describe only their dated historical runs and are superseded here.
+
+## Historical review verification (2026-09-29)
 
 The final IT Staff review branch passes 32 client tests and 50 server tests with `npm.cmd run test:staff` in each directory. Both production builds pass. These checks include ownership reassignment, active staff validation, persistence and stale claim handling. The earlier results below document intermediate checks; the complete legacy suites were not rerun for this push and their previously reported failures remain disclosed.
 
@@ -42,11 +50,11 @@ From `server`: `npm.cmd test -- tests/lab-03/staff.api.test.ts`
 
 From `client`: `npm.cmd test -- tests/lab-03/TicketDiscussion.test.tsx`
 
-For all focused staff checks, run `npm.cmd run test:staff` in each of `client` and `server`. Expected results: 7 client tests and 7 server tests pass. The normal `npm.cmd test` command still includes the legacy tests.
+The focused commands above reproduce individual suites. For current complete verification, use the commands and totals in [tests](tests.md); the old 7-test counts below/above are historical and must not be used as current expectations.
 
 Run `npm.cmd run build` in each directory. The integration test requires the configured PostgreSQL database with current migrations applied.
 
-## Limits and outstanding regression work
+## Historical limits and regression work (superseded)
 
 The pre-existing Lab 2 API suite still uses unauthenticated requests. Its baseline run has 3 passing tests, 3 failing tests and 17 skipped tests because protected ticket requests return 401. Those legacy tests need migration to authenticated fixtures; authentication was not weakened to make them pass.
 

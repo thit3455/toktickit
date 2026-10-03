@@ -1,5 +1,13 @@
 # Lab 3 Requester implementation and verification
 
+## Latest pre-merge verification - 2026-10-03
+
+The complete suites passed: **125 frontend, 163 backend, 33 E2E; 321 total, 0 failed, 0 skipped**. Both builds passed. These results include the six real-API Requester browser checks across desktop/tablet/mobile, alongside migration, dedicated authentication, real-API Staff and Administrator coverage. Current Requester Create/List/Detail screenshot triplets are reviewed in [visual evidence](visual-evidence.md), PASS with a normal single-line input viewport observation. See [tests](tests.md) for current totals and paths.
+
+The verified working tree was on `lab3-staging`, not final `main`. Part 3 final-main output and final PDF readability remain pending submission checks. The smaller counts below are historical, not current totals.
+
+## Historical implementation record
+
 Verified 2026-10-01 on branch `feature/lab3-requester-resolution`.
 
 ## Already implemented and retained

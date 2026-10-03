@@ -996,6 +996,10 @@ export async function login(
 
 
   if (!response.ok) {
+    const result = await response.json().catch(() => null);
+    if (response.status === 403 && result?.error?.code === "ACCOUNT_INACTIVE") {
+      throw new Error("Account is inactive.");
+    }
     throw new Error(
       "Invalid email or password"
     );

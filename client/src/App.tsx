@@ -1,9 +1,14 @@
+import { StaffTicketQueue } from "./StaffTicketQueue";
+import { AdminUserManagement } from "./AdminUserManagement";
+import "./Requester.css";
+import "./ZenTables.css";
+import { LoginScreen } from "./LoginScreen.js";
+import { TicketDiscussion } from "./TicketDiscussion.js";
 import { useEffect, useState } from "react";
 
 import {
   Category,
   CreatedTicket,
-  DevelopmentRequester,
   RelatedSystem,
   RequestedPriority,
   TicketAttachment,
@@ -15,18 +20,29 @@ import {
   getCategories,
   getMyTickets,
   getRelatedSystems,
-  getRequesters,
   getTicketAttachments,
   getTicketDetail,
+  getStaffTicketDetail,
+  claimStaffTicket,
+  getActiveStaffUsers,
+  reassignStaffTicket,
+  ActiveStaffUser,
+  updateStaffTicketPriority,
+  updateStaffTicketStatus,
   removeAttachment,
   uploadTicketAttachment,
+  TicketStatus,
+  getCurrentUser,
+  logout,
+  indicateResolution,
+  changePassword,
 } from "./api.js";
 
-type RequesterState =
-  | "loading"
-  | "ready"
-  | "empty"
-  | "error";
+
+type UserRole =
+  | "REQUESTER"
+  | "IT_STAFF"
+  | "ADMINISTRATOR";
 
 type ReferenceState =
   | "idle"
@@ -65,7 +81,9 @@ type AttachmentActionState =
 type Screen =
   | "create"
   | "myTickets"
-  | "ticketDetail";
+  | "ticketDetail"
+  | "staffQueue"
+  | "adminUsers";
 
 const MAX_ATTACHMENT_SIZE =
   5 * 1024 * 1024;
@@ -86,35 +104,78 @@ const EMPTY_PAGINATION: TicketPagination = {
   totalPages: 0,
 };
 
+function requesterFailure(error: unknown, fallback: string) {
+  const status = (error as { status?: number } | null)?.status;
+  if (status === 401) return "Your session has expired. Please log out and log in again.";
+  if (status === 403) return "You do not have permission to perform this action.";
+  if (status === 404) return "The requested item was not found.";
+  if (status === 409) return "This item has changed. Refresh and try again.";
+  return fallback;
+}
+
 export default function App() {
+
   // =========================================================
-  // Development Requester
+// Authentication
+// =========================================================
+
+const [currentUser, setCurrentUser] =
+  useState<{
+    id: number;
+    name: string;
+    email: string;
+    role: UserRole;
+    mustChangePassword: boolean;
+  } | null>(null);
+
+
+const [currentPassword, setCurrentPassword] =
+  useState("");
+
+const [newPassword, setNewPassword] =
+  useState("");
+
+const [confirmPassword, setConfirmPassword] =
+  useState("");
+
+const [passwordChangeError, setPasswordChangeError] =
+  useState("");
+
+const [passwordChangeBusy, setPasswordChangeBusy] =
+  useState(false);
   // =========================================================
-
-  const [requesters, setRequesters] =
-    useState<DevelopmentRequester[]>([]);
-
-  const [
-    selectedRequesterId,
-    setSelectedRequesterId,
-  ] = useState("");
-
-  const [
-    currentRequester,
-    setCurrentRequester,
-  ] =
-    useState<DevelopmentRequester | null>(
-      null
-    );
-
-  const [
-    requesterState,
-    setRequesterState,
-  ] =
-    useState<RequesterState>("loading");
+  const currentRequester = currentUser?.role === "REQUESTER" ? currentUser : null;
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState("");
+  const [logoutBusy, setLogoutBusy] = useState(false);
+  const [resolutionBusy, setResolutionBusy] = useState(false);
+  const [resolutionMessage, setResolutionMessage] = useState("");
+  const [resolutionError, setResolutionError] = useState("");
+  const [listError, setListError] = useState("");
+  const [detailError, setDetailError] = useState("");
+  const [createError, setCreateError] = useState("");
 
   const [screen, setScreen] =
     useState<Screen>("create");
+
+    // =========================================================
+  // IT Staff Ticket Queue
+  // =========================================================
+
+const [staffActionStatus, setStaffActionStatus] =
+  useState("");
+
+const [staffActionPriority, setStaffActionPriority] =
+  useState("");
+
+const [staffActionMessage, setStaffActionMessage] = useState("");
+const [staffActionBusy, setStaffActionBusy] = useState(false);
+const [activeStaffUsers, setActiveStaffUsers] = useState<ActiveStaffUser[]>([]);
+const [staffUsersState, setStaffUsersState] = useState<"loading" | "ready" | "error">("loading");
+const [staffUsersError, setStaffUsersError] = useState("");
+const [staffUsersRetry, setStaffUsersRetry] = useState(0);
+const [reassignTo, setReassignTo] = useState("");
+
 
   // =========================================================
   // Reference Data
@@ -247,7 +308,7 @@ export default function App() {
   const [
     filterStatus,
     setFilterStatus,
-  ] = useState<"" | "NEW">("");
+  ] = useState<"" | TicketStatus>("");
 
   const [sortBy, setSortBy] =
     useState<
@@ -351,62 +412,15 @@ export default function App() {
     );
 
   // =========================================================
-  // Load Development Requesters
-  // =========================================================
-
+  // Restore only the server-authenticated identity.
   useEffect(() => {
-    async function loadRequesters() {
-      try {
-        const data =
-          await getRequesters();
-
-        setRequesters(data);
-
-        if (data.length === 0) {
-          setRequesterState("empty");
-          return;
-        }
-
-        setRequesterState("ready");
-
-        const storedId =
-          sessionStorage.getItem(
-            "developmentRequesterId"
-          );
-
-        if (!storedId) {
-          return;
-        }
-
-        const storedRequester =
-          data.find(
-            (requester) =>
-              requester.id ===
-              Number(storedId)
-          );
-
-        if (storedRequester) {
-          setSelectedRequesterId(
-            storedId
-          );
-
-          setCurrentRequester(
-            storedRequester
-          );
-        } else {
-          sessionStorage.removeItem(
-            "developmentRequesterId"
-          );
-        }
-      } catch {
-        setRequesterState("error");
-      }
-    }
-
-    loadRequesters();
+    let active = true;
+    getCurrentUser().then(user => { if (active) setCurrentUser(user); })
+      .catch(() => { if (active) setAuthError("Unable to restore your session. Please log in again."); })
+      .finally(() => { if (active) setAuthLoading(false); });
+    return () => { active = false; };
   }, []);
 
-  // =========================================================
   // Load Categories + Related Systems
   // =========================================================
 
@@ -459,6 +473,7 @@ export default function App() {
     const requesterId =
       currentRequester.id;
 
+    let active = true;
     async function loadTickets() {
       try {
         setTicketListState(
@@ -467,8 +482,6 @@ export default function App() {
 
         const result =
           await getMyTickets({
-            requesterId,
-
             page: ticketPage,
 
             pageSize,
@@ -504,6 +517,7 @@ export default function App() {
             sortOrder,
           });
 
+        if (!active) return;
         setTickets(result.data);
 
         setPagination(
@@ -513,7 +527,9 @@ export default function App() {
         setTicketListState(
           "ready"
         );
-      } catch {
+      } catch (error) {
+        if (!active) return;
+        setListError(requesterFailure(error, "Unable to load My Tickets."));
         setTicketListState(
           "error"
         );
@@ -521,6 +537,7 @@ export default function App() {
     }
 
     loadTickets();
+    return () => { active = false; };
   }, [
     currentRequester,
     screen,
@@ -535,14 +552,30 @@ export default function App() {
     sortOrder,
     reloadTicketsKey,
   ]);
-
   // =========================================================
   // Load Ticket Detail
   // =========================================================
 
   useEffect(() => {
+    if (screen !== "ticketDetail" || currentUser?.role !== "IT_STAFF" || selectedTicketId === null) return;
+    let active = true;
+    setReassignTo("");
+    setStaffUsersState("loading");
+    setStaffUsersError("");
+    getActiveStaffUsers().then(users => {
+      if (active) { setActiveStaffUsers(users); setStaffUsersState("ready"); }
+    }).catch(error => {
+      if (active) {
+        setActiveStaffUsers([]);
+        setStaffUsersState("error");
+        setStaffUsersError(error instanceof Error ? error.message : "Unable to load active IT Staff.");
+      }
+    });
+    return () => { active = false; };
+  }, [screen, currentUser?.role, selectedTicketId, staffUsersRetry]);
+
+  useEffect(() => {
     if (
-      !currentRequester ||
       screen !== "ticketDetail" ||
       selectedTicketId === null
     ) {
@@ -550,11 +583,13 @@ export default function App() {
     }
 
     const requesterId =
-      currentRequester.id;
+      currentRequester?.id ?? 0;
 
     const ticketId =
       selectedTicketId;
 
+    setResolutionMessage(""); setResolutionError("");
+    let active = true;
     async function loadDetail() {
       try {
         setTicketDetailState(
@@ -563,18 +598,32 @@ export default function App() {
 
         setTicketDetail(null);
 
-        const detail =
-          await getTicketDetail(
-            ticketId,
-            requesterId
-          );
+        let detail;
 
+      if (currentUser?.role === "IT_STAFF") {
+    detail =
+      await getStaffTicketDetail(
+        ticketId
+    );
+} else {
+  detail =
+    await getTicketDetail(
+      ticketId,
+      requesterId ?? 0
+    );
+}
+
+        if (!active) return;
         setTicketDetail(detail);
+        setStaffActionPriority(detail.itPriority ?? "MEDIUM");
+        setStaffActionStatus(detail.currentStatus);
 
         setTicketDetailState(
           "ready"
         );
-      } catch {
+      } catch (error) {
+        if (!active) return;
+        setDetailError(requesterFailure(error, "Unable to load this Ticket. It may be unavailable or your session may have expired."));
         setTicketDetailState(
           "error"
         );
@@ -582,20 +631,20 @@ export default function App() {
     }
 
     loadDetail();
+    return () => { active = false; };
   }, [
     currentRequester,
+    currentUser?.role,
     screen,
     selectedTicketId,
     reloadDetailKey,
   ]);
-
   // =========================================================
   // Load Ticket Attachments
   // =========================================================
 
   useEffect(() => {
     if (
-      !currentRequester ||
       screen !== "ticketDetail" ||
       selectedTicketId === null
     ) {
@@ -603,11 +652,12 @@ export default function App() {
     }
 
     const requesterId =
-      currentRequester.id;
+      currentRequester?.id ?? 0;
 
     const ticketId =
       selectedTicketId;
 
+    let active = true;
     async function loadAttachments() {
       try {
         setAttachmentState(
@@ -620,6 +670,7 @@ export default function App() {
             requesterId
           );
 
+        if (!active) return;
         setTicketAttachments(
           data
         );
@@ -628,6 +679,7 @@ export default function App() {
           "ready"
         );
       } catch {
+        if (!active) return;
         setAttachmentState(
           "error"
         );
@@ -635,6 +687,7 @@ export default function App() {
     }
 
     loadAttachments();
+    return () => { active = false; };
   }, [
     currentRequester,
     screen,
@@ -643,58 +696,22 @@ export default function App() {
   ]);
 
   // =========================================================
-  // Requester Selection
-  // =========================================================
+// Role Routing
+// =========================================================
 
-  function handleContinue() {
-    const requester =
-      requesters.find(
-        (item) =>
-          item.id ===
-          Number(
-            selectedRequesterId
-          )
-      );
-
-    if (!requester) {
-      return;
-    }
-
-    sessionStorage.setItem(
-      "developmentRequesterId",
-      String(requester.id)
-    );
-
-    setCurrentRequester(
-      requester
-    );
-
+useEffect(() => {
+  if (
+    currentUser?.role === "IT_STAFF"
+  ) {
+    setScreen("staffQueue");
+  } else if (currentUser?.role === "REQUESTER") {
     setScreen("create");
+  } else if (currentUser?.role === "ADMINISTRATOR") {
+    setScreen("adminUsers");
   }
-
-  function handleChangeRequester() {
-    sessionStorage.removeItem(
-      "developmentRequesterId"
-    );
-
-    setCurrentRequester(null);
-
-    setSelectedRequesterId("");
-
-    setScreen("create");
-
-    setSelectedTicketId(null);
-
-    setTicketDetail(null);
-
-    setTicketAttachments([]);
-
-    resetCreateTicketForm();
-
-    resetTicketFilters();
-
-    resetDetailAttachmentState();
-  }
+}, [
+  currentUser,
+]);
 
   // =========================================================
   // Reset Create Ticket
@@ -902,9 +919,6 @@ export default function App() {
 
       const ticket =
         await createTicket({
-          requesterId:
-            currentRequester.id,
-
           categoryId:
             Number(categoryId),
 
@@ -953,7 +967,8 @@ export default function App() {
       setReloadTicketsKey(
         (value) => value + 1
       );
-    } catch {
+    } catch (error) {
+      setCreateError(requesterFailure(error, "Unable to create Ticket."));
       setSubmitState("error");
     }
   }
@@ -997,6 +1012,8 @@ export default function App() {
   function openTicketDetail(
     ticketId: number
   ) {
+    setStaffActionMessage("");
+    setReassignTo("");
     setSelectedTicketId(
       ticketId
     );
@@ -1025,6 +1042,90 @@ export default function App() {
       (value) => value + 1
     );
   }
+  async function handleClaimTicket() {
+  if (!ticketDetail || ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null || staffActionBusy) return;
+  setStaffActionBusy(true);
+  setStaffActionMessage("");
+  try {
+    const result = await claimStaffTicket(ticketDetail.id);
+    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
+    setStaffActionMessage("Ticket claimed successfully.");
+  } catch (error) {
+    setStaffActionMessage(error instanceof Error ? error.message : "Unable to claim ticket. Please try again.");
+    // Another staff member may have claimed it since this detail was loaded.
+    try { setTicketDetail(await getStaffTicketDetail(ticketDetail.id)); } catch { /* Keep the existing error visible. */ }
+  } finally { setStaffActionBusy(false); }
+}
+
+async function handleReassignTicket() {
+  if (!ticketDetail || !reassignTo || staffActionBusy) return;
+  setStaffActionBusy(true);
+  setStaffActionMessage("");
+  try {
+    const result = await reassignStaffTicket(ticketDetail.id, Number(reassignTo));
+    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
+    setReassignTo("");
+    setStaffActionMessage(`Ticket reassigned to ${result.data.assignedStaff.name} successfully.`);
+  } catch (error) {
+    setStaffActionMessage(error instanceof Error ? error.message : "Unable to reassign ticket. Please try again.");
+  } finally { setStaffActionBusy(false); }
+}
+
+async function handleStaffUpdate(kind: "priority" | "status") {
+  if (!ticketDetail || staffActionBusy) return;
+  setStaffActionBusy(true);
+  setStaffActionMessage("");
+  try {
+    const result = kind === "priority"
+      ? await updateStaffTicketPriority(ticketDetail.id, staffActionPriority)
+      : await updateStaffTicketStatus(ticketDetail.id, staffActionStatus);
+    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
+    setStaffActionMessage(kind === "priority" ? "IT priority updated successfully." : "Ticket status updated successfully.");
+  } catch (error) {
+    setStaffActionMessage(error instanceof Error ? error.message : "Unable to update ticket. Please try again.");
+  } finally { setStaffActionBusy(false); }
+}
+
+
+async function handleUpdateStatus(
+  status: string
+) {
+ if (!selectedTicketId || !status) {
+    return;
+  }
+
+  try {
+    await updateStaffTicketStatus(
+      selectedTicketId,
+      status
+    );
+
+    setReloadDetailKey(
+      (value) => value + 1
+    );
+
+  } catch {
+    console.error(
+      "Unable to update status"
+    );
+  }
+}
+
+
+
+  function backToStaffQueue() {
+  setScreen("staffQueue");
+
+  setSelectedTicketId(null);
+
+  setTicketDetail(null);
+
+  setTicketAttachments([]);
+
+  resetDetailAttachmentState();
+
+
+}
 
   // =========================================================
   // Ticket Detail Attachment Upload
@@ -1086,7 +1187,6 @@ export default function App() {
 
   async function handleDetailUpload() {
     if (
-      !currentRequester ||
       selectedTicketId === null ||
       !detailUploadFile
     ) {
@@ -1108,7 +1208,7 @@ export default function App() {
 
       await uploadTicketAttachment(
         selectedTicketId,
-        currentRequester.id,
+        currentRequester?.id ?? 0,
         detailUploadFile
       );
 
@@ -1140,7 +1240,6 @@ export default function App() {
     attachment: TicketAttachment
   ) {
     if (
-      !currentRequester ||
       attachment.isRemoved
     ) {
       return;
@@ -1153,7 +1252,7 @@ export default function App() {
 
       await downloadAttachmentFile(
         attachment,
-        currentRequester.id
+        currentRequester?.id ?? 0
       );
     } catch {
       setAttachmentActionError(
@@ -1263,137 +1362,150 @@ export default function App() {
       (1024 * 1024)
     ).toFixed(1)} MB`;
   }
-
   // =========================================================
-  // Development Requester Selection Screen
-  // =========================================================
+// Authentication Gate
+// =========================================================
 
-  if (!currentRequester) {
-    return (
-      <main
-        className="container py-5"
-        style={{
-          maxWidth: 640,
+if (authLoading) return <main className="container py-5" role="status">Loading session...</main>;
+if (!currentUser) {
+  return <><LoginScreen onLogin={user => { setAuthError(""); setCurrentUser(user); }} />{authError && <p role="alert">{authError}</p>}</>;
+}
+if (currentUser.mustChangePassword) {
+  return (
+    <main
+      className="container py-5"
+      style={{ maxWidth: 520 }}
+    >
+      <h1 className="h3 mb-2">
+        Change Password
+      </h1>
+
+      <p className="text-muted mb-4">
+        You are using an initial password.
+        Please change it before continuing.
+      </p>
+
+      <div className="mb-3">
+        <label className="form-label" htmlFor="current-password">
+          Current Password
+        </label>
+
+        <input
+          id="current-password"
+          type="password"
+          className="form-control"
+          value={currentPassword}
+          onChange={(e) =>
+            setCurrentPassword(e.target.value)
+          }
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label" htmlFor="new-password">
+          New Password
+        </label>
+
+        <input
+          id="new-password"
+          type="password"
+          className="form-control"
+          value={newPassword}
+          onChange={(e) =>
+            setNewPassword(e.target.value)
+          }
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label" htmlFor="confirm-password">
+          Confirm New Password
+        </label>
+
+        <input
+          id="confirm-password"
+          type="password"
+          className="form-control"
+          value={confirmPassword}
+          onChange={(e) =>
+            setConfirmPassword(e.target.value)
+          }
+        />
+      </div>
+
+      {passwordChangeError && (
+        <div
+          className="alert alert-danger"
+          role="alert"
+        >
+          {passwordChangeError}
+        </div>
+      )}
+
+      <button
+        type="button"
+        className="btn btn-success"
+        disabled={passwordChangeBusy}
+        onClick={async () => {
+          setPasswordChangeError("");
+
+          if (newPassword.length < 8) {
+            setPasswordChangeError(
+              "New password must be at least 8 characters."
+            );
+            return;
+          }
+
+          if (new TextEncoder().encode(newPassword).length > 72) {
+            setPasswordChangeError("New password must be at most 72 UTF-8 bytes.");
+            return;
+          }
+
+          if (
+            newPassword !== confirmPassword
+          ) {
+            setPasswordChangeError(
+              "New passwords do not match."
+            );
+            return;
+          }
+
+          try {
+            setPasswordChangeBusy(true);
+
+            await changePassword(
+              currentPassword,
+              newPassword
+            );
+
+            setCurrentUser({
+              ...currentUser,
+              mustChangePassword: false,
+            });
+
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+          } catch (error) {
+            setPasswordChangeError(
+              error instanceof Error
+                ? error.message
+                : "Unable to change password."
+            );
+          } finally {
+            setPasswordChangeBusy(false);
+          }
         }}
       >
-        <h1 className="h3 mb-4">
-          TokTickIT{" "}
-          <span className="text-success">
-            IT Service Desk
-          </span>
-        </h1>
+        {passwordChangeBusy
+          ? "Changing..."
+          : "Change Password"}
+      </button>
+    </main>
+  );
+}
 
-        <h2 className="h5 mb-3">
-          Select a Development
-          Requester
-        </h2>
 
-        <p className="text-muted">
-          Select a Development
-          Requester to test
-          requester-specific ticket
-          behavior. This is not a login
-          screen. Authentication and
-          role-based access will be
-          introduced in Lab 3.
-        </p>
-
-        {requesterState ===
-          "loading" && (
-          <p aria-live="polite">
-            Loading Development
-            Requesters...
-          </p>
-        )}
-
-        {requesterState ===
-          "empty" && (
-          <div
-            className="alert alert-warning"
-            role="status"
-          >
-            No active Development
-            Requesters are available.
-          </div>
-        )}
-
-        {requesterState ===
-          "error" && (
-          <div
-            className="alert alert-danger"
-            role="alert"
-          >
-            Unable to load Development
-            Requesters.
-          </div>
-        )}
-
-        <div className="mb-3">
-          <label
-            htmlFor="development-requester"
-            className="form-label"
-          >
-            Development Requester
-          </label>
-
-          <select
-            id="development-requester"
-            className="form-select"
-            value={
-              selectedRequesterId
-            }
-            onChange={(event) =>
-              setSelectedRequesterId(
-                event.target.value
-              )
-            }
-            disabled={
-              requesterState !==
-              "ready"
-            }
-          >
-            <option value="">
-              Select a Requester
-            </option>
-
-            {requesters.map(
-              (requester) => (
-                <option
-                  key={
-                    requester.id
-                  }
-                  value={
-                    requester.id
-                  }
-                >
-                  {requester.name} (
-                  {requester.email})
-                </option>
-              )
-            )}
-          </select>
-        </div>
-
-        <button
-          type="button"
-          className="btn btn-success"
-          onClick={
-            handleContinue
-          }
-          disabled={
-            requesterState !==
-              "ready" ||
-            selectedRequesterId ===
-              ""
-          }
-        >
-          Continue
-        </button>
-      </main>
-    );
-  }
-
-  // =========================================================
   // Main Application
   // =========================================================
 
@@ -1401,6 +1513,7 @@ export default function App() {
     <main
       className="container py-5"
       style={{
+        overflowWrap: "anywhere",
         maxWidth: 1100,
       }}
     >
@@ -1412,33 +1525,38 @@ export default function App() {
             TokTickIT
           </h1>
 
+          {currentUser?.role !== "IT_STAFF" && (
           <p className="mb-0">
-            Current Requester:{" "}
-            <strong>
-              {
-                currentRequester.name
-              }
-            </strong>
+              <strong>
+                {currentUser?.name ?? ""}
+               </strong>{" "}
+               (
+               {currentUser?.role ?? ""}
+                )
           </p>
+          )}
         </div>
 
-        <button
-          type="button"
-          className="btn btn-outline-success"
-          onClick={
-            handleChangeRequester
-          }
-        >
-          Change Requester
-        </button>
+       <button type="button" className="btn btn-outline-success" disabled={logoutBusy} onClick={async () => {
+         setLogoutBusy(true); setAuthError("");
+         try {
+           await logout();
+           setCurrentUser(null); setScreen("create"); setSelectedTicketId(null);
+           setTicketDetail(null); setTickets([]); setTicketAttachments([]);
+           resetCreateTicketForm(); resetTicketFilters(); resetDetailAttachmentState();
+         } catch { setAuthError("Unable to log out. Please try again."); }
+         finally { setLogoutBusy(false); }
+       }}>{logoutBusy ? "Logging out..." : "Logout"}</button>
+       {authError && <p role="alert" className="text-danger">{authError}</p>}
       </div>
 
       {/* Navigation */}
 
       <nav
         className="d-flex flex-wrap gap-2 mb-4"
-        aria-label="Requester navigation"
+        aria-label={currentUser.role === "ADMINISTRATOR" ? "Administrator navigation" : "Requester navigation"}
       >
+        {currentUser?.role === "REQUESTER" && (
         <button
           type="button"
           className={
@@ -1461,7 +1579,8 @@ export default function App() {
         >
           My Tickets
         </button>
-
+        )}
+        {currentUser?.role === "REQUESTER" && (
         <button
           type="button"
           className={
@@ -1479,7 +1598,36 @@ export default function App() {
         >
           Create Ticket
         </button>
+        )}
+        {currentUser?.role === "IT_STAFF" && (
+         <div>
+         <button
+              type="button"
+              className={
+                screen === "staffQueue"
+                  ? "btn btn-success"
+                  : "btn btn-outline-success"
+              }
+              onClick={() => {
+                setScreen(
+                  "staffQueue"
+                );
+              }}
+            >
+              IT Staff Queue
+            </button>
+            <p className="text-success mt-2 mb-0">IT Staff - {currentUser.name}</p>
+         </div>
+        )}
+
+        {currentUser.role === "ADMINISTRATOR" && <button type="button" className="btn btn-success" onClick={() => setScreen("adminUsers")}>User Management</button>}
       </nav>
+
+      {currentUser.role === "ADMINISTRATOR" && screen === "adminUsers" && <AdminUserManagement
+        currentUserId={currentUser.id}
+        onSelfChange={user => setCurrentUser(previous => previous ? { ...previous, ...user } : previous)}
+        onSessionEnded={() => { setCurrentUser(null); setScreen("create"); }}
+      />}
 
       {/* =====================================================
           MY TICKETS
@@ -1496,7 +1644,7 @@ export default function App() {
               <p className="text-muted mb-0">
                 Tickets belonging to{" "}
                 {
-                  currentRequester.name
+                  currentRequester?.name ?? ""
                 }
                 .
               </p>
@@ -1705,7 +1853,7 @@ export default function App() {
                         event.target
                           .value as
                           | ""
-                          | "NEW"
+                          | TicketStatus
                       );
 
                       setTicketPage(
@@ -1720,6 +1868,7 @@ export default function App() {
                     <option value="NEW">
                       New
                     </option>
+                    {(["OPEN", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "RESOLVED", "CLOSED", "REOPENED", "CANCELLED"] as const).map(status => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}
                   </select>
                 </div>
 
@@ -1882,8 +2031,7 @@ export default function App() {
               role="alert"
             >
               <p className="mb-2">
-                Unable to load My
-                Tickets.
+                {listError}
               </p>
 
               <button
@@ -1962,7 +2110,7 @@ export default function App() {
             "ready" &&
             tickets.length > 0 && (
               <>
-                <div className="table-responsive">
+                <div className="table-responsive requester-tickets">
                   <table className="table table-bordered table-hover align-middle">
                     <thead>
                       <tr>
@@ -2008,7 +2156,7 @@ export default function App() {
                               ticket.id
                             }
                           >
-                            <td>
+                            <td data-label="Ticket Number">
                               <button
                                 type="button"
                                 className="btn btn-link p-0 fw-bold text-success"
@@ -2024,13 +2172,13 @@ export default function App() {
                               </button>
                             </td>
 
-                            <td>
+                            <td data-label="Summary">
                               {
                                 ticket.summary
                               }
                             </td>
 
-                            <td>
+                            <td data-label="Category">
                               {
                                 ticket
                                   .category
@@ -2038,7 +2186,7 @@ export default function App() {
                               }
                             </td>
 
-                            <td>
+                            <td data-label="Related System">
                               {
                                 ticket
                                   .relatedSystem
@@ -2046,7 +2194,7 @@ export default function App() {
                               }
                             </td>
 
-                            <td>
+                            <td data-label="Priority">
                               <span className="badge text-bg-light border">
                                 {
                                   ticket.requestedPriority
@@ -2054,7 +2202,7 @@ export default function App() {
                               </span>
                             </td>
 
-                            <td>
+                            <td data-label="Status">
                               <span className="badge text-bg-success">
                                 {
                                   ticket.currentStatus
@@ -2062,13 +2210,13 @@ export default function App() {
                               </span>
                             </td>
 
-                            <td>
+                            <td data-label="Created">
                               {formatDate(
                                 ticket.createdAt
                               )}
                             </td>
 
-                            <td>
+                            <td data-label="Updated">
                               {formatDate(
                                 ticket.updatedAt
                               )}
@@ -2160,21 +2308,27 @@ export default function App() {
                 Ticket Detail
               </h2>
 
-              <p className="text-muted mb-0">
-                Requester-owned Ticket
-                information and
-                attachments.
-              </p>
+             <p className="text-muted mb-0">
+              {currentUser?.role === "IT_STAFF"
+                  ? "IT Staff ticket information and actions."
+                  : "Requester-owned Ticket information and attachments."}
+            </p>
             </div>
 
             <button
               type="button"
               className="btn btn-outline-success"
               onClick={
-                backToMyTickets
+                currentUser?.role === "IT_STAFF"
+                  ? backToStaffQueue
+                   : backToMyTickets
               }
             >
-              Back to My Tickets
+              {
+                 currentUser?.role === "IT_STAFF"
+                    ? "Back to IT Staff Queue"
+                    : "Back to My Tickets"
+              }
             </button>
           </div>
 
@@ -2195,10 +2349,7 @@ export default function App() {
               role="alert"
             >
               <p className="mb-2">
-                Unable to load this
-                Ticket. It may not
-                belong to the selected
-                Requester.
+                {detailError}
               </p>
 
               <button
@@ -2387,6 +2538,186 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* =====================================================
+    IT STAFF ACTIONS
+====================================================== */}
+
+{currentUser?.role === "IT_STAFF" &&
+ ticketDetail && (
+  <section className="card mb-4">
+
+    <div className="card-header bg-success text-white">
+      IT Staff Actions
+    </div>
+
+    <div className="card-body">
+
+      {staffActionMessage && <p className="alert alert-info" role="status">{staffActionMessage}</p>}
+      <p>Current IT Priority: <strong>{ticketDetail.itPriority ?? "MEDIUM"}</strong></p>
+      <p>Current Ticket Status: <strong>{ticketDetail.currentStatus}</strong></p>
+
+      {ticketDetail.requesterResolvedAt && (
+        <section className="alert alert-success" aria-label="Requester resolution indication">
+          <h4 className="h6">Requester: Problem Appears Resolved</h4>
+          <p className="mb-1">Recorded on <time dateTime={ticketDetail.requesterResolvedAt}>{formatDate(ticketDetail.requesterResolvedAt)}</time>.</p>
+          <p className="mb-0">This indication does not change the ticket status. IT Staff can use Update Status to formally resolve or close the ticket.</p>
+        </section>
+      )}
+
+      <p>
+        Assigned Staff:
+        {" "}
+        {
+          ticketDetail.assignedStaff?.name
+          ?? "Unassigned"
+        }
+      </p>
+
+      {!ticketDetail.assignedStaff && ticketDetail.assignedStaffId == null && <button
+        type="button"
+        className="btn btn-success"
+        onClick={handleClaimTicket}
+        disabled={staffActionBusy}
+      >
+        Claim Ticket
+
+      </button>}
+
+      {(ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null) && <section className="mt-3 mb-4" aria-labelledby="reassign-ticket-title">
+        <h3 id="reassign-ticket-title" className="h6">Reassign Ticket</h3>
+        {staffUsersState === "loading" && <p role="status">Loading active IT Staff...</p>}
+        {staffUsersState === "error" && <div className="alert alert-danger" role="alert">
+          {staffUsersError} <button type="button" className="btn btn-outline-success btn-sm" onClick={() => setStaffUsersRetry(value => value + 1)}>Retry staff list</button>
+        </div>}
+        <label className="form-label" htmlFor="reassign-staff">Reassign to</label>
+        <div className="d-flex flex-column flex-sm-row gap-2">
+          <select id="reassign-staff" className="form-select" value={reassignTo} disabled={staffActionBusy || staffUsersState !== "ready"} onChange={event => setReassignTo(event.target.value)}>
+            <option value="">Select an active IT Staff member</option>
+            {activeStaffUsers.filter(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)).map(staff => <option key={staff.id} value={staff.id}>{staff.name} ({staff.email})</option>)}
+          </select>
+          <button type="button" className="btn btn-success flex-shrink-0" disabled={staffActionBusy || staffUsersState !== "ready" || !reassignTo} onClick={handleReassignTicket}>Reassign Ticket</button>
+        </div>
+        {staffUsersState === "ready" && !activeStaffUsers.some(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)) && <p className="text-muted mt-2">No other active IT Staff members are available.</p>}
+      </section>}
+
+    <div className="mt-3">
+  <label className="form-label" htmlFor="staff-it-priority">
+    IT Priority
+  </label>
+
+  <select
+    className="form-select"
+    id="staff-it-priority"
+    disabled={staffActionBusy}
+    value={staffActionPriority}
+    onChange={(e) =>
+      setStaffActionPriority(e.target.value)
+    }
+  >
+    <option value="">
+      Select IT Priority
+    </option>
+
+    <option value="LOW">
+      LOW
+    </option>
+
+    <option value="MEDIUM">
+      MEDIUM
+    </option>
+
+    <option value="HIGH">
+      HIGH
+    </option>
+
+    <option value="URGENT">
+      URGENT
+    </option>
+  </select>
+
+  <button
+    type="button"
+    className="btn btn-success mt-3"
+    disabled={!staffActionPriority || staffActionBusy}
+    onClick={() => handleStaffUpdate("priority")}
+  >
+    Update IT Priority
+  </button>
+</div>
+
+  <label className="form-label" htmlFor="staff-ticket-status">
+    Status
+  </label>
+
+  <select
+    className="form-select"
+    id="staff-ticket-status"
+    disabled={staffActionBusy}
+    value={staffActionStatus}
+    onChange={(e) =>
+      setStaffActionStatus(e.target.value)
+    }
+  >
+    <option value="">
+      Select Status
+    </option>
+    {["NEW", "CANCELLED"].includes(staffActionStatus) && <option value={staffActionStatus}>{staffActionStatus}</option>}
+    <option value="REOPENED">REOPENED</option>
+
+    <option value="OPEN">
+      OPEN
+    </option>
+
+    <option value="IN_PROGRESS">
+      IN_PROGRESS
+    </option>
+
+    <option value="WAITING_FOR_REQUESTER">
+      WAITING_FOR_REQUESTER
+    </option>
+
+    <option value="RESOLVED">
+      RESOLVED
+    </option>
+
+    <option value="CLOSED">
+      CLOSED
+    </option>
+
+  </select>
+<button
+  type="button"
+  className="btn btn-success mt-3"
+  disabled={!staffActionStatus || staffActionBusy}
+  onClick={() => handleStaffUpdate("status")}
+>
+  Update Status
+</button>
+</div>
+
+  </section>
+)}
+
+                {currentRequester && <section className="card mb-3" aria-label="Resolution indication">
+                  <div className="card-body">
+                    <h3 className="h5">Problem Appears Resolved</h3>
+                    <p>This tells IT Staff the problem appears resolved. IT Staff remain responsible for formally resolving or closing the ticket.</p>
+                    {ticketDetail.requesterResolvedAt ? <p role="status">You indicated that the problem appears resolved on {formatDate(ticketDetail.requesterResolvedAt)}.</p> :
+                      <button className="btn btn-success" disabled={resolutionBusy} onClick={async () => {
+                        setResolutionBusy(true); setResolutionMessage(""); setResolutionError("");
+                        try {
+                          const saved = await indicateResolution(ticketDetail.id);
+                          setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous);
+                          setResolutionMessage("Resolution indication saved. Ticket status has not changed.");
+                        } catch (error) { setResolutionError(error instanceof Error ? error.message : "Unable to save resolution indication."); }
+                        finally { setResolutionBusy(false); }
+                      }}>{resolutionBusy ? "Saving..." : "Problem Appears Resolved"}</button>}
+                    {resolutionMessage && <p role="status" className="text-success mt-2">{resolutionMessage}</p>}
+                    {resolutionError && <p role="alert" className="text-danger mt-2">{resolutionError}</p>}
+                  </div>
+                </section>}
+                <TicketDiscussion key={ticketDetail.id} ticketId={ticketDetail.id} staff={currentUser.role === "IT_STAFF" || currentUser.role === "ADMINISTRATOR"} />
 
                 {/* Attachment Section */}
 
@@ -2701,11 +3032,19 @@ export default function App() {
         </section>
       )}
 
+
+
+
+          {/* =====================================================
+              IT STAFF TICKET QUEUE
+          ====================================================== */}
+
+          {screen === "staffQueue" && <StaffTicketQueue onOpen={openTicketDetail} />}
+
       {/* =====================================================
           CREATE TICKET
       ====================================================== */}
-
-      {screen === "create" && (
+      {currentUser.role === "REQUESTER" && screen === "create" && (
         <section>
           <h2 className="h4 mb-4">
             Create Ticket
@@ -2783,7 +3122,7 @@ export default function App() {
               className="alert alert-danger"
               role="alert"
             >
-              Unable to create Ticket.
+              {createError}{" "}
               Your entered values have
               been preserved.
             </div>
@@ -2842,7 +3181,7 @@ export default function App() {
                   id="requester"
                   className="form-control bg-light"
                   value={
-                    currentRequester.name
+                    currentRequester?.name ?? ""
                   }
                   readOnly
                 />

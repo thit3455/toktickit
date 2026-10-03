@@ -1,0 +1,10 @@
+.requester-tickets td { overflow-wrap: anywhere; }
+@media (max-width: 991px) {
+  .requester-tickets { overflow: visible; }
+  .requester-tickets table, .requester-tickets tbody, .requester-tickets tr, .requester-tickets td { display: block; width: 100%; }
+  .requester-tickets thead { display: none; }
+  .requester-tickets tr { margin-bottom: 1rem; border: 1px solid #badbcc; border-radius: .5rem; overflow: hidden; }
+  .requester-tickets td { display: grid; grid-template-columns: minmax(6rem, 35%) minmax(0, 1fr); gap: .5rem; border: 0; }
+  .requester-tickets td::before { content: attr(data-label); font-weight: 600; color: #155b3b; }
+  .requester-tickets td > * { min-width: 0; white-space: normal; text-align: left; }
+}

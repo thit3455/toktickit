@@ -1,3 +1,4 @@
+import { requesterFixture } from "../helpers/requester.js";
 import {
   afterAll,
   beforeAll,
@@ -13,6 +14,7 @@ import { getPrisma } from "../../src/prisma.js";
 
 describe("GET /api/tickets", () => {
   const prisma = getPrisma();
+  let fixture: Awaited<ReturnType<typeof requesterFixture>>;
 
   let requesterId: number;
   let categoryOneId: number;
@@ -29,16 +31,10 @@ describe("GET /api/tickets", () => {
   // ---------------------------------------------------------
 
   beforeAll(async () => {
-    const requesterResponse =
-      await request(app).get(
-        "/api/requesters"
-      );
-
-    requesterId =
-      requesterResponse.body.data[0].id;
-
+    fixture = await requesterFixture();
+    requesterId = fixture.users[0].id;
     const categoryResponse =
-      await request(app).get(
+      await fixture.agents[0].get(
         "/api/categories"
       );
 
@@ -49,7 +45,7 @@ describe("GET /api/tickets", () => {
       categoryResponse.body[1].id;
 
     const systemResponse =
-      await request(app).get(
+      await fixture.agents[0].get(
         "/api/related-systems"
       );
 
@@ -70,7 +66,7 @@ describe("GET /api/tickets", () => {
           ? categoryTwoId
           : categoryOneId;
 
-      const response = await request(app)
+      const response = await fixture.agents[0]
         .post("/api/tickets")
         .send({
           requesterId,
@@ -109,6 +105,7 @@ describe("GET /api/tickets", () => {
         },
       });
     }
+    await fixture?.cleanup();
   });
 
   // ---------------------------------------------------------
@@ -116,7 +113,7 @@ describe("GET /api/tickets", () => {
   // ---------------------------------------------------------
 
   it("returns only Tickets belonging to the selected Requester", async () => {
-    const response = await request(app)
+    const response = await fixture.agents[0]
       .get("/api/tickets")
       .query({
         requesterId,
@@ -146,7 +143,7 @@ describe("GET /api/tickets", () => {
   // ---------------------------------------------------------
 
   it("searches Tickets by summary", async () => {
-    const response = await request(app)
+    const response = await fixture.agents[0]
       .get("/api/tickets")
       .query({
         requesterId,
@@ -174,7 +171,7 @@ describe("GET /api/tickets", () => {
   // ---------------------------------------------------------
 
   it("filters Tickets by Category and Requested Priority", async () => {
-    const response = await request(app)
+    const response = await fixture.agents[0]
       .get("/api/tickets")
       .query({
         requesterId,
@@ -209,7 +206,7 @@ describe("GET /api/tickets", () => {
   // ---------------------------------------------------------
 
   it("sorts Tickets by Ticket Number in ascending order", async () => {
-    const response = await request(app)
+    const response = await fixture.agents[0]
       .get("/api/tickets")
       .query({
         requesterId,
@@ -246,7 +243,7 @@ describe("GET /api/tickets", () => {
 
   it("paginates requester Tickets correctly", async () => {
     const firstPage =
-      await request(app)
+      await fixture.agents[0]
         .get("/api/tickets")
         .query({
           requesterId,
@@ -274,7 +271,7 @@ describe("GET /api/tickets", () => {
     ).toBe(2);
 
     const secondPage =
-      await request(app)
+      await fixture.agents[0]
         .get("/api/tickets")
         .query({
           requesterId,

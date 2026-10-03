@@ -49,31 +49,7 @@ describe("My Tickets", () => {
   }
 
   async function selectRequester() {
-    const requesterSelect =
-      await screen.findByRole(
-        "combobox",
-        {
-          name: /Development Requester/i,
-        }
-      );
-
-    fireEvent.change(
-      requesterSelect,
-      {
-        target: {
-          value: "1",
-        },
-      }
-    );
-
-    fireEvent.click(
-      screen.getByRole(
-        "button",
-        {
-          name: /Continue/i,
-        }
-      )
-    );
+    await screen.findByRole("heading", { name: "Create Ticket" });
 
     await screen.findByRole(
       "button",
@@ -83,18 +59,11 @@ describe("My Tickets", () => {
     );
   }
 
-  it("shows only the selected Requester's Tickets", async () => {
+  it("shows only the authenticated Requester's Tickets", async () => {
     vi.spyOn(
       api,
-      "getRequesters"
-    ).mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email:
-          "alice.johnson@toktickit.test",
-      },
-    ]);
+      "getCurrentUser"
+    ).mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     mockReferenceData();
 
@@ -176,7 +145,6 @@ describe("My Tickets", () => {
         getMyTicketsSpy
       ).toHaveBeenCalledWith(
         expect.objectContaining({
-          requesterId: 1,
           page: 1,
           pageSize: 10,
         })
@@ -187,15 +155,8 @@ describe("My Tickets", () => {
   it("shows the empty state when the Requester has no Tickets", async () => {
     vi.spyOn(
       api,
-      "getRequesters"
-    ).mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email:
-          "alice.johnson@toktickit.test",
-      },
-    ]);
+      "getCurrentUser"
+    ).mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     mockReferenceData();
 
@@ -245,15 +206,8 @@ describe("My Tickets", () => {
   it("sends search and filter values to the My Tickets API", async () => {
     vi.spyOn(
       api,
-      "getRequesters"
-    ).mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email:
-          "alice.johnson@toktickit.test",
-      },
-    ]);
+      "getCurrentUser"
+    ).mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     mockReferenceData();
 
@@ -326,7 +280,6 @@ describe("My Tickets", () => {
         getMyTicketsSpy
       ).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          requesterId: 1,
           search: "battery",
           categoryId: 1,
           requestedPriority:
@@ -339,15 +292,8 @@ describe("My Tickets", () => {
   it("shows a safe failure state when My Tickets cannot load", async () => {
     vi.spyOn(
       api,
-      "getRequesters"
-    ).mockResolvedValue([
-      {
-        id: 1,
-        name: "Alice Johnson",
-        email:
-          "alice.johnson@toktickit.test",
-      },
-    ]);
+      "getCurrentUser"
+    ).mockResolvedValue({ id: 1, name: "Alice Johnson", email: "alice.johnson@toktickit.test", role: "REQUESTER" as const, mustChangePassword: false });
 
     mockReferenceData();
 

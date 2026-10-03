@@ -1,3 +1,4 @@
+import { discussionRoutes } from "./discussion.routes.js";
 import express, {
   Request,
   Response,
@@ -5,6 +6,15 @@ import express, {
 
 import cors from "cors";
 import multer from "multer";
+import cookieParser from "cookie-parser";
+import staffRoutes from "./staff/staff.routes.js";
+import adminRoutes from "./admin/admin.routes.js";
+import {
+  authenticateToken,
+  AuthRequest,
+} from "./auth/auth.middleware.js";
+
+import { requireRole } from "./auth/role.middleware.js";
 
 import {
   Prisma,
@@ -13,11 +23,31 @@ import {
 } from "@prisma/client";
 
 import { getPrisma } from "./prisma.js";
+import authRoutes from "./auth/auth.routes.js";
 
 export const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
+
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+
+app.use("/api/staff", staffRoutes);
+app.use("/api/admin", adminRoutes);
+
+// ---------------------------------------------------------------------------
+// Lab 3 — Authentication Routes
+// ---------------------------------------------------------------------------
+
+app.use("/api/auth", authRoutes);
 
 // ---------------------------------------------------------------------------
 // Lab 2 — Attachment Configuration
@@ -92,51 +122,6 @@ app.get(
 );
 
 // ---------------------------------------------------------------------------
-// Lab 2 — Development Requester List
-// This is NOT authentication.
-// ---------------------------------------------------------------------------
-
-app.get(
-  "/api/requesters",
-  async (_req: Request, res: Response) => {
-    try {
-      const requesters =
-        await getPrisma().requesterUser.findMany(
-          {
-            where: {
-              isActive: true,
-            },
-
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-
-            orderBy: {
-              id: "asc",
-            },
-          }
-        );
-
-      return res.status(200).json({
-        data: requesters,
-      });
-    } catch {
-      return res.status(500).json({
-        error: {
-          code:
-            "REQUESTER_LOAD_ERROR",
-
-          message:
-            "Unable to retrieve Development Requesters.",
-        },
-      });
-    }
-  }
-);
-
-// ---------------------------------------------------------------------------
 // Lab 2 — Related System List
 // ---------------------------------------------------------------------------
 
@@ -185,12 +170,12 @@ app.get(
 // ---------------------------------------------------------------------------
 
 app.get(
-  "/api/tickets",
-  async (req: Request, res: Response) => {
+  ["/api/tickets", "/api/tickets/my"],
+  authenticateToken,
+  requireRole("REQUESTER"),
+  async (req: AuthRequest, res: Response) => {
     try {
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       const page = Number(
         req.query.page ?? 1
@@ -313,7 +298,7 @@ app.get(
 
       if (
         currentStatus &&
-        currentStatus !== "NEW"
+        !Object.values(TicketStatus).includes(currentStatus as TicketStatus)
       ) {
         return res.status(400).json({
           error: {
@@ -364,11 +349,12 @@ app.get(
       // -----------------------------------------------------
 
       const requester =
-        await prisma.requesterUser.findFirst(
+        await prisma.user.findFirst(
           {
             where: {
               id: requesterId,
               isActive: true,
+              role: "REQUESTER",
             },
 
             select: {
@@ -384,7 +370,7 @@ app.get(
               "REQUESTER_NOT_FOUND",
 
             message:
-              "Development Requester was not found.",
+              "Requester was not found.",
           },
         });
       }
@@ -560,24 +546,19 @@ app.get(
 
 app.get(
   "/api/tickets/:id",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const ticketId = Number(
         req.params.id
       );
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       if (
-        !Number.isInteger(ticketId) ||
-        ticketId <= 0 ||
-        !Number.isInteger(
-          requesterId
-        ) ||
-        requesterId <= 0
-      ) {
+  !Number.isInteger(ticketId) ||
+  ticketId <= 0
+  ){
         return res.status(400).json({
           error: {
             code:
@@ -597,7 +578,7 @@ app.get(
           {
             where: {
               id: ticketId,
-              requesterId,
+              ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
             },
 
             select: {
@@ -608,6 +589,7 @@ app.get(
               relatedSystemId: true,
               summary: true,
               description: true,
+              requesterResolvedAt: true,
               requestedPriority: true,
               currentStatus: true,
               createdAt: true,
@@ -674,8 +656,8 @@ app.get(
 
 app.post(
   "/api/tickets/:id/attachments",
-
-  (req: Request, res: Response) => {
+  authenticateToken,
+ (req: AuthRequest, res: Response) => {
     upload.single("file")(
       req,
       res,
@@ -720,23 +702,16 @@ app.post(
             req.params.id
           );
 
-          const requesterId = Number(
-            req.query.requesterId
-          );
+          const requesterId = req.user!.userId;
 
           // -------------------------------------------------
           // Validate Ticket + Requester IDs
           // -------------------------------------------------
 
           if (
-            !Number.isInteger(
-              ticketId
-            ) ||
-            ticketId <= 0 ||
-            !Number.isInteger(
-              requesterId
-            ) ||
-            requesterId <= 0
+            !Number.isInteger(ticketId) ||
+            ticketId <= 0
+
           ) {
             return res
               .status(400)
@@ -763,7 +738,7 @@ app.post(
               {
                 where: {
                   id: ticketId,
-                  requesterId,
+                  ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
                 },
 
                 select: {
@@ -922,22 +897,19 @@ app.post(
 
 app.get(
   "/api/tickets/:id/attachments",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const ticketId = Number(
         req.params.id
       );
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       if (
         !Number.isInteger(ticketId) ||
-        ticketId <= 0 ||
-        !Number.isInteger(requesterId) ||
-        requesterId <= 0
-      ) {
+        ticketId <= 0
+      ){
         return res.status(400).json({
           error: {
             code:
@@ -956,7 +928,7 @@ app.get(
           {
             where: {
               id: ticketId,
-              requesterId,
+              ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
             },
 
             select: {
@@ -1027,24 +999,19 @@ app.get(
 
 app.get(
   "/api/attachments/:attachmentId/download",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const attachmentId = Number(
-        req.params.attachmentId
-      );
+  req.params.attachmentId
+);
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+const requesterId = req.user!.userId;
 
-      if (
-        !Number.isInteger(
-          attachmentId
-        ) ||
-        attachmentId <= 0 ||
-        !Number.isInteger(requesterId) ||
-        requesterId <= 0
-      ) {
+     if (
+      !Number.isInteger(attachmentId) ||
+      attachmentId <= 0
+    ) {
         return res.status(400).json({
           error: {
             code:
@@ -1083,8 +1050,7 @@ app.get(
 
       if (
         !attachment ||
-        attachment.ticket.requesterId !==
-          requesterId ||
+        (req.user!.role === "REQUESTER" && attachment.ticket.requesterId !== requesterId) ||
         attachment.isRemoved
       ) {
         return res.status(404).json({
@@ -1140,15 +1106,14 @@ app.get(
 
 app.delete(
   "/api/attachments/:attachmentId",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
     try {
       const attachmentId = Number(
         req.params.attachmentId
       );
 
-      const requesterId = Number(
-        req.query.requesterId
-      );
+      const requesterId = req.user!.userId;
 
       const removalReason =
         typeof req.body?.removalReason ===
@@ -1287,16 +1252,18 @@ app.delete(
 
 app.post(
   "/api/tickets",
-  async (req: Request, res: Response) => {
+  authenticateToken,
+  requireRole("REQUESTER"),
+  async (req: AuthRequest, res: Response) => {
     try {
       const {
-        requesterId,
         categoryId,
         relatedSystemId,
         summary,
         requestedPriority,
         description,
       } = req.body;
+      const requesterId = req.user!.userId;
 
       const cleanSummary =
         typeof summary === "string"
@@ -1308,6 +1275,10 @@ app.post(
         "string"
           ? description.trim()
           : "";
+
+      if (![categoryId, relatedSystemId].every(value => (typeof value === "number" || typeof value === "string") && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647)) {
+        return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "The request contains invalid data." } });
+      }
 
       // -----------------------------------------------------
       // Required-field validation
@@ -1373,7 +1344,7 @@ app.post(
         category,
         relatedSystem,
       ] = await Promise.all([
-        prisma.requesterUser.findFirst(
+        prisma.user.findFirst(
           {
             where: {
               id: Number(
@@ -1381,6 +1352,7 @@ app.post(
               ),
 
               isActive: true,
+              role: "REQUESTER",
             },
           }
         ),
@@ -1462,7 +1434,7 @@ app.post(
               "NEW",
           },
         });
-
+        
       // -----------------------------------------------------
       // Generate official Ticket Number
       // -----------------------------------------------------
@@ -1516,6 +1488,8 @@ app.post(
             ticket.createdAt,
         },
       });
+      
+
     } catch {
       return res.status(500).json({
         error: {
@@ -1529,5 +1503,26 @@ app.post(
     }
   }
 );
+// ---------------------------------------------------------------------------
+// Lab 3 Issue 5 — Public Ticket Comments
+// ---------------------------------------------------------------------------
+
+app.patch("/api/tickets/:id/resolution-indication", authenticateToken, requireRole("REQUESTER"), async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: { code: "INVALID_QUERY", message: "A valid Ticket ID is required." } });
+  try {
+    const prisma = getPrisma();
+    const where = { id, requesterId: req.user!.userId };
+    // Idempotent: preserve the first indication timestamp. Never mutate status.
+    await prisma.ticket.updateMany({ where: { ...where, requesterResolvedAt: null }, data: { requesterResolvedAt: new Date() } });
+    const data = await prisma.ticket.findFirst({ where, select: { id: true, requesterResolvedAt: true, currentStatus: true, updatedAt: true } });
+    if (!data) return res.status(404).json({ error: { code: "TICKET_NOT_FOUND", message: "Ticket was not found." } });
+    return res.json({ data });
+  } catch {
+    return res.status(500).json({ error: { code: "RESOLUTION_INDICATION_ERROR", message: "Unable to save resolution indication." } });
+  }
+});
+
+app.use("/api", discussionRoutes);
 
 export default app;

@@ -1,3 +1,4 @@
+import { requesterFixture } from "../helpers/requester.js";
 import {
   afterAll,
   beforeAll,
@@ -13,6 +14,7 @@ import { getPrisma } from "../../src/prisma.js";
 
 describe("GET /api/tickets/:id", () => {
   const prisma = getPrisma();
+  let fixture: Awaited<ReturnType<typeof requesterFixture>>;
 
   let requesterAId: number;
   let requesterBId: number;
@@ -21,19 +23,11 @@ describe("GET /api/tickets/:id", () => {
   let ticketId: number;
 
   beforeAll(async () => {
-    const requesterResponse =
-      await request(app).get(
-        "/api/requesters"
-      );
-
-    requesterAId =
-      requesterResponse.body.data[0].id;
-
-    requesterBId =
-      requesterResponse.body.data[1].id;
-
+    fixture = await requesterFixture();
+    requesterAId = fixture.users[0].id;
+    requesterBId = fixture.users[1].id;
     const categoryResponse =
-      await request(app).get(
+      await fixture.agents[0].get(
         "/api/categories"
       );
 
@@ -41,7 +35,7 @@ describe("GET /api/tickets/:id", () => {
       categoryResponse.body[0].id;
 
     const systemResponse =
-      await request(app).get(
+      await fixture.agents[0].get(
         "/api/related-systems"
       );
 
@@ -49,7 +43,7 @@ describe("GET /api/tickets/:id", () => {
       systemResponse.body.data[0].id;
 
     const createResponse =
-      await request(app)
+      await fixture.agents[0]
         .post("/api/tickets")
         .send({
           requesterId:
@@ -85,11 +79,12 @@ describe("GET /api/tickets/:id", () => {
         },
       });
     }
+    await fixture?.cleanup();
   });
 
   it("returns an owned Ticket with its read-only detail fields", async () => {
     const response =
-      await request(app).get(
+      await fixture.agents[0].get(
         `/api/tickets/${ticketId}`
       ).query({
         requesterId:
@@ -137,11 +132,11 @@ describe("GET /api/tickets/:id", () => {
 
   it("does not return another Requester's Ticket", async () => {
     const response =
-      await request(app).get(
+      await fixture.agents[1].get(
         `/api/tickets/${ticketId}`
       ).query({
         requesterId:
-          requesterBId,
+          requesterAId,
       });
 
     expect(
@@ -153,7 +148,7 @@ describe("GET /api/tickets/:id", () => {
     ).toBeDefined();
   });
 
-  it("rejects an invalid Requester query", async () => {
+  it("rejects unauthenticated detail access", async () => {
     const response =
       await request(app).get(
         `/api/tickets/${ticketId}`
@@ -161,12 +156,12 @@ describe("GET /api/tickets/:id", () => {
 
     expect(
       response.status
-    ).toBe(400);
+    ).toBe(401);
 
     expect(
       response.body.error.code
     ).toBe(
-      "INVALID_QUERY"
+      "UNAUTHENTICATED"
     );
   });
 });

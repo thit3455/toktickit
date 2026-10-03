@@ -1,6 +1,67 @@
 const API_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
+export type AccountRole = "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
+export interface ManagedUser {
+  id: number; name: string; email: string; role: AccountRole; isActive: boolean; mustChangePassword: boolean;
+}
+export interface AccountInput { name: string; email: string; role: AccountRole; isActive: boolean; password?: string }
+export class AdminApiError extends Error {
+  constructor(public status: number, message: string, public fields: Record<string, string> = {}) { super(message); }
+}
+async function adminRequest(path: string, options: RequestInit = {}) {
+  let response: Response;
+  try { response = await fetch(`${API_URL}/api/admin/users${path}`, { ...options, credentials: "include" }); }
+  catch { throw new AdminApiError(0, "Unable to reach the server. Please try again."); }
+  const result = await response.json().catch(() => null);
+  if (!response.ok) {
+    const conflicts: Record<string, string> = {
+      DUPLICATE_EMAIL: "An account with this email already exists.",
+      SELF_DEACTIVATION: "You cannot deactivate your own account.",
+      LAST_ADMINISTRATOR: "At least one active Administrator must remain.",
+    };
+    const message = response.status === 401 ? "Your session has expired. Please log out and log in again." :
+      response.status === 403 ? "Administrator access is required." :
+      response.status === 404 ? "User was not found. Refresh the list." :
+      response.status === 409 ? conflicts[result?.error?.code] ?? "Another account change occurred. Refresh and try again." :
+      response.status === 400 ? "Check the highlighted fields and try again." : "Unable to complete user management request. Please try again.";
+    throw new AdminApiError(response.status, message, [400, 409].includes(response.status) ? result?.error?.fields ?? {} : {});
+  }
+  if (!result || !("data" in result)) throw new AdminApiError(500, "The server returned an unexpected response. Please try again.");
+  return result.data;
+}
+export async function getAdminUsers(filters: { search?: string; role?: string; active?: string } = {}, signal?: AbortSignal): Promise<ManagedUser[]> {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) if (value) query.set(key, value);
+  return adminRequest(`?${query}`, { signal });
+}
+export async function createAdminUser(input: AccountInput): Promise<ManagedUser> {
+  return adminRequest("", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+export async function updateAdminUser(id: number, input: Omit<AccountInput, "password">): Promise<ManagedUser> {
+  return adminRequest(`/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+}
+export async function setAdminInitialPassword(id: number, password: string): Promise<ManagedUser> {
+  return adminRequest(`/${id}/password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
+}
+
+export class RequesterApiError extends Error {
+  constructor(public status: number, fallback: string) {
+    super(status === 401 ? "Your session has expired. Please log in again." :
+      status === 403 ? "You do not have permission to perform this action." :
+      status === 404 ? "The requested item was not found." :
+      status === 409 ? "This item has changed. Refresh and try again." : fallback);
+  }
+}
+
+async function staffActionResult(response: Response, fallback: string) {
+  if (response.status === 401) throw new Error("Your session has expired. Refresh the page and log in again.");
+  const result = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(result?.error?.message ?? fallback);
+  if (!result?.data) throw new Error("The server returned an unexpected response. Please try again.");
+  return result;
+}
+
 // ---------------------------------------------------------
 // Category
 // ---------------------------------------------------------
@@ -8,39 +69,6 @@ const API_URL =
 export interface Category {
   id: number;
   name: string;
-}
-
-// ---------------------------------------------------------
-// Development Requester
-// ---------------------------------------------------------
-
-export interface DevelopmentRequester {
-  id: number;
-  name: string;
-  email: string;
-}
-
-interface RequesterResponse {
-  data: DevelopmentRequester[];
-}
-
-export async function getRequesters(): Promise<
-  DevelopmentRequester[]
-> {
-  const response = await fetch(
-    `${API_URL}/api/requesters`
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      "Unable to load Development Requesters"
-    );
-  }
-
-  const result: RequesterResponse =
-    await response.json();
-
-  return result.data;
 }
 
 // ---------------------------------------------------------
@@ -104,14 +132,13 @@ export type RequestedPriority =
   | "MEDIUM"
   | "HIGH";
 
-export type TicketStatus = "NEW";
+export type TicketStatus = "NEW" | "OPEN" | "IN_PROGRESS" | "WAITING_FOR_REQUESTER" | "RESOLVED" | "CLOSED" | "REOPENED" | "CANCELLED";
 
 // ---------------------------------------------------------
 // Ticket Creation
 // ---------------------------------------------------------
 
 export interface CreateTicketInput {
-  requesterId: number;
   categoryId: number;
   relatedSystemId: number;
   summary: string;
@@ -144,6 +171,7 @@ export async function createTicket(
     `${API_URL}/api/tickets`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -152,7 +180,7 @@ export async function createTicket(
   );
 
   if (!response.ok) {
-    throw new Error(
+    throw new RequesterApiError(response.status,
       "Unable to create Ticket"
     );
   }
@@ -201,7 +229,6 @@ export interface TicketListResponse {
 }
 
 export interface GetMyTicketsParams {
-  requesterId: number;
   page?: number;
   pageSize?: 10 | 20 | 50;
   search?: string;
@@ -221,10 +248,6 @@ export async function getMyTickets(
 ): Promise<TicketListResponse> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(params.requesterId)
-  );
 
   query.set(
     "page",
@@ -286,11 +309,12 @@ export async function getMyTickets(
   }
 
   const response = await fetch(
-    `${API_URL}/api/tickets?${query.toString()}`
+    `${API_URL}/api/tickets?${query.toString()}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
-    throw new Error(
+    throw new RequesterApiError(response.status,
       "Unable to load My Tickets"
     );
   }
@@ -303,7 +327,9 @@ export async function getMyTickets(
 // ---------------------------------------------------------
 
 export interface TicketDetail {
+  requesterResolvedAt?: string | null;
   id: number;
+  assignedStaffId?: number | null;
   ticketNumber: string;
   requesterId: number;
   categoryId: number;
@@ -311,7 +337,8 @@ export interface TicketDetail {
   summary: string;
   description: string;
   requestedPriority: RequestedPriority;
-  currentStatus: TicketStatus;
+  itPriority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+   currentStatus: TicketStatus;
   createdAt: string;
   updatedAt: string;
 
@@ -330,6 +357,11 @@ export interface TicketDetail {
     id: number;
     name: string;
   };
+  assignedStaff?: {
+  id: number;
+  name: string;
+  email: string;
+} | null;
 }
 
 interface TicketDetailResponse {
@@ -342,16 +374,14 @@ export async function getTicketDetail(
 ): Promise<TicketDetail> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
-    `${API_URL}/api/tickets/${ticketId}?${query.toString()}`
+    `${API_URL}/api/tickets/${ticketId}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
+    if ([401, 403].includes(response.status)) throw new RequesterApiError(response.status, "Unable to load Ticket Detail");
     if (response.status === 404) {
       throw new Error(
         "Ticket not found or access denied"
@@ -435,13 +465,10 @@ export async function getTicketAttachments(
 ): Promise<TicketAttachment[]> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
-    `${API_URL}/api/tickets/${ticketId}/attachments?${query.toString()}`
+    `${API_URL}/api/tickets/${ticketId}/attachments?${query.toString()}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
@@ -473,10 +500,6 @@ export async function uploadTicketAttachment(
 ): Promise<TicketAttachment> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const formData = new FormData();
 
@@ -490,6 +513,7 @@ export async function uploadTicketAttachment(
     {
       method: "POST",
       body: formData,
+      credentials: "include",
     }
   );
 
@@ -527,13 +551,10 @@ export async function downloadAttachment(
 ): Promise<Blob> {
   const query = new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
-    `${API_URL}/api/attachments/${attachmentId}/download?${query.toString()}`
+    `${API_URL}/api/attachments/${attachmentId}/download?${query.toString()}`,
+    { credentials: "include" }
   );
 
   if (!response.ok) {
@@ -609,15 +630,12 @@ export async function removeAttachment(
   const query =
     new URLSearchParams();
 
-  query.set(
-    "requesterId",
-    String(requesterId)
-  );
 
   const response = await fetch(
     `${API_URL}/api/attachments/${attachmentId}?${query.toString()}`,
     {
       method: "DELETE",
+      credentials: "include",
       headers: {
         "Content-Type":
           "application/json",
@@ -651,4 +669,391 @@ export async function removeAttachment(
     await response.json();
 
   return mapAttachment(result.data);
+}
+// ---------------------------------------------------------
+// IT Staff Ticket Queue
+// ---------------------------------------------------------
+
+export interface StaffTicket {
+  id: number;
+  ticketNumber: string;
+  summary: string;
+  requestedPriority: RequestedPriority;
+  itPriority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  currentStatus: string;
+  createdAt: string;
+  updatedAt: string;
+
+  requester: {
+    id: number;
+    name: string;
+    email: string;
+  };
+
+  assignedStaff?: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+
+  category: {
+    id: number;
+    name: string;
+  };
+
+  relatedSystem: {
+    id: number;
+    name: string;
+  };
+}
+
+
+export interface StaffTicketPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+
+export interface StaffTicketQueueResponse {
+  data: StaffTicket[];
+
+  pagination: StaffTicketPagination;
+}
+
+
+export interface GetStaffTicketsParams {
+  search?: string;
+
+  status?: string;
+
+  priority?: RequestedPriority;
+  itPriority?: StaffTicket["itPriority"];
+
+  assigned?: boolean;
+
+  page?: number;
+
+  limit?: number;
+
+  sort?: string;
+
+  order?: "asc" | "desc";
+}
+
+export class StaffQueueError extends Error {
+  constructor(public status: number) {
+    super(status === 403 ? "You do not have permission to view the IT Staff queue." : status === 401 ? "Your session has expired. Please log in again." : "Unable to load the ticket queue. Please try again.");
+  }
+}
+
+
+export async function getStaffTickets(
+  params: GetStaffTicketsParams = {},
+  signal?: AbortSignal
+): Promise<StaffTicketQueueResponse> {
+
+  const query =
+    new URLSearchParams();
+
+
+  if (params.search) {
+    query.set(
+      "search",
+      params.search
+    );
+  }
+
+
+  if (params.status) {
+    query.set(
+      "status",
+      params.status
+    );
+  }
+
+
+  if (params.priority) {
+    query.set(
+      "priority",
+      params.priority
+    );
+  }
+
+  if (params.itPriority) query.set("itPriority", params.itPriority);
+
+
+  if (params.assigned !== undefined) {
+    query.set(
+      "assigned",
+      String(params.assigned)
+    );
+  }
+
+
+  query.set(
+    "page",
+    String(params.page ?? 1)
+  );
+
+
+  query.set(
+    "limit",
+    String(params.limit ?? 10)
+  );
+
+
+  if (params.sort) {
+    query.set(
+      "sort",
+      params.sort
+    );
+  }
+
+
+  if (params.order) {
+    query.set(
+      "order",
+      params.order
+    );
+  }
+
+
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets?${query.toString()}`,
+    {
+      credentials: "include",
+      signal,
+    }
+  );
+
+
+  if (!response.ok) {
+
+    throw new StaffQueueError(response.status);
+  }
+
+
+  return response.json();
+}
+
+// ---------------------------------------------------------
+// IT Staff Ticket Detail
+// ---------------------------------------------------------
+
+export async function getStaffTicketDetail(
+  ticketId: number
+): Promise<TicketDetail> {
+
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to load Staff Ticket Detail"
+    );
+  }
+
+  const result = await response.json();
+
+  return result.data;
+}
+// ---------------------------------------------------------
+// IT Staff Ticket Actions
+// ---------------------------------------------------------
+
+export async function claimStaffTicket(
+  ticketId: number
+) {
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}/assign`,
+    {
+      method: "PATCH",
+      credentials: "include",
+    }
+  );
+
+  return staffActionResult(response, "Unable to claim ticket. Please try again.");
+}
+
+export interface ActiveStaffUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export async function getActiveStaffUsers(): Promise<ActiveStaffUser[]> {
+  const response = await fetch(`${API_URL}/api/staff/users`, { credentials: "include" });
+  const result = await staffActionResult(response, "Unable to load active IT Staff. Please try again.");
+  return result.data;
+}
+
+export async function reassignStaffTicket(ticketId: number, assignedStaffId: number) {
+  const response = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ assignedStaffId }),
+  });
+  return staffActionResult(response, "Unable to reassign ticket. Please try again.");
+}
+
+
+export async function updateStaffTicketStatus(
+  ticketId: number,
+  currentStatus: string
+) {
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}/status`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentStatus,
+      }),
+    }
+  );
+
+  return staffActionResult(response, "Unable to update ticket status. Please try again.");
+}
+
+export async function updateStaffTicketPriority(
+  ticketId: number,
+  itPriority: string
+) {
+  const response = await fetch(
+    `${API_URL}/api/staff/tickets/${ticketId}/priority`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        itPriority,
+      }),
+    }
+  );
+
+  return staffActionResult(response, "Unable to update IT priority. Please try again.");
+}
+
+// ---------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------
+
+export interface LoginResponse {
+  data: {
+    sessionId: string;
+
+    user: {
+      id: number;
+      name: string;
+      email: string;
+      role:
+        | "REQUESTER"
+        | "IT_STAFF"
+        | "ADMINISTRATOR";
+
+      mustChangePassword: boolean;
+    };
+  };
+}
+
+
+export async function login(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
+
+  const response = await fetch(
+    `${API_URL}/api/auth/login`,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      credentials:
+        "include",
+
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }
+  );
+
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null);
+    if (response.status === 403 && result?.error?.code === "ACCOUNT_INACTIVE") {
+      throw new Error("Account is inactive.");
+    }
+    throw new Error(
+      "Invalid email or password"
+    );
+  }
+
+
+  return response.json();
+}
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/api/auth/change-password`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const result = await response.json();
+
+    throw new Error(
+      result?.error?.message ??
+        "Unable to change password"
+    );
+  }
+}
+
+export async function getCurrentUser(): Promise<LoginResponse["data"]["user"] | null> {
+  const response = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" });
+  if (response.status === 401) return null;
+  if (!response.ok) throw new Error("Unable to restore session.");
+  return (await response.json()).data;
+}
+
+export async function logout(): Promise<void> {
+  const response = await fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" });
+  if (!response.ok) throw new Error("Unable to log out.");
+}
+
+export async function indicateResolution(ticketId: number): Promise<Pick<TicketDetail, "id" | "requesterResolvedAt" | "currentStatus" | "updatedAt">> {
+  const response = await fetch(`${API_URL}/api/tickets/${ticketId}/resolution-indication`, { method: "PATCH", credentials: "include" });
+  if (response.status === 401) throw new Error("Your session has expired. Please log in again.");
+  if (response.status === 403) throw new Error("You do not have permission to perform this action.");
+  if (response.status === 404) throw new Error("Ticket was not found.");
+  if (!response.ok) throw new Error("Unable to save resolution indication. Please try again.");
+  return (await response.json()).data;
 }

@@ -118,6 +118,10 @@ describe("Create Ticket", () => {
         name: /Submit Ticket/i,
       });
 
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
+
     fireEvent.click(submitButton);
 
     expect(

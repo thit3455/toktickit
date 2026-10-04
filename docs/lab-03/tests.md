@@ -2,7 +2,7 @@
 
 ## Final recorded results and actual test paths
 
-Source: complete pre-merge verification on 2026-10-03; exact suite counts are in [Administrator verification](admin-verification.md). The verified checkout was `lab3-staging`; the requested `feature/lab3-final-compliance` branch was absent. These are not final-main results. Part 3 test output must be collected after integration into `main`.
+The results below are verified **FINAL MAIN results**, collected after integration into `main`: 321 tests passed, 0 failed and 0 skipped. Frontend verification used `npm.cmd --prefix client test -- --run`; backend/API, full Playwright E2E and both builds also passed final-main verification. The earlier pre-merge verification on 2026-10-03 used `lab3-staging` because the requested `feature/lab3-final-compliance` branch was absent; that historical record remains in [Administrator verification](admin-verification.md).
 
 | Level | Passed | Failed | Skipped |
 |---|---:|---:|---:|
@@ -11,7 +11,7 @@ Source: complete pre-merge verification on 2026-10-03; exact suite counts are in
 | E2E | 33 | 0 | 0 |
 | **Total** | **321** | **0** | **0** |
 
-Both frontend and backend build/type checks passed. All 15 frontend suites, 13 backend suites and 5 E2E files across three device profiles passed. Initial sandbox configuration/browser-access failures were resolved by unrestricted reruns.
+Final-main frontend production build: **PASS**. Final-main backend TypeScript build: **PASS**. Frontend: **15 test files passed (15), 125 tests passed (125)**. Backend/API: **13 test files passed (13), 163 tests passed (163)**. Full Playwright E2E: **33 tests passed**. Each level had **0 failed and 0 skipped**.
 
 | Test ID / AC | Type | Expected result | Actual test paths (repository-relative) | Final recorded status |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ Additional passing frontend suites in the 125 total: `client/tests/lab-01/App.te
 
 Additional passing backend suites in the 163 total: `server/tests/lab-01/health.test.ts`, `server/tests/lab-01/categories.test.ts`, `server/tests/lab-02/requesters.api.test.ts`, `server/tests/lab-02/create-ticket.api.test.ts`, `server/tests/lab-02/my-tickets.api.test.ts`, `server/tests/lab-02/ticket-detail.api.test.ts`, and `server/tests/lab-02/attachments.api.test.ts`. These preserve existing health/catalog and Requester API regression coverage.
 
-Recorded commands:
+Historical pre-merge commands (the dated E2E output path belongs to that earlier run):
 
 ```text
 npm.cmd --prefix client test -- --run
@@ -44,7 +44,7 @@ npm.cmd --prefix client run build
 npm.cmd --prefix server run build
 ```
 
-All five compliance gaps are resolved. MIG-01 proves migration regression. Authentication, Staff workflow, Administrator and Requester browser suites use real APIs and disposable fixtures; only supplemental `staff-queue.spec.ts` mocks responses. `authentication.spec.ts`, `staff-ticket-flow.spec.ts` and `user-administration.spec.ts` under `e2e/lab-03/` satisfy the required structure without duplicate Administrator tests. The Staff workflow covers login, queue/detail, claim/reassign, priority/status, Public Comment, Internal Note and reload persistence. The 39 reviewed screenshots and completed [visual checklist](visual-evidence.md) pass with an observation about normal single-line input viewports. Final-main output and final PDF rendering/readability remain submission steps, not unresolved application testing gaps.
+All five compliance gaps are resolved. MIG-01 proves migration regression. Authentication, Staff workflow, Administrator and Requester browser suites use real APIs and disposable fixtures; only supplemental `staff-queue.spec.ts` mocks responses. `authentication.spec.ts`, `staff-ticket-flow.spec.ts` and `user-administration.spec.ts` under `e2e/lab-03/` satisfy the required structure without duplicate Administrator tests. The Staff workflow covers login, queue/detail, claim/reassign, priority/status, Public Comment, Internal Note and reload persistence. The 39 reviewed screenshots and completed [visual checklist](visual-evidence.md) pass with an observation about normal single-line input viewports. Final-main verification is complete. Final PDF rendering/readability remains a submission step, not an unresolved application testing gap.
 
 ## Historical focused migration repair verification
 
@@ -71,7 +71,7 @@ These focused counts describe the original migration-only run. The latest comple
 
 ## Administrator verification — 2026-10-02
 
-See [Administrator verification](admin-verification.md) for commands, exact results, evidence and limitations. `server/tests/lab-03/admin.api.test.ts` has 53 database/API tests. `AdminUserManagement.test.tsx` and `AdminApi.test.tsx` have 43 frontend tests. `e2e/lab-03/user-administration.spec.ts` runs the real account lifecycle on desktop, tablet and mobile. Historical 2026-10-02 results were 154 backend, 114 frontend and 15 browser tests passed; zero failed. The latest complete pre-merge results at the top of this document supersede those counts. Both builds and Requester/Staff regressions pass in the latest run.
+See [Administrator verification](admin-verification.md) for commands, exact results, evidence and limitations. `server/tests/lab-03/admin.api.test.ts` has 53 database/API tests. `AdminUserManagement.test.tsx` and `AdminApi.test.tsx` have 43 frontend tests. `e2e/lab-03/user-administration.spec.ts` runs the real account lifecycle on desktop, tablet and mobile. Historical 2026-10-02 results were 154 backend, 114 frontend and 15 browser tests passed; zero failed. The final-main results at the top of this document supersede those counts. Both builds and Requester/Staff regressions pass in the final-main verification.
 
 ## Requester regression evidence — 2026-10-01
 

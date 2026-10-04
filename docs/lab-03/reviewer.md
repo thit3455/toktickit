@@ -8,7 +8,7 @@
 
 ## Pull Request Reviews
 
-### PR #41 — Lab 3 Engineering Contract
+### [PR #41](https://github.com/thit3455/toktickit/pull/41) — Lab 3 Engineering Contract
 
 **Reviewer comment:**
 > I think it is enough. Approve.
@@ -20,7 +20,7 @@
 
 ---
 
-### PR #42 — Complete Lab 3 Database Migration Foundation
+### [PR #42](https://github.com/thit3455/toktickit/pull/42) — Complete Lab 3 Database Migration Foundation
 
 **Reviewer comment:**
 > I checked the migration SQL and noticed that it creates a new User table while the existing RequesterUser table is preserved separately. I don't see existing requester data/IDs being migrated to User or the Ticket requester foreign key being changed to reference User. Since Lab 3 authentication should replace the temporary requester identity, should the migration preserve the existing requester records by migrating them into User and update the Ticket relationship accordingly?
@@ -43,7 +43,7 @@
 
 ---
 
-### PR #43 — Complete Lab 3 Authentication Flow
+### [PR #43](https://github.com/thit3455/toktickit/pull/43) — Complete Lab 3 Authentication Flow
 
 **Reviewer comment:**
 > Reviewed the authentication flow and the implemented changes. Login, logout, session handling, current-user verification, password hashing and first-login password change are covered and the reported authentication tests are passing. The changes look good to me. Approved.
@@ -52,7 +52,7 @@
 
 ---
 
-### PR #45 — Complete Issue 4 Authorization System
+### [PR #45](https://github.com/thit3455/toktickit/pull/45) — Complete Issue 4 Authorization System
 
 **Reviewer comment:**
 > Looks fine. Approve.
@@ -61,7 +61,7 @@
 
 ---
 
-### PR #46 — Completed Requester Regression
+### [PR #46](https://github.com/thit3455/toktickit/pull/46) — Completed Requester Regression
 
 **Reviewer comment:**
 > Seems fine. Approve!
@@ -70,7 +70,7 @@
 
 ---
 
-### PR #47 — Complete IT Staff Queue and Ticket Ownership Workflow
+### [PR #47](https://github.com/thit3455/toktickit/pull/47) — Complete IT Staff Queue and Ticket Ownership Workflow
 
 **Reviewer comment:**
 > Your verification and UI meet the criteria. So go ahead!
@@ -82,7 +82,7 @@
 
 ---
 
-### PR #48 — Complete Lab 3 Requester Regression and Resolution Workflow
+### [PR #48](https://github.com/thit3455/toktickit/pull/48) — Complete Lab 3 Requester Regression and Resolution Workflow
 
 **Reviewer comment:**
 > Your requester page seems fine. Approve.
@@ -91,7 +91,7 @@
 
 ---
 
-### PR #49 — Complete Lab 3 Administrator User Management
+### [PR #49](https://github.com/thit3455/toktickit/pull/49) — Complete Lab 3 Administrator User Management
 
 **Reviewer comment:**
 > Your administrator seems fine and fits all the criteria. Approve!
@@ -107,14 +107,14 @@
 
 | PR | Scope | Merge Commit | Review Status |
 |---|---|---|---|
-| #41 | Lab 3 Engineering Contract | `e062021` | Approved |
-| #42 | Database Migration Foundation | `04bae53` | Feedback addressed and approved |
-| #43 | Authentication Flow | `ad38955` | Approved |
-| #45 | Authorization System | `50b392c` | Approved |
-| #46 | Requester Regression | `d2bac92` | Approved |
-| #47 | IT Staff Queue and Ticket Ownership | `9eab2ac` | Approved |
-| #48 | Requester Resolution Workflow | `abea3ea` | Approved |
-| #49 | Administrator User Management | `17c3f82` | Approved |
+| [#41](https://github.com/thit3455/toktickit/pull/41) | Lab 3 Engineering Contract | `e062021` | Approved |
+| [#42](https://github.com/thit3455/toktickit/pull/42) | Database Migration Foundation | `04bae53` | Feedback addressed and approved |
+| [#43](https://github.com/thit3455/toktickit/pull/43) | Authentication Flow | `ad38955` | Approved |
+| [#45](https://github.com/thit3455/toktickit/pull/45) | Authorization System | `50b392c` | Approved |
+| [#46](https://github.com/thit3455/toktickit/pull/46) | Requester Regression | `d2bac92` | Approved |
+| [#47](https://github.com/thit3455/toktickit/pull/47) | IT Staff Queue and Ticket Ownership | `9eab2ac` | Approved |
+| [#48](https://github.com/thit3455/toktickit/pull/48) | Requester Resolution Workflow | `abea3ea` | Approved |
+| [#49](https://github.com/thit3455/toktickit/pull/49) | Administrator User Management | `17c3f82` | Approved |
 
 ---
 
@@ -122,7 +122,7 @@
 
 The Lab 3 pull requests listed above were reviewed by GitHub user `Chanya-Grace-2546`.
 
-The most significant review feedback occurred during PR #42. The reviewer identified that the initial database migration did not fully migrate existing `RequesterUser` records into the new `User` model or preserve the Ticket ownership relationship.
+The most significant review feedback occurred during [PR #42](https://github.com/thit3455/toktickit/pull/42). The reviewer identified that the initial database migration did not fully migrate existing `RequesterUser` records into the new `User` model or preserve the Ticket ownership relationship.
 
 The migration was revised to migrate the requester records, preserve existing Ticket ownership through ID mapping, update the Ticket foreign key, and remove the old `RequesterUser` dependency only after the migration was complete.
 

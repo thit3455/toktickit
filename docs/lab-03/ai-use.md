@@ -3,8 +3,8 @@
 ## AI Model Details
 
 - Tool/provider: ChatGPT AI assistant and coding agent
-- Specification support model/version: OpenAI ChatGPT (used for requirement analysis, PDF interpretation, planning, and review)
-- Coding support model/version: Coding agent integrated with AI assistance (used for implementation guidance, code review, testing support, and documentation preparation)
+- Specification support: OpenAI ChatGPT, GPT-5.6 Sol (used for requirement analysis, PDF interpretation, planning, and review)
+- Coding support: Codex coding agent (used for implementation guidance, code review, testing support, and documentation preparation; underlying model/version not verified)
 - Development period: Lab 3 implementation period
 - Assistance scope:
   - Analysing Lab 3 requirements and acceptance criteria
@@ -37,9 +37,9 @@ AI assistance was used as a development support tool. All generated suggestions 
 
 During Lab 3 development, AI assistance was mainly used for understanding requirements, planning implementation steps, reviewing code changes, and improving testing coverage.
 
-For the specification stage, I used AI to analyse the Lab 3 PDF and break the requirements into smaller development tasks. I compared the suggestions with the official requirements and adjusted the implementation plan when necessary.
+For the specification stage, I used the specification-agent to analyse the Lab 3 PDF, requirements, and acceptance criteria and break them into smaller development tasks for implementation planning. I compared the suggestions with the official requirements and adjusted the implementation plan when necessary.
 
-During the coding stage, AI helped explain technical approaches, identify possible issues, and suggest solutions. However, I reviewed the generated changes manually and verified that the implementation matched the required behaviour. Automated tests were used as the main confirmation that features worked correctly.
+During the coding stage, the coding-agent helped with implementation guidance, code review, debugging, tests, and documentation. I manually reviewed AI suggestions and generated changes and verified them against the official Lab 3 requirements and automated tests to confirm that the implementation matched the required behaviour.
 
 For testing, AI helped organise test coverage for API, UI, security, regression, and end-to-end scenarios. The final verification included frontend tests, backend tests, and browser-based E2E tests.
 
@@ -57,4 +57,4 @@ The following documents provide supporting evidence for the completed Lab 3 impl
 - `docs/lab-03/requester-verification.md`
 - `docs/lab-03/tests.md`
 
-These documents contain implementation verification details and pre-merge feature validation results. Latest verified totals are 125 frontend, 163 backend and 33 E2E tests passed (321 total, 0 failed, 0 skipped), with both builds passing. Migration regression, dedicated authentication E2E, real-API Staff E2E, required E2E structure and responsive evidence are now covered. See `docs/lab-03/visual-evidence.md` for the screenshot review and normal single-line input observation. This is not final-main verification: Part 3 output must be collected after the final merge. No new reviewer approval is implied by automated passing results.
+These documents contain implementation verification details and historical pre-merge feature validation results. Final-main verification is complete: Frontend: 125 passed; Backend: 163 passed; E2E: 33 passed; Total: 321 passed, 0 failed, 0 skipped. Frontend and backend builds passed. Migration regression, dedicated authentication E2E, real-API Staff E2E, required E2E structure and responsive evidence are now covered. See `docs/lab-03/visual-evidence.md` for the screenshot review and normal single-line input observation. No new reviewer approval is implied by automated passing results.

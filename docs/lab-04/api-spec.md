@@ -97,9 +97,13 @@ PerformedBy becomes `{id,name}` from authenticated completing user and never der
 | 403 | FORBIDDEN, ACCOUNT_INACTIVE, PASSWORD_CHANGE_REQUIRED | Role/account/initial-password restriction; no protected DTO. |
 | 404 | TICKET_NOT_FOUND, ACTION_NOT_FOUND | Missing or inaccessible parent/resource; no cross-owner existence disclosure. |
 | 409 | STALE_UPDATE, CONCURRENT_UPDATE, INVALID_TRANSITION, RESOLUTION_GATE_FAILED, TICKET_NOT_ACTIVE, ACTION_IMMUTABLE, IDEMPOTENCY_CONFLICT, TICKET_ALREADY_ASSIGNED | Stale Ticket status version takes precedence over same-status/no-change and transition/gate checks; fresh different unlisted transition is INVALID_TRANSITION. Retain draft; refresh then explicitly reapply; never blindly update expected version and resend. |
+| 413 | INVALID_INPUT (JSON transport) | JSON body exceeds the existing parser limit of 100 KiB. Existing attachment-specific errors retain their contracts. |
+| 415 | INVALID_INPUT (JSON transport) | Unsupported JSON charset or Content-Encoding; no submitted encoding value is echoed. |
 | 500 | SERVER_ERROR | Generic operation-safe message, no SQL/stack/storage/credential details. |
 
 Resolution error may include safe blocker messages using `fields.currentStatus`, e.g. `"Complete or cancel outstanding actions and clear required follow-up before resolving."` Staff detail metadata below supplies precise authorized blockers. JSON parse errors must use the safe JSON envelope on new routes rather than Express HTML stack output. Existing attachment-specific 413/415 and prior endpoint error contracts remain valid.
+
+**Focused-remediation clarification (2026-10-29):** parser failures use the same safe `{ error: { code, message } }` envelope across `/api` routes, including existing authentication/Ticket routes. Malformed JSON is 400 INVALID_INPUT (`Supply valid JSON.`); oversized JSON is 413 INVALID_INPUT (`JSON request body is too large.`); unsupported charset/content encoding is 415 INVALID_INPUT (`JSON request encoding is not supported.`). Other unreadable bodies, including invalid compressed streams, return safe 400 INVALID_INPUT. Unexpected parser failures return generic 500 SERVER_ERROR. Transport parsing still precedes authentication; valid JSON continues through existing authentication and route validation unchanged. This documents previously unspecified size/encoding cases and preserves Express's existing HTTP statuses and size limit while replacing unsafe HTML/stack responses. It does not change action eligibility, lifecycle, ownership or any other business rule.
 
 ## 4. Current action list and creation
 

@@ -103,8 +103,10 @@ describe("IT Staff authenticated workflow", () => {
   it("protects staff-list and reassignment APIs against unauthenticated and other roles", async () => {
     expect((await request(app).get("/api/staff/users")).status).toBe(401);
     expect((await request(app).patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0] })).status).toBe(401);
+    expect((await agents[2].get("/api/staff/users")).status).toBe(403);
+    // I2 needs the approved Admin lookup for eligible action assignees.
+    expect((await administrator.get("/api/staff/users")).status).toBe(200);
     for (const agent of [agents[2], administrator]) {
-      expect((await agent.get("/api/staff/users")).status).toBe(403);
       expect((await agent.patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0] })).status).toBe(403);
     }
   });

@@ -1,7 +1,9 @@
 import { discussionRoutes } from "./discussion.routes.js";
+import { actionRoutes } from "./actions/actions.routes.js";
 import express, {
   Request,
   Response,
+  NextFunction,
 } from "express";
 
 import cors from "cors";
@@ -37,6 +39,24 @@ app.use(
 app.use(cookieParser());
 
 app.use(express.json());
+
+// This middleware is immediately after the parser: sanitize transport failures
+// for every API, preserving parser HTTP statuses and normal route/auth behavior.
+app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+  if (!/^\/api(?:\/|$)/i.test(req.path)) return next(error);
+  const failure = error !== null && typeof error === "object" ? error as { type?: unknown; status?: unknown } : {};
+  if (failure.type === "entity.parse.failed") return res.status(400).json({ error: { code: "INVALID_INPUT", message: "Supply valid JSON." } });
+  if (failure.type === "entity.too.large") return res.status(413).json({ error: { code: "INVALID_INPUT", message: "JSON request body is too large." } });
+  if (failure.type === "charset.unsupported" || failure.type === "encoding.unsupported") {
+    return res.status(415).json({ error: { code: "INVALID_INPUT", message: "JSON request encoding is not supported." } });
+  }
+  // Includes invalid compressed streams and aborted/incorrect-length bodies.
+  // Never echo parser messages, request contents, encodings or stack details.
+  if (failure.status === 400) return res.status(400).json({ error: { code: "INVALID_INPUT", message: "Unable to read JSON request body." } });
+  return res.status(500).json({ error: { code: "SERVER_ERROR", message: "Unable to read request body." } });
+});
+
+app.use("/api", actionRoutes);
 
 app.use("/api/auth", authRoutes);
 

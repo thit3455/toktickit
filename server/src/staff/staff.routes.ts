@@ -159,7 +159,7 @@ router.get(
   }
 );
 // Only active IT Staff are valid primary owners. Expose no account secrets.
-router.get("/users", authenticateToken, requireRole("IT_STAFF"), async (_req, res) => {
+router.get("/users", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (_req, res) => {
   try {
     const data = await getPrisma().user.findMany({
       where: { role: "IT_STAFF", isActive: true },

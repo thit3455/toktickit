@@ -21,6 +21,8 @@ Status: **planned contract, not implemented or tested**. PDF section 6 requires 
 
 Repository documents sometimes describe `/api/staff/tickets/:id/owner` and `ownerId`; current code uses `/assign` and `assignedStaffId`. The contract preserves the implemented path, not the historical discrepancy. Existing requester list parameters differ from staff queue parameters; do not rename them globally.
 
+**I3 implementation boundary (approved 2026-10-31):** the student explicitly approved Administrator **read-only** access to existing `GET /api/staff/tickets` so Administrators can navigate to Actions Taken. This implements the queue-read portion of the already-approved operational-access design. It does not grant Ticket assignment, priority or status writes: those three PATCH routes and the staff-specific detail GET remain IT_STAFF-only until I4. Administrator Ticket viewing uses the already-authorized generic `GET /api/tickets/:id`; action versions come from the action-list response. The capability matrix below describes the final Lab 4 contract, not a claim that I4 endpoints are implemented.
+
 ## 2. Authentication, authorization and security matrix
 
 All new protected routes use existing `authenticateToken`/role enforcement and server session identity. No body/query/header can substitute requester/actor/performer identity. Inactive or must-change-password users remain blocked by existing middleware. Operational writes revalidate active actor/role and affected account facts inside transactions. Frontend visibility is not authorization.

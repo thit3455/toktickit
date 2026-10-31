@@ -11,6 +11,7 @@ const ticket: api.TicketDetail = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(api.getActionsTaken).mockResolvedValue({ ticketId: 101, ticketVersion: 0, items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [] }) }));
   vi.mocked(api.getCurrentUser).mockResolvedValue({ id: 1, name: "Alice", email: "alice@test.test", role: "REQUESTER", mustChangePassword: false });
   vi.mocked(api.getCategories).mockResolvedValue([ticket.category]);

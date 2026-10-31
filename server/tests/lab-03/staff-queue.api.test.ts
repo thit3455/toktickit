@@ -89,10 +89,18 @@ describe("IT Staff queue queries", () => {
   it.each([{ page: "0" }, { page: "-1" }, { page: "1.5" }, { limit: "101" }, { limit: "NaN" }, { sort: "passwordHash" }, { order: "sideways" }, { status: "FAKE" }, { priority: "URGENT" }, { itPriority: "FAKE" }, { assigned: "yes" }, { search: ["one", "two"] }])("rejects malformed queries %j", async query => {
     expect((await queue(query)).status).toBe(400);
   });
-  it("enforces existing staff-only access on the server", async () => {
+  it("allows Administrator queue reads while retaining authentication and requester restrictions", async () => {
     expect((await request(app).get("/api/staff/tickets")).status).toBe(401);
     expect((await requester.get("/api/staff/tickets")).status).toBe(403);
-    expect((await admin.get("/api/staff/tickets")).status).toBe(403);
+    const response = await admin.get("/api/staff/tickets").query({ search: stamp });
+    expect(response.status).toBe(200);
+    expect(ticketIds(response)).toEqual([...ids].reverse());
+  });
+  it.each(["assign", "priority", "status"])("does not grant Administrator Ticket %s writes", async operation => {
+    const before = await prisma.ticket.findUniqueOrThrow({ where: { id: ids[0] } });
+    const response = await admin.patch(`/api/staff/tickets/${ids[0]}/${operation}`).send({ assignedStaffId: userIds[0], itPriority: "HIGH", currentStatus: "IN_PROGRESS" });
+    expect(response.status).toBe(403);
+    expect(await prisma.ticket.findUniqueOrThrow({ where: { id: ids[0] } })).toEqual(before);
   });
   it("returns a safe server failure without database details", async () => {
     const spy = vi.spyOn(prisma, "$transaction").mockRejectedValueOnce(new Error("private database error"));

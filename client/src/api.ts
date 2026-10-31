@@ -1057,3 +1057,112 @@ export async function indicateResolution(ticketId: number): Promise<Pick<TicketD
   if (!response.ok) throw new Error("Unable to save resolution indication. Please try again.");
   return (await response.json()).data;
 }
+
+// Lab 4 Actions Taken: preserve status/code without exposing raw server errors.
+export type ActionStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+export interface ActionContent {
+  description: string; result: string; followUpRequired: boolean; followUpNote: string; attachmentNotes: string;
+}
+export interface ActionTaken extends ActionContent {
+  id: number; ticketId: number; status: ActionStatus; version: number;
+  createdAt: string; updatedAt: string; completedAt: string | null; cancelledAt: string | null; cancellationReason: string | null;
+  createdBy: { id: number; name: string };
+  assignedTo: { id: number; name: string; role: AccountRole; isActive: boolean };
+  performedBy: { id: number; name: string } | null;
+}
+export interface ActionPagination { page: number; limit: number; total: number; totalPages: number }
+export interface ActionList { ticketId: number; ticketVersion: number; items: ActionTaken[]; pagination: ActionPagination }
+export interface CreateActionInput extends ActionContent { requestId: string; expectedTicketVersion: number; assignedToId: number }
+export interface PatchActionInput extends Partial<ActionContent> {
+  expectedVersion: number; expectedTicketVersion: number; assignedToId?: number; status?: ActionStatus; reason?: string;
+}
+export interface ActionMutation { action: ActionTaken; ticketVersion: number; replayed?: boolean }
+export interface ActionRevision {
+  id: number; version: number; operation: "CREATE" | "EDIT" | "ASSIGN" | "STATUS";
+  actor: { id: number; name: string; role: AccountRole }; createdAt: string;
+  snapshot: ActionContent & { status: ActionStatus; assignedToId: number; createdById: number; performedById: number | null; completedAt: string | null; cancelledAt: string | null; cancellationReason: string | null };
+}
+export interface ActionHistory { ticketId: number; actionId: number; items: ActionRevision[]; pagination: ActionPagination }
+export class ActionsApiError extends Error {
+  constructor(public status: number, public code: string) {
+    super(status === 401 ? "Your session has expired. Please sign in again."
+      : code === "PASSWORD_CHANGE_REQUIRED" ? "Change your initial password before continuing."
+      : status === 403 ? "You no longer have access to these actions."
+      : status === 404 ? "This Ticket or action is unavailable."
+      : code === "INVALID_ASSIGNEE" ? "Select an active IT Staff assignee. The account may have changed."
+      : code === "NO_CHANGES" ? "There are no changes to save."
+      : status === 409 ? "The record or its permissions changed. Refresh and review before applying your draft."
+      : status === 413 ? "The request is too large. Shorten the entered text."
+      : status === 415 ? "The request encoding is unsupported. Refresh the application and try again."
+      : status === 400 ? "Check the entered values and current assignee eligibility."
+      : code === "MALFORMED_RESPONSE" ? "The server returned an unreadable response. Retry safely."
+      : status === 0 ? "Unable to reach the server. Your draft has been kept."
+      : "Unable to complete the Actions Taken request. Please try again.");
+    this.name = "ActionsApiError";
+  }
+}
+type JsonObject = Record<string, unknown>;
+const object = (value: unknown): value is JsonObject => typeof value === "object" && value !== null && !Array.isArray(value);
+const integer = (value: unknown): value is number => Number.isSafeInteger(value) && (value as number) >= 0;
+const date = (value: unknown) => typeof value === "string" && Number.isFinite(Date.parse(value));
+const nullableDate = (value: unknown) => value === null || date(value);
+const role = (value: unknown) => ["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(value as string);
+const person = (value: unknown): value is JsonObject => object(value) && integer(value.id) && value.id > 0 && typeof value.name === "string";
+const actionStatus = (value: unknown) => ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"].includes(value as string);
+const actionContent = (value: JsonObject) => ["description", "result", "followUpNote", "attachmentNotes"].every(key => typeof value[key] === "string") && typeof value.followUpRequired === "boolean";
+function validAction(value: unknown): value is ActionTaken {
+  return object(value) && integer(value.id) && value.id > 0 && integer(value.ticketId) && actionContent(value) && actionStatus(value.status)
+    && integer(value.version) && value.version > 0 && date(value.createdAt) && date(value.updatedAt)
+    && nullableDate(value.completedAt) && nullableDate(value.cancelledAt) && (value.cancellationReason === null || typeof value.cancellationReason === "string")
+    && person(value.createdBy) && person(value.assignedTo) && role(value.assignedTo.role) && typeof value.assignedTo.isActive === "boolean"
+    && (value.performedBy === null || person(value.performedBy));
+}
+function pagination(value: unknown): boolean {
+  return object(value) && ["page", "limit", "total", "totalPages"].every(key => integer(value[key])) && (value.page as number) > 0 && (value.limit as number) > 0;
+}
+async function actionRequest<T>(path: string, valid: (data: unknown) => boolean, options: RequestInit = {}): Promise<T> {
+  let response: Response;
+  try { response = await fetch(`${API_URL}${path}`, { ...options, credentials: "include" }); }
+  catch (error) { if (object(error) && error.name === "AbortError") throw error; throw new ActionsApiError(0, "NETWORK_ERROR"); }
+  let body: unknown;
+  try { body = await response.json(); } catch { throw new ActionsApiError(response.status, "MALFORMED_RESPONSE"); }
+  if (!response.ok) {
+    const code = object(body) && object(body.error) && typeof body.error.code === "string" ? body.error.code : "REQUEST_FAILED";
+    throw new ActionsApiError(response.status, code);
+  }
+  if (!object(body) || !valid(body.data)) throw new ActionsApiError(response.status, "MALFORMED_RESPONSE");
+  return body.data as T;
+}
+export function getActionsTaken(ticketId: number, page = 1, signal?: AbortSignal): Promise<ActionList> {
+  return actionRequest(`/api/tickets/${ticketId}/actions-taken?page=${page}&limit=20`, data => object(data) && data.ticketId === ticketId && integer(data.ticketVersion)
+    && Array.isArray(data.items) && data.items.every(item => validAction(item) && item.ticketId === ticketId) && pagination(data.pagination), { signal });
+}
+const validMutation = (ticketId: number, data: unknown) => object(data) && validAction(data.action) && data.action.ticketId === ticketId && integer(data.ticketVersion);
+export function createActionTaken(ticketId: number, input: CreateActionInput): Promise<ActionMutation> {
+  return actionRequest(`/api/tickets/${ticketId}/actions-taken`, data => validMutation(ticketId, data) && object(data) && typeof data.replayed === "boolean", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+  });
+}
+export function patchActionTaken(ticketId: number, actionId: number, input: PatchActionInput): Promise<ActionMutation> {
+  return actionRequest(`/api/tickets/${ticketId}/actions-taken/${actionId}`, data => validMutation(ticketId, data) && object(data) && object(data.action) && data.action.id === actionId, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+  });
+}
+export function getActionHistory(ticketId: number, actionId: number, page = 1, signal?: AbortSignal): Promise<ActionHistory> {
+  return actionRequest(`/api/tickets/${ticketId}/actions-taken/${actionId}/history?page=${page}&limit=50`, data => object(data) && data.ticketId === ticketId && data.actionId === actionId
+    && pagination(data.pagination) && Array.isArray(data.items) && data.items.every(item => object(item) && integer(item.id) && integer(item.version)
+      && ["CREATE", "EDIT", "ASSIGN", "STATUS"].includes(item.operation as string) && person(item.actor) && role(item.actor.role) && date(item.createdAt)
+      && object(item.snapshot) && actionContent(item.snapshot) && actionStatus(item.snapshot.status) && integer(item.snapshot.assignedToId)
+      && integer(item.snapshot.createdById) && (item.snapshot.performedById === null || integer(item.snapshot.performedById))
+      && nullableDate(item.snapshot.completedAt) && nullableDate(item.snapshot.cancelledAt) && (item.snapshot.cancellationReason === null || typeof item.snapshot.cancellationReason === "string")), { signal });
+}
+export function getActionAssignees(signal?: AbortSignal): Promise<ActiveStaffUser[]> {
+  return actionRequest("/api/staff/users", data => Array.isArray(data) && data.every(item => person(item) && typeof item.email === "string"), { signal });
+}
+export async function getActionTicketSummary(ticketId: number): Promise<Pick<TicketDetail, "id" | "currentStatus" | "updatedAt">> {
+  // The generic detail route already permits staff/Admin and owned Requesters.
+  // Retain auth codes during background refresh without changing older adapters.
+  const detail = await actionRequest<TicketDetail>(`/api/tickets/${ticketId}`, data => object(data) && data.id === ticketId
+    && ["NEW", "OPEN", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "RESOLVED", "CLOSED", "REOPENED", "CANCELLED"].includes(data.currentStatus as string) && date(data.updatedAt));
+  return { id: detail.id, currentStatus: detail.currentStatus, updatedAt: detail.updatedAt };
+}

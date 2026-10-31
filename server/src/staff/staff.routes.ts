@@ -11,7 +11,8 @@ const router = Router();
 
 
 // IT Staff Ticket Queue: all statuses remain visible unless explicitly filtered.
-router.get("/tickets", authenticateToken, requireRole("IT_STAFF"), async (req: AuthRequest, res: Response) => {
+// I3 prerequisite: operational queue reads only. Ticket mutations remain IT_STAFF-only.
+router.get("/tickets", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: AuthRequest, res: Response) => {
   const query = req.query;
   const scalar = (key: string, fallback = "") => query[key] === undefined ? fallback : typeof query[key] === "string" ? query[key] as string : null;
   const search = scalar("search")?.trim();

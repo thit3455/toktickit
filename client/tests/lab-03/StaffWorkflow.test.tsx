@@ -14,6 +14,8 @@ const ticket = {
 };
 beforeEach(() => {
   vi.resetAllMocks(); sessionStorage.clear();
+  vi.mocked(api.getActionsTaken).mockImplementation(async ticketId => ({ ticketId, ticketVersion: 0, items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } }));
+  vi.mocked(api.getActionAssignees).mockResolvedValue([]);
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [] }) }));
   vi.mocked(api.getCurrentUser).mockResolvedValue(null);
   vi.mocked(api.getCategories).mockResolvedValue([]);

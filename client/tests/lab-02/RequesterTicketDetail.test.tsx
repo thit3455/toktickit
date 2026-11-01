@@ -22,9 +22,12 @@ import {
   getCurrentUser,
   getTicketAttachments,
   getTicketDetail,
+  getActionsTaken,
 } from "../../src/api.js";
 
 vi.mock("../../src/api.js", () => ({
+  getActionsTaken: vi.fn(),
+  ActionsApiError: class extends Error {},
   getCurrentUser: vi.fn(),
   getCategories: vi.fn(),
   getRelatedSystems: vi.fn(),
@@ -125,6 +128,7 @@ describe(
   "Requester Ticket Detail",
   () => {
     beforeEach(() => {
+      vi.mocked(getActionsTaken).mockResolvedValue({ ticketId: 101, ticketVersion: 0, items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
       vi.clearAllMocks();
 
       sessionStorage.clear();

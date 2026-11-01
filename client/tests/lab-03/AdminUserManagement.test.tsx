@@ -258,14 +258,14 @@ describe("Administrator User Management", () => {
     await act(async () => finish([requester]));
     expect(screen.queryByText(requester.email)).toBeNull();
   });
-  it("preserves the Administrator shell and logout without ticket operation navigation", async () => {
+  it("preserves the Administrator shell and logout with approved read-only queue navigation", async () => {
     vi.spyOn(api, "getCurrentUser").mockResolvedValue(admin);
     vi.spyOn(api, "logout").mockResolvedValue();
     render(<App />);
     await screen.findByRole("heading", { name: "User Management" });
     expect(screen.getByText("Test Administrator", { selector: "main > div > div > p > strong" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Administrator navigation" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "IT Staff Queue" })).toBeNull();
+    expect(screen.getByRole("button", { name: "IT Staff Queue" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create Ticket" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Logout" }));
     await screen.findByRole("heading", { name: "TokTickIT Login" });

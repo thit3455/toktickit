@@ -4,7 +4,8 @@ import "./Requester.css";
 import "./ZenTables.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
-import { useEffect, useState } from "react";
+import { ActionsTaken } from "./ActionsTaken";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import {
   Category,
@@ -22,6 +23,7 @@ import {
   getRelatedSystems,
   getTicketAttachments,
   getTicketDetail,
+  getActionTicketSummary,
   getStaffTicketDetail,
   claimStaffTicket,
   getActiveStaffUsers,
@@ -699,7 +701,9 @@ const [reassignTo, setReassignTo] = useState("");
 // Role Routing
 // =========================================================
 
-useEffect(() => {
+// Settle the role landing screen before navigation becomes interactive.
+// A passive effect can otherwise overwrite an immediate queue selection.
+useLayoutEffect(() => {
   if (
     currentUser?.role === "IT_STAFF"
   ) {
@@ -1599,12 +1603,12 @@ if (currentUser.mustChangePassword) {
           Create Ticket
         </button>
         )}
-        {currentUser?.role === "IT_STAFF" && (
+        {(currentUser?.role === "IT_STAFF" || currentUser?.role === "ADMINISTRATOR") && (
          <div>
          <button
               type="button"
               className={
-                screen === "staffQueue"
+                screen === "staffQueue" || screen === "ticketDetail"
                   ? "btn btn-success"
                   : "btn btn-outline-success"
               }
@@ -1616,11 +1620,11 @@ if (currentUser.mustChangePassword) {
             >
               IT Staff Queue
             </button>
-            <p className="text-success mt-2 mb-0">IT Staff - {currentUser.name}</p>
+            {currentUser.role === "IT_STAFF" && <p className="text-success mt-2 mb-0">IT Staff - {currentUser.name}</p>}
          </div>
         )}
 
-        {currentUser.role === "ADMINISTRATOR" && <button type="button" className="btn btn-success" onClick={() => setScreen("adminUsers")}>User Management</button>}
+        {currentUser.role === "ADMINISTRATOR" && <button type="button" className={screen === "adminUsers" ? "btn btn-success" : "btn btn-outline-success"} onClick={() => setScreen("adminUsers")}>User Management</button>}
       </nav>
 
       {currentUser.role === "ADMINISTRATOR" && screen === "adminUsers" && <AdminUserManagement
@@ -2309,8 +2313,8 @@ if (currentUser.mustChangePassword) {
               </h2>
 
              <p className="text-muted mb-0">
-              {currentUser?.role === "IT_STAFF"
-                  ? "IT Staff ticket information and actions."
+              {currentUser?.role !== "REQUESTER"
+                  ? "Operational Ticket information and Actions Taken."
                   : "Requester-owned Ticket information and attachments."}
             </p>
             </div>
@@ -2319,13 +2323,13 @@ if (currentUser.mustChangePassword) {
               type="button"
               className="btn btn-outline-success"
               onClick={
-                currentUser?.role === "IT_STAFF"
+                currentUser?.role !== "REQUESTER"
                   ? backToStaffQueue
                    : backToMyTickets
               }
             >
               {
-                 currentUser?.role === "IT_STAFF"
+                 currentUser?.role !== "REQUESTER"
                     ? "Back to IT Staff Queue"
                     : "Back to My Tickets"
               }
@@ -2717,6 +2721,17 @@ if (currentUser.mustChangePassword) {
                     {resolutionError && <p role="alert" className="text-danger mt-2">{resolutionError}</p>}
                   </div>
                 </section>}
+                <ActionsTaken key={`${currentUser.id}:${ticketDetail.id}`} ticketId={ticketDetail.id} ticketStatus={ticketDetail.currentStatus} role={currentUser.role} userName={currentUser.name}
+                  onRefreshTicket={async () => {
+                    // Background refresh preserves mounted discussion/action drafts.
+                    const saved = await getActionTicketSummary(ticketDetail.id);
+                    setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous);
+                  }}
+                  onAccessFailure={code => {
+                    setTicketDetail(null); setTicketAttachments([]); setTickets([]); setSelectedTicketId(null);
+                    if (code === "PASSWORD_CHANGE_REQUIRED") setCurrentUser(previous => previous ? { ...previous, mustChangePassword: true } : null);
+                    else { setCurrentUser(null); setScreen("create"); }
+                  }} />
                 <TicketDiscussion key={ticketDetail.id} ticketId={ticketDetail.id} staff={currentUser.role === "IT_STAFF" || currentUser.role === "ADMINISTRATOR"} />
 
                 {/* Attachment Section */}

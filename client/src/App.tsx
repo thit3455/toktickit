@@ -5,6 +5,7 @@ import "./ZenTables.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
 import { ActionsTaken } from "./ActionsTaken";
+import { TicketWorkflow } from "./TicketWorkflow";
 import { useEffect, useLayoutEffect, useState } from "react";
 
 import {
@@ -25,12 +26,6 @@ import {
   getTicketDetail,
   getActionTicketSummary,
   getStaffTicketDetail,
-  claimStaffTicket,
-  getActiveStaffUsers,
-  reassignStaffTicket,
-  ActiveStaffUser,
-  updateStaffTicketPriority,
-  updateStaffTicketStatus,
   removeAttachment,
   uploadTicketAttachment,
   TicketStatus,
@@ -164,20 +159,8 @@ const [passwordChangeBusy, setPasswordChangeBusy] =
   // IT Staff Ticket Queue
   // =========================================================
 
-const [staffActionStatus, setStaffActionStatus] =
-  useState("");
-
-const [staffActionPriority, setStaffActionPriority] =
-  useState("");
-
-const [staffActionMessage, setStaffActionMessage] = useState("");
-const [staffActionBusy, setStaffActionBusy] = useState(false);
-const [activeStaffUsers, setActiveStaffUsers] = useState<ActiveStaffUser[]>([]);
-const [staffUsersState, setStaffUsersState] = useState<"loading" | "ready" | "error">("loading");
-const [staffUsersError, setStaffUsersError] = useState("");
-const [staffUsersRetry, setStaffUsersRetry] = useState(0);
-const [reassignTo, setReassignTo] = useState("");
-
+const [workflowRefreshKey, setWorkflowRefreshKey] = useState(0);
+const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
 
   // =========================================================
   // Reference Data
@@ -559,24 +542,6 @@ const [reassignTo, setReassignTo] = useState("");
   // =========================================================
 
   useEffect(() => {
-    if (screen !== "ticketDetail" || currentUser?.role !== "IT_STAFF" || selectedTicketId === null) return;
-    let active = true;
-    setReassignTo("");
-    setStaffUsersState("loading");
-    setStaffUsersError("");
-    getActiveStaffUsers().then(users => {
-      if (active) { setActiveStaffUsers(users); setStaffUsersState("ready"); }
-    }).catch(error => {
-      if (active) {
-        setActiveStaffUsers([]);
-        setStaffUsersState("error");
-        setStaffUsersError(error instanceof Error ? error.message : "Unable to load active IT Staff.");
-      }
-    });
-    return () => { active = false; };
-  }, [screen, currentUser?.role, selectedTicketId, staffUsersRetry]);
-
-  useEffect(() => {
     if (
       screen !== "ticketDetail" ||
       selectedTicketId === null
@@ -617,8 +582,6 @@ const [reassignTo, setReassignTo] = useState("");
 
         if (!active) return;
         setTicketDetail(detail);
-        setStaffActionPriority(detail.itPriority ?? "MEDIUM");
-        setStaffActionStatus(detail.currentStatus);
 
         setTicketDetailState(
           "ready"
@@ -1016,8 +979,6 @@ useLayoutEffect(() => {
   function openTicketDetail(
     ticketId: number
   ) {
-    setStaffActionMessage("");
-    setReassignTo("");
     setSelectedTicketId(
       ticketId
     );
@@ -1046,77 +1007,6 @@ useLayoutEffect(() => {
       (value) => value + 1
     );
   }
-  async function handleClaimTicket() {
-  if (!ticketDetail || ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null || staffActionBusy) return;
-  setStaffActionBusy(true);
-  setStaffActionMessage("");
-  try {
-    const result = await claimStaffTicket(ticketDetail.id);
-    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
-    setStaffActionMessage("Ticket claimed successfully.");
-  } catch (error) {
-    setStaffActionMessage(error instanceof Error ? error.message : "Unable to claim ticket. Please try again.");
-    // Another staff member may have claimed it since this detail was loaded.
-    try { setTicketDetail(await getStaffTicketDetail(ticketDetail.id)); } catch { /* Keep the existing error visible. */ }
-  } finally { setStaffActionBusy(false); }
-}
-
-async function handleReassignTicket() {
-  if (!ticketDetail || !reassignTo || staffActionBusy) return;
-  setStaffActionBusy(true);
-  setStaffActionMessage("");
-  try {
-    const result = await reassignStaffTicket(ticketDetail.id, Number(reassignTo));
-    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
-    setReassignTo("");
-    setStaffActionMessage(`Ticket reassigned to ${result.data.assignedStaff.name} successfully.`);
-  } catch (error) {
-    setStaffActionMessage(error instanceof Error ? error.message : "Unable to reassign ticket. Please try again.");
-  } finally { setStaffActionBusy(false); }
-}
-
-async function handleStaffUpdate(kind: "priority" | "status") {
-  if (!ticketDetail || staffActionBusy) return;
-  setStaffActionBusy(true);
-  setStaffActionMessage("");
-  try {
-    const result = kind === "priority"
-      ? await updateStaffTicketPriority(ticketDetail.id, staffActionPriority)
-      : await updateStaffTicketStatus(ticketDetail.id, staffActionStatus);
-    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
-    setStaffActionMessage(kind === "priority" ? "IT priority updated successfully." : "Ticket status updated successfully.");
-  } catch (error) {
-    setStaffActionMessage(error instanceof Error ? error.message : "Unable to update ticket. Please try again.");
-  } finally { setStaffActionBusy(false); }
-}
-
-
-async function handleUpdateStatus(
-  status: string
-) {
- if (!selectedTicketId || !status) {
-    return;
-  }
-
-  try {
-    await updateStaffTicketStatus(
-      selectedTicketId,
-      status
-    );
-
-    setReloadDetailKey(
-      (value) => value + 1
-    );
-
-  } catch {
-    console.error(
-      "Unable to update status"
-    );
-  }
-}
-
-
-
   function backToStaffQueue() {
   setScreen("staffQueue");
 
@@ -2547,167 +2437,21 @@ if (currentUser.mustChangePassword) {
     IT STAFF ACTIONS
 ====================================================== */}
 
-{currentUser?.role === "IT_STAFF" &&
- ticketDetail && (
-  <section className="card mb-4">
-
-    <div className="card-header bg-success text-white">
-      IT Staff Actions
-    </div>
-
-    <div className="card-body">
-
-      {staffActionMessage && <p className="alert alert-info" role="status">{staffActionMessage}</p>}
-      <p>Current IT Priority: <strong>{ticketDetail.itPriority ?? "MEDIUM"}</strong></p>
-      <p>Current Ticket Status: <strong>{ticketDetail.currentStatus}</strong></p>
-
-      {ticketDetail.requesterResolvedAt && (
-        <section className="alert alert-success" aria-label="Requester resolution indication">
-          <h4 className="h6">Requester: Problem Appears Resolved</h4>
-          <p className="mb-1">Recorded on <time dateTime={ticketDetail.requesterResolvedAt}>{formatDate(ticketDetail.requesterResolvedAt)}</time>.</p>
-          <p className="mb-0">This indication does not change the ticket status. IT Staff can use Update Status to formally resolve or close the ticket.</p>
-        </section>
-      )}
-
-      <p>
-        Assigned Staff:
-        {" "}
-        {
-          ticketDetail.assignedStaff?.name
-          ?? "Unassigned"
-        }
-      </p>
-
-      {!ticketDetail.assignedStaff && ticketDetail.assignedStaffId == null && <button
-        type="button"
-        className="btn btn-success"
-        onClick={handleClaimTicket}
-        disabled={staffActionBusy}
-      >
-        Claim Ticket
-
-      </button>}
-
-      {(ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null) && <section className="mt-3 mb-4" aria-labelledby="reassign-ticket-title">
-        <h3 id="reassign-ticket-title" className="h6">Reassign Ticket</h3>
-        {staffUsersState === "loading" && <p role="status">Loading active IT Staff...</p>}
-        {staffUsersState === "error" && <div className="alert alert-danger" role="alert">
-          {staffUsersError} <button type="button" className="btn btn-outline-success btn-sm" onClick={() => setStaffUsersRetry(value => value + 1)}>Retry staff list</button>
-        </div>}
-        <label className="form-label" htmlFor="reassign-staff">Reassign to</label>
-        <div className="d-flex flex-column flex-sm-row gap-2">
-          <select id="reassign-staff" className="form-select" value={reassignTo} disabled={staffActionBusy || staffUsersState !== "ready"} onChange={event => setReassignTo(event.target.value)}>
-            <option value="">Select an active IT Staff member</option>
-            {activeStaffUsers.filter(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)).map(staff => <option key={staff.id} value={staff.id}>{staff.name} ({staff.email})</option>)}
-          </select>
-          <button type="button" className="btn btn-success flex-shrink-0" disabled={staffActionBusy || staffUsersState !== "ready" || !reassignTo} onClick={handleReassignTicket}>Reassign Ticket</button>
-        </div>
-        {staffUsersState === "ready" && !activeStaffUsers.some(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)) && <p className="text-muted mt-2">No other active IT Staff members are available.</p>}
-      </section>}
-
-    <div className="mt-3">
-  <label className="form-label" htmlFor="staff-it-priority">
-    IT Priority
-  </label>
-
-  <select
-    className="form-select"
-    id="staff-it-priority"
-    disabled={staffActionBusy}
-    value={staffActionPriority}
-    onChange={(e) =>
-      setStaffActionPriority(e.target.value)
-    }
-  >
-    <option value="">
-      Select IT Priority
-    </option>
-
-    <option value="LOW">
-      LOW
-    </option>
-
-    <option value="MEDIUM">
-      MEDIUM
-    </option>
-
-    <option value="HIGH">
-      HIGH
-    </option>
-
-    <option value="URGENT">
-      URGENT
-    </option>
-  </select>
-
-  <button
-    type="button"
-    className="btn btn-success mt-3"
-    disabled={!staffActionPriority || staffActionBusy}
-    onClick={() => handleStaffUpdate("priority")}
-  >
-    Update IT Priority
-  </button>
-</div>
-
-  <label className="form-label" htmlFor="staff-ticket-status">
-    Status
-  </label>
-
-  <select
-    className="form-select"
-    id="staff-ticket-status"
-    disabled={staffActionBusy}
-    value={staffActionStatus}
-    onChange={(e) =>
-      setStaffActionStatus(e.target.value)
-    }
-  >
-    <option value="">
-      Select Status
-    </option>
-    {["NEW", "CANCELLED"].includes(staffActionStatus) && <option value={staffActionStatus}>{staffActionStatus}</option>}
-    <option value="REOPENED">REOPENED</option>
-
-    <option value="OPEN">
-      OPEN
-    </option>
-
-    <option value="IN_PROGRESS">
-      IN_PROGRESS
-    </option>
-
-    <option value="WAITING_FOR_REQUESTER">
-      WAITING_FOR_REQUESTER
-    </option>
-
-    <option value="RESOLVED">
-      RESOLVED
-    </option>
-
-    <option value="CLOSED">
-      CLOSED
-    </option>
-
-  </select>
-<button
-  type="button"
-  className="btn btn-success mt-3"
-  disabled={!staffActionStatus || staffActionBusy}
-  onClick={() => handleStaffUpdate("status")}
->
-  Update Status
-</button>
-</div>
-
-  </section>
-)}
+{currentUser.role !== "REQUESTER" && <TicketWorkflow key={"workflow:" + currentUser.id + ":" + ticketDetail.id}
+                  ticketId={ticketDetail.id} role={currentUser.role} refreshKey={workflowRefreshKey}
+                  onTicketUpdated={saved => setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous)}
+                  onMutated={() => setActionsRefreshKey(value => value + 1)}
+                  onAccessFailure={code => {
+                    setTicketDetail(null); setTicketAttachments([]); setTickets([]); setSelectedTicketId(null);
+                    if (code === "PASSWORD_CHANGE_REQUIRED") setCurrentUser(previous => previous ? { ...previous, mustChangePassword: true } : null);
+                    else { setCurrentUser(null); setScreen("create"); }
+                  }} />}
 
                 {currentRequester && <section className="card mb-3" aria-label="Resolution indication">
                   <div className="card-body">
                     <h3 className="h5">Problem Appears Resolved</h3>
                     <p>This tells IT Staff the problem appears resolved. IT Staff remain responsible for formally resolving or closing the ticket.</p>
-                    {ticketDetail.requesterResolvedAt ? <p role="status">You indicated that the problem appears resolved on {formatDate(ticketDetail.requesterResolvedAt)}.</p> :
+                    {ticketDetail.requesterResolvedAt ? <p role="status">{ticketDetail.currentStatus === "REOPENED" ? "Historical indication: you" : "You"} indicated that the problem appears resolved on {formatDate(ticketDetail.requesterResolvedAt)}.</p> :
                       <button className="btn btn-success" disabled={resolutionBusy} onClick={async () => {
                         setResolutionBusy(true); setResolutionMessage(""); setResolutionError("");
                         try {
@@ -2721,11 +2465,12 @@ if (currentUser.mustChangePassword) {
                     {resolutionError && <p role="alert" className="text-danger mt-2">{resolutionError}</p>}
                   </div>
                 </section>}
-                <ActionsTaken key={`${currentUser.id}:${ticketDetail.id}`} ticketId={ticketDetail.id} ticketStatus={ticketDetail.currentStatus} role={currentUser.role} userName={currentUser.name}
+                <ActionsTaken key={`${currentUser.id}:${ticketDetail.id}`} ticketId={ticketDetail.id} ticketStatus={ticketDetail.currentStatus} role={currentUser.role} userName={currentUser.name} refreshKey={actionsRefreshKey}
                   onRefreshTicket={async () => {
                     // Background refresh preserves mounted discussion/action drafts.
                     const saved = await getActionTicketSummary(ticketDetail.id);
                     setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous);
+                    setWorkflowRefreshKey(value => value + 1);
                   }}
                   onAccessFailure={code => {
                     setTicketDetail(null); setTicketAttachments([]); setTickets([]); setSelectedTicketId(null);

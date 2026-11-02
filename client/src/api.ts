@@ -1,4 +1,4 @@
-const API_URL =
+export const API_URL =
   import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export type AccountRole = "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR";
@@ -868,13 +868,15 @@ export async function getStaffTicketDetail(
 // ---------------------------------------------------------
 
 export async function claimStaffTicket(
-  ticketId: number
+  ticketId: number, expectedTicketVersion: number
 ) {
   const response = await fetch(
     `${API_URL}/api/staff/tickets/${ticketId}/assign`,
     {
       method: "PATCH",
       credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expectedTicketVersion }),
     }
   );
 
@@ -893,12 +895,12 @@ export async function getActiveStaffUsers(): Promise<ActiveStaffUser[]> {
   return result.data;
 }
 
-export async function reassignStaffTicket(ticketId: number, assignedStaffId: number) {
+export async function reassignStaffTicket(ticketId: number, assignedStaffId: number, expectedTicketVersion: number) {
   const response = await fetch(`${API_URL}/api/staff/tickets/${ticketId}/assign`, {
     method: "PATCH",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ assignedStaffId }),
+    body: JSON.stringify({ assignedStaffId, expectedTicketVersion }),
   });
   return staffActionResult(response, "Unable to reassign ticket. Please try again.");
 }
@@ -906,7 +908,7 @@ export async function reassignStaffTicket(ticketId: number, assignedStaffId: num
 
 export async function updateStaffTicketStatus(
   ticketId: number,
-  currentStatus: string
+  currentStatus: string, expectedTicketVersion: number, reason?: string
 ) {
   const response = await fetch(
     `${API_URL}/api/staff/tickets/${ticketId}/status`,
@@ -917,7 +919,7 @@ export async function updateStaffTicketStatus(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        currentStatus,
+        currentStatus, expectedTicketVersion, ...(reason === undefined ? {} : { reason }),
       }),
     }
   );
@@ -927,7 +929,7 @@ export async function updateStaffTicketStatus(
 
 export async function updateStaffTicketPriority(
   ticketId: number,
-  itPriority: string
+  itPriority: string, expectedTicketVersion: number
 ) {
   const response = await fetch(
     `${API_URL}/api/staff/tickets/${ticketId}/priority`,
@@ -938,7 +940,7 @@ export async function updateStaffTicketPriority(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        itPriority,
+        itPriority, expectedTicketVersion,
       }),
     }
   );

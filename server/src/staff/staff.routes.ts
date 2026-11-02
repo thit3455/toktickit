@@ -6,12 +6,16 @@ import {
 } from "../auth/auth.middleware.js";
 import { requireRole } from "../auth/role.middleware.js";
 import { getPrisma } from "../prisma.js";
+import { parseId } from "../actions/actions.rules.js";
+import { parseAssignment, parsePriority, parseStatus } from "../workflow/ticket-workflow.rules.js";
+import { assignTicket, getWorkflowTicket, prioritizeTicket, transitionTicket } from "../workflow/ticket-workflow.service.js";
+import { workflowFailure } from "../workflow/ticket-workflow.routes.js";
 
 const router = Router();
 
 
 // IT Staff Ticket Queue: all statuses remain visible unless explicitly filtered.
-// I3 prerequisite: operational queue reads only. Ticket mutations remain IT_STAFF-only.
+// I4: Staff/Admin operational access follows the explicitly approved permission matrix.
 router.get("/tickets", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: AuthRequest, res: Response) => {
   const query = req.query;
   const scalar = (key: string, fallback = "") => query[key] === undefined ? fallback : typeof query[key] === "string" ? query[key] as string : null;
@@ -71,94 +75,11 @@ router.get("/tickets", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR
     return res.status(500).json({ error: { code: "SERVER_ERROR", message: "Unable to retrieve ticket queue." } });
   }
 });
-// IT Staff Ticket Detail
-router.get(
-  "/tickets/:id",
-  authenticateToken,
-  requireRole("IT_STAFF"),
-  async (
-    req: AuthRequest,
-    res: Response
-  ) => {
-    try {
-      const ticketId = Number(req.params.id);
-
-      if (
-        !Number.isInteger(ticketId) ||
-        ticketId <= 0
-      ) {
-        return res.status(400).json({
-          error: {
-            code: "INVALID_TICKET_ID",
-            message: "Invalid ticket id.",
-          },
-        });
-      }
-
-
-      const prisma = getPrisma();
-
-
-      const ticket =
-        await prisma.ticket.findUnique({
-          where: {
-            id: ticketId,
-          },
-
-          include: {
-            requester: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-
-            assignedStaff: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-
-            category: true,
-
-            relatedSystem: true,
-
-            attachments: true,
-          },
-        });
-
-
-      if (!ticket) {
-        return res.status(404).json({
-          error: {
-            code: "TICKET_NOT_FOUND",
-            message: "Ticket not found.",
-          },
-        });
-      }
-
-
-      return res.status(200).json({
-        data: ticket,
-      });
-
-
-    } catch {
-
-      return res.status(500).json({
-        error: {
-          code: "SERVER_ERROR",
-          message:
-            "Unable to retrieve ticket.",
-        },
-      });
-
-    }
-  }
-);
+// I4 explicitly extends operational reads and writes to Administrators.
+router.get("/tickets/:id", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: AuthRequest, res) => {
+  try { return res.json({ data: await getWorkflowTicket(parseId(req.params.id), req.user!.userId) }); }
+  catch (error) { return workflowFailure(res, error); }
+});
 // Only active IT Staff are valid primary owners. Expose no account secrets.
 router.get("/users", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (_req, res) => {
   try {
@@ -173,245 +94,17 @@ router.get("/users", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR")
   }
 });
 
-// No assignedStaffId means claim; an explicit ID means reassignment.
-router.patch("/tickets/:id/assign", authenticateToken, requireRole("IT_STAFF"), async (req: AuthRequest, res: Response) => {
-  const ticketId = Number(req.params.id);
-  const reassign = Object.prototype.hasOwnProperty.call(req.body ?? {}, "assignedStaffId");
-  const staffId = reassign ? req.body.assignedStaffId : req.user!.userId;
-  if (!Number.isSafeInteger(ticketId) || ticketId <= 0)
-    return res.status(400).json({ error: { code: "INVALID_TICKET_ID", message: "Invalid ticket id." } });
-  if (typeof staffId !== "number" || !Number.isSafeInteger(staffId) || staffId <= 0)
-    return res.status(400).json({ error: { code: "INVALID_STAFF_ID", message: "Select a valid active IT Staff member." } });
-  try {
-    const result = await getPrisma().$transaction(async tx => {
-      const ticket = await tx.ticket.findUnique({ where: { id: ticketId } });
-      if (!ticket) return { status: 404, error: { code: "TICKET_NOT_FOUND", message: "Ticket not found." } };
-      const staff = await tx.user.findFirst({ where: { id: staffId, role: "IT_STAFF", isActive: true } });
-      if (!staff) return { status: 400, error: { code: "INVALID_STAFF_ID", message: "Select a valid active IT Staff member." } };
-      if (!reassign) {
-        // Conditional write prevents a claim from overwriting another owner's claim.
-        const claim = await tx.ticket.updateMany({ where: { id: ticketId, OR: [{ assignedStaffId: null }, { assignedStaffId: staffId }] }, data: { assignedStaffId: staffId } });
-        if (!claim.count) return { status: 409, error: { code: "TICKET_ALREADY_ASSIGNED", message: "This ticket already has an owner. Refresh the ticket and use Reassign Ticket." } };
-      } else {
-        await tx.ticket.update({ where: { id: ticketId }, data: { assignedStaffId: staffId } });
-      }
-      const data = await tx.ticket.findUniqueOrThrow({ where: { id: ticketId }, include: { assignedStaff: { select: { id: true, name: true, email: true } } } });
-      return { status: 200, data };
-    });
-    return res.status(result.status).json("error" in result ? { error: result.error } : { data: result.data });
-  } catch {
-    return res.status(500).json({ error: { code: "SERVER_ERROR", message: "Unable to assign ticket." } });
-  }
+// Versions, role revalidation and writes/history share the workflow transaction.
+router.patch("/tickets/:id/assign", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: AuthRequest, res) => {
+  try { return res.json({ data: await assignTicket(parseId(req.params.id), req.user!.userId, parseAssignment(req.body)) }); }
+  catch (error) { return workflowFailure(res, error); }
 });
-// Update Ticket Status
-router.patch(
-  "/tickets/:id/status",
-  authenticateToken,
-  requireRole("IT_STAFF"),
-  async (
-    req: AuthRequest,
-    res: Response
-  ) => {
-    try {
-
-      const ticketId = Number(req.params.id);
-
-      const {
-        currentStatus,
-      } = req.body;
-
-
-      if (
-        !Number.isInteger(ticketId) ||
-        ticketId <= 0
-      ) {
-        return res.status(400).json({
-          error: {
-            code: "INVALID_TICKET_ID",
-            message: "Invalid ticket id.",
-          },
-        });
-      }
-
-
-      const allowedStatuses = [
-        "OPEN",
-        "REOPENED",
-        "IN_PROGRESS",
-        "WAITING_FOR_REQUESTER",
-        "RESOLVED",
-        "CLOSED",
-      ];
-
-
-      if (
-        !allowedStatuses.includes(
-          currentStatus
-        )
-      ) {
-        return res.status(400).json({
-          error: {
-            code: "INVALID_STATUS",
-            message: "Invalid ticket status.",
-          },
-        });
-      }
-
-
-      const prisma = getPrisma();
-
-
-      const ticket =
-        await prisma.ticket.findUnique({
-          where: {
-            id: ticketId,
-          },
-        });
-
-
-      if (!ticket) {
-        return res.status(404).json({
-          error: {
-            code: "TICKET_NOT_FOUND",
-            message: "Ticket not found.",
-          },
-        });
-      }
-
-
-      const updatedTicket =
-        await prisma.ticket.update({
-          where: {
-            id: ticketId,
-          },
-
-          data: {
-            currentStatus,
-          },
-        });
-
-
-      return res.status(200).json({
-        data: updatedTicket,
-      });
-
-
-    } catch {
-
-      return res.status(500).json({
-        error: {
-          code: "SERVER_ERROR",
-          message:
-            "Unable to update ticket status.",
-        },
-      });
-
-    }
-  }
-);
-// Update Ticket Priority
-router.patch(
-  "/tickets/:id/priority",
-  authenticateToken,
-  requireRole("IT_STAFF"),
-  async (
-    req: AuthRequest,
-    res: Response
-  ) => {
-    try {
-
-      const ticketId = Number(req.params.id);
-
-      const {
-        itPriority,
-        } = req.body;
-
-
-      if (
-        !Number.isInteger(ticketId) ||
-        ticketId <= 0
-      ) {
-        return res.status(400).json({
-          error: {
-            code: "INVALID_TICKET_ID",
-            message: "Invalid ticket id.",
-          },
-        });
-      }
-
-
-      const allowedPriority = [
-        "LOW",
-        "MEDIUM",
-        "HIGH",
-        "URGENT",
-      ];
-
-
-      if (
-        !allowedPriority.includes(
-           itPriority
-        )
-      ) {
-        return res.status(400).json({
-          error: {
-            code: "INVALID_PRIORITY",
-            message: "Invalid priority.",
-          },
-        });
-      }
-
-
-      const prisma = getPrisma();
-
-
-      const ticket =
-        await prisma.ticket.findUnique({
-          where: {
-            id: ticketId,
-          },
-        });
-
-
-      if (!ticket) {
-        return res.status(404).json({
-          error: {
-            code: "TICKET_NOT_FOUND",
-            message: "Ticket not found.",
-          },
-        });
-      }
-
-
-      const updatedTicket =
-        await prisma.ticket.update({
-          where: {
-            id: ticketId,
-          },
-
-          data: {
-              itPriority,
-          },
-        });
-
-
-      return res.status(200).json({
-        data: updatedTicket,
-      });
-
-
-    } catch {
-
-      return res.status(500).json({
-        error: {
-          code: "SERVER_ERROR",
-          message:
-            "Unable to update priority.",
-        },
-      });
-
-    }
-  }
-);
-
+router.patch("/tickets/:id/status", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: AuthRequest, res) => {
+  try { return res.json({ data: await transitionTicket(parseId(req.params.id), req.user!.userId, parseStatus(req.body)) }); }
+  catch (error) { return workflowFailure(res, error); }
+});
+router.patch("/tickets/:id/priority", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR"), async (req: AuthRequest, res) => {
+  try { return res.json({ data: await prioritizeTicket(parseId(req.params.id), req.user!.userId, parsePriority(req.body)) }); }
+  catch (error) { return workflowFailure(res, error); }
+});
 export default router;

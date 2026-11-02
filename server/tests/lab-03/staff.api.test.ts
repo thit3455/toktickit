@@ -1,11 +1,16 @@
-import { beforeAll, afterAll, describe, expect, it } from "vitest";
+import { beforeAll, afterAll, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import bcrypt from "bcrypt";
+import { randomUUID } from "node:crypto";
 import { app } from "../../src/app.js";
-import { getPrisma } from "../../src/prisma.js";
+import { PrismaClient } from "@prisma/client";
+import { isolatedLab4Database } from "../helpers/lab4-database.js";
+let isolatedPrisma: PrismaClient;
+vi.mock("../../src/prisma.js", () => ({ getPrisma: () => isolatedPrisma }));
 
 describe("IT Staff authenticated workflow", () => {
-  const prisma = getPrisma();
+  let prisma: PrismaClient;
+  let database: Awaited<ReturnType<typeof isolatedLab4Database>>;
   const stamp = `staff-test-${Date.now()}`;
   const agents = [request.agent(app), request.agent(app), request.agent(app), request.agent(app)];
   const userIds: number[] = [];
@@ -13,6 +18,7 @@ describe("IT Staff authenticated workflow", () => {
   let inactiveId: number;
   let ticketId: number, categoryId: number, systemId: number, attachmentId: number;
   beforeAll(async () => {
+    database = await isolatedLab4Database(); prisma = isolatedPrisma = database.prisma; database.migrate();
     const passwordHash = await bcrypt.hash("StaffTest123!", 10);
     for (let i = 0; i < agents.length; i++) {
       const email = `${stamp}-${i}@example.test`;
@@ -31,28 +37,26 @@ describe("IT Staff authenticated workflow", () => {
     categoryId = (await prisma.category.create({ data: { name: stamp } })).id;
     systemId = (await prisma.relatedSystem.create({ data: { name: stamp } })).id;
     ticketId = (await prisma.ticket.create({ data: { ticketNumber: stamp, requesterId: userIds[2], categoryId, relatedSystemId: systemId, summary: "Staff workflow test", description: "Isolated fixture", requestedPriority: "LOW" } })).id;
-  }, 30000);
-  afterAll(async () => {
-    if (ticketId) await prisma.ticket.delete({ where: { id: ticketId } });
-    await prisma.session.deleteMany({ where: { userId: { in: userIds } } });
-    await prisma.user.deleteMany({ where: { id: { in: userIds } } });
-    if (categoryId) await prisma.category.delete({ where: { id: categoryId } });
-    if (systemId) await prisma.relatedSystem.delete({ where: { id: systemId } });
-  });
+  }, 120000);
+  afterAll(async () => { vi.restoreAllMocks(); await database?.dispose(); }, 30000);
   for (const index of [0, 1]) {
     it(`staff account ${index + 1} can view queue/detail, claim, update priority and status`, async () => {
-      await prisma.ticket.update({ where: { id: ticketId }, data: { assignedStaffId: null } });
+      await prisma.ticket.update({ where: { id: ticketId }, data: { assignedStaffId: null, currentStatus: "NEW" } });
       expect((await agents[index].get("/api/staff/tickets")).status).toBe(200);
       expect((await agents[index].get(`/api/staff/tickets/${ticketId}`)).status).toBe(200);
-      const claim = await agents[index].patch(`/api/staff/tickets/${ticketId}/assign`);
+      const claim = await agents[index].patch(`/api/staff/tickets/${ticketId}/assign`).send({ expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version });
       expect(claim.status).toBe(200);
       expect(claim.body.data.assignedStaffId).toBe(userIds[index]);
       for (const itPriority of ["LOW", "MEDIUM", "HIGH", "URGENT"]) {
-        expect((await agents[index].patch(`/api/staff/tickets/${ticketId}/priority`).send({ itPriority })).status).toBe(200);
+        expect((await agents[index].patch(`/api/staff/tickets/${ticketId}/priority`).send({ itPriority, expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version })).status).toBe(200);
         expect((await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).itPriority).toBe(itPriority);
       }
+      const ticketVersion = (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version;
+      const created = await agents[index].post(`/api/tickets/${ticketId}/actions-taken`).send({ requestId: randomUUID(), expectedTicketVersion: ticketVersion, assignedToId: userIds[index], description: "Synthetic regression repair" });
+      expect(created.status).toBe(201);
+      expect((await agents[index].patch(`/api/tickets/${ticketId}/actions-taken/${created.body.data.action.id}`).send({ expectedTicketVersion: created.body.data.ticketVersion, expectedVersion: 1, status: "COMPLETED", result: "Synthetic verified repair" })).status).toBe(200);
       for (const currentStatus of ["OPEN", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "RESOLVED", "CLOSED"]) {
-        expect((await agents[index].patch(`/api/staff/tickets/${ticketId}/status`).send({ currentStatus })).status).toBe(200);
+        expect((await agents[index].patch(`/api/staff/tickets/${ticketId}/status`).send({ currentStatus, expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version })).status).toBe(200);
         expect((await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).currentStatus).toBe(currentStatus);
       }
     });
@@ -64,7 +68,7 @@ describe("IT Staff authenticated workflow", () => {
     expect((await agents[0].get(`/api/staff/tickets/${ticketId}`)).status).toBe(200);
   });
   it("reopens a closed ticket and persists its reopened status", async () => {
-    const response = await agents[0].patch(`/api/staff/tickets/${ticketId}/status`).send({ currentStatus: "REOPENED" });
+    const response = await agents[0].patch(`/api/staff/tickets/${ticketId}/status`).send({ currentStatus: "REOPENED", reason: "Regression recurrence", expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version });
     expect(response.status).toBe(200);
     expect(response.body.data.currentStatus).toBe("REOPENED");
     expect((await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).currentStatus).toBe("REOPENED");
@@ -77,7 +81,7 @@ describe("IT Staff authenticated workflow", () => {
     for (const user of response.body.data) expect(Object.keys(user).sort()).toEqual(["email", "id", "name"]);
   });
   it("persists reassignment and returns the new owner in fresh detail and queue requests", async () => {
-    const response = await agents[1].patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0] });
+    const response = await agents[1].patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0], expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version });
     expect(response.status).toBe(200);
     expect(response.body.data.assignedStaff.id).toBe(userIds[0]);
     expect((await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).assignedStaffId).toBe(userIds[0]);
@@ -87,27 +91,27 @@ describe("IT Staff authenticated workflow", () => {
     expect(queue.body.data[0].assignedStaff.id).toBe(userIds[0]);
   });
   it("does not let Claim overwrite another owner", async () => {
-    expect((await agents[1].patch(`/api/staff/tickets/${ticketId}/assign`)).status).toBe(409);
+    expect((await agents[1].patch(`/api/staff/tickets/${ticketId}/assign`).send({ expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version })).status).toBe(409);
     expect((await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).assignedStaffId).toBe(userIds[0]);
   });
   it.each([null, "1", -1, 0, 1.5, 2147483647])("rejects invalid reassignment ID %s", async assignedStaffId => {
-    const response = await agents[0].patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId });
+    const response = await agents[0].patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId, expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version });
     expect(response.status).toBe(400);
     expect((await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).assignedStaffId).toBe(userIds[0]);
   });
   it("rejects inactive staff and nonstaff owners", async () => {
     for (const assignedStaffId of [inactiveId, userIds[2], userIds[5]]) {
-      expect((await agents[0].patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId })).status).toBe(400);
+      expect((await agents[0].patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId, expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version })).status).toBe(400);
     }
   });
   it("protects staff-list and reassignment APIs against unauthenticated and other roles", async () => {
     expect((await request(app).get("/api/staff/users")).status).toBe(401);
-    expect((await request(app).patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0] })).status).toBe(401);
+    expect((await request(app).patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0], expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version })).status).toBe(401);
     expect((await agents[2].get("/api/staff/users")).status).toBe(403);
     // I2 needs the approved Admin lookup for eligible action assignees.
     expect((await administrator.get("/api/staff/users")).status).toBe(200);
-    for (const agent of [agents[2], administrator]) {
-      expect((await agent.patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0] })).status).toBe(403);
+    for (const agent of [agents[2]]) {
+      expect((await agent.patch(`/api/staff/tickets/${ticketId}/assign`).send({ assignedStaffId: userIds[0], expectedTicketVersion: (await prisma.ticket.findUniqueOrThrow({ where: { id: ticketId } })).version })).status).toBe(403);
     }
   });
   it("rejects unauthenticated and requester staff actions", async () => {
@@ -123,7 +127,7 @@ describe("IT Staff authenticated workflow", () => {
       expect((await agents[0].patch(`/api/staff/tickets/${ticketId}/${action}`).send({ itPriority: "INVALID", currentStatus: "INVALID" })).status).toBe(400);
       expect((await agents[0].patch(`/api/staff/tickets/invalid/${action}`).send({})).status).toBe(400);
     }
-    expect((await agents[0].patch("/api/staff/tickets/2147483647/assign")).status).toBe(404);
+    expect((await agents[0].patch("/api/staff/tickets/2147483647/assign").send({ expectedTicketVersion: 0 })).status).toBe(404);
   });
   it("shares public comments with the owner but protects other requesters", async () => {
     expect((await agents[0].post(`/api/tickets/${ticketId}/comments`).send({ message: "Public update" })).status).toBe(201);

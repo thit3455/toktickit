@@ -7,7 +7,7 @@ import { actionContentInput, actionDraft, activeActionTicket, bangkokActionTime,
 import "./ActionsTaken.css";
 
 interface Props {
-  ticketId: number; ticketStatus: string; role: AccountRole; userName: string;
+  ticketId: number; ticketStatus: string; role: AccountRole; userName: string; refreshKey?: number;
   onRefreshTicket: () => Promise<void>; onAccessFailure: (code: string) => void;
 }
 type Mode = "create" | "edit" | "start" | "complete" | "cancel";
@@ -18,7 +18,7 @@ interface Editor {
 const label = (value: string) => value.replaceAll("_", " ");
 const safeError = (error: unknown) => error instanceof ActionsApiError ? error.message : "Unable to complete the request. Your draft has been kept. Please try again.";
 
-export function ActionsTaken({ ticketId, ticketStatus, role, userName, onRefreshTicket, onAccessFailure }: Props) {
+export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKey = 0, onRefreshTicket, onAccessFailure }: Props) {
   const operational = role === "IT_STAFF" || role === "ADMINISTRATOR";
   const activeTicket = activeActionTicket(ticketStatus);
   const [list, setList] = useState<ActionList | null>(null);
@@ -66,7 +66,7 @@ export function ActionsTaken({ ticketId, ticketStatus, role, userName, onRefresh
       protectedFailure(failure); setList(null); setListError(safeError(failure)); setLoading(false);
     });
     return () => { current = false; controller.abort(); };
-  }, [ticketId, page, reload]);
+  }, [ticketId, page, reload, refreshKey]);
   useEffect(() => {
     if (!operational) return;
     const controller = new AbortController(); let current = true;

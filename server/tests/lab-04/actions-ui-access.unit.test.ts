@@ -20,7 +20,7 @@ beforeEach(() => {
   db.ticket.findMany.mockResolvedValue([{ id: 5, ticketNumber: "UI-5", assignedStaff: null }]);
   db.$transaction.mockImplementation(async work => work(db));
 });
-describe("I3 Administrator queue read prerequisite (no database)", () => {
+describe("I4 explicitly approved operational authorization (no database)", () => {
   it.each(["ADMINISTRATOR", "IT_STAFF"])("allows authenticated %s queue reads", async role => {
     db.session.findUnique.mockResolvedValue(session(role));
     const response = await authenticated("get", "/api/staff/tickets?search=UI&limit=10");
@@ -49,12 +49,13 @@ describe("I3 Administrator queue read prerequisite (no database)", () => {
     expect(response.status).toBe(401); expect(response.body.error.code).toBe("SESSION_EXPIRED");
     expect(db.$transaction).not.toHaveBeenCalled();
   });
-  it.each(["assign", "priority", "status"])("does not authorize Administrator Ticket %s writes", async operation => {
+  it.each(["assign", "priority", "status"])("requires the versioned supported contract for Administrator Ticket %s writes", async operation => {
     const response = await authenticated("patch", `/api/staff/tickets/5/${operation}`).send({ assignedStaffId: 9, itPriority: "HIGH", currentStatus: "OPEN" });
-    expect(response.status).toBe(403); expect(response.body.error.code).toBe("FORBIDDEN");
+    expect(response.status).toBe(400); expect(response.body.error.code).toBe("INVALID_INPUT");
     expect(db.ticket.update).not.toHaveBeenCalled(); expect(db.ticket.updateMany).not.toHaveBeenCalled(); expect(db.$transaction).not.toHaveBeenCalled();
   });
-  it("keeps the staff-specific detail route restricted to IT Staff", async () => {
+  it("keeps Requesters outside the operational detail route", async () => {
+    db.session.findUnique.mockResolvedValue(session("REQUESTER"));
     expect((await authenticated("get", "/api/staff/tickets/5")).status).toBe(403);
     expect(db.ticket.findUnique).not.toHaveBeenCalled();
   });

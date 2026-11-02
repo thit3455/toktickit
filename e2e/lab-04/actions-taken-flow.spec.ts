@@ -1,9 +1,12 @@
-import { test, expect, type Lab4Case } from "./fixtures";
+import * as originalHarness from "./fixtures";
+import * as workflowHarness from "./workflow-fixtures";
+import type { Lab4Case } from "./fixtures";
+const { test, expect } = process.env.LAB4_I4_E2E_APPROVED === "1" ? workflowHarness : originalHarness;
 import type { Page } from "@playwright/test";
 
 // This suite has no development DATABASE_URL fallback and never provisions a database.
 // The guarded worker requires separately approved, empty, dedicated test access.
-test.use({ baseURL: "http://localhost:5174" });
+test.use({ baseURL: "http://localhost:5174", trace: "retain-on-failure", screenshot: "only-on-failure" });
 test.setTimeout(90000);
 async function login(page: Page, data: Lab4Case, index: number) {
   await page.goto("/");
@@ -19,6 +22,10 @@ async function openTicket(page: Page, data: Lab4Case, requester = false) {
   await page.getByRole("button", { name: requester ? data.ticketNumber : `Open ${data.ticketNumber}`, exact: true }).click();
   await expect(page.getByRole("heading", { name: "Actions Taken", exact: true })).toBeVisible();
   await expect(page.getByText("Loading Actions Taken...", { exact: true })).toHaveCount(0);
+  if (!requester) {
+    await expect(page.getByText("Loading Ticket workflow...", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Update Status", exact: true })).toBeVisible();
+  }
 }
 async function create(page: Page, data: Lab4Case, description: string, assignee = 1) {
   await page.getByRole("button", { name: "Record action", exact: true }).click();
@@ -56,10 +63,13 @@ test("staff/Admin lifecycle, attribution, corrections, inactive cancellation and
   await page.getByRole("button", { name: "Logout", exact: true }).click();
 
   await login(page, lab4, 3); await openTicket(page, lab4);
-  await expect(page.getByRole("button", { name: /Claim Ticket|Reassign Ticket|Update Status|Update IT Priority/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Claim Ticket", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Reassign Ticket", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Update Status", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Update IT Priority", exact: true })).toBeVisible();
   for (const operation of ["assign", "priority", "status"]) {
     const response = await page.request.patch(`${lab4.apiUrl}/api/staff/tickets/${lab4.ticketId}/${operation}`, { data: { assignedStaffId: lab4.users[3].id, currentStatus: "RESOLVED", itPriority: "HIGH" } });
-    expect(response.status()).toBe(403);
+    expect(response.status()).toBe(400); // I4 permits scoped Admin writes, but rejects this unversioned mixed-field payload.
   }
   await page.getByRole("button", { name: `Complete action #${id}`, exact: true }).click();
   await expect(page.getByText(`The actual performer will be ${lab4.users[3].name}. Pending follow-up may remain, but blocks later Ticket resolution.`)).toBeVisible();

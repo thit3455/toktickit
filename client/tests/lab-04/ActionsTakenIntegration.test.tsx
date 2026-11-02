@@ -3,11 +3,15 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import App from "../../src/App";
 import * as api from "../../src/api";
 import { action, list } from "./fixtures";
+import * as workflow from "../../src/ticket-workflow.api";
+import { workflowTicket, ticketHistory } from "./workflow-fixtures";
 
 vi.mock("../../src/api");
+vi.mock("../../src/ticket-workflow.api", async original => ({ ...await original<typeof workflow>(), getWorkflowTicket: vi.fn(), changeTicket: vi.fn(), getTicketHistory: vi.fn() }));
 const ticket: api.TicketDetail = { id: 101, ticketNumber: "UI-101", requesterId: 1, categoryId: 1, relatedSystemId: 1, summary: "Printer unavailable", description: "Office printer cannot connect", requestedPriority: "HIGH", currentStatus: "OPEN", createdAt: action.createdAt, updatedAt: action.updatedAt, category: { id: 1, name: "Hardware" }, relatedSystem: { id: 1, name: "Office" }, requester: { id: 1, name: "Requester" } };
 beforeEach(() => {
   vi.resetAllMocks(); sessionStorage.clear();
+  vi.mocked(workflow.getWorkflowTicket).mockResolvedValue(workflowTicket({ ...ticket })); vi.mocked(workflow.getTicketHistory).mockResolvedValue(ticketHistory);
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [] }) }));
   vi.mocked(api.getCurrentUser).mockResolvedValue({ id: 99, name: "Administrator", email: "admin@example.test", role: "ADMINISTRATOR", mustChangePassword: false });
   vi.mocked(api.getAdminUsers).mockResolvedValue([]);
@@ -27,11 +31,12 @@ async function openAdminTicket() {
   await screen.findByRole("heading", { name: "Actions Taken" });
 }
 describe("Actions Taken in the existing application", () => {
-  it("lets Admin navigate queue/detail/actions without exposing Ticket write controls", async () => {
+  it("lets Admin navigate queue/detail/actions with the explicitly approved I4 Ticket controls", async () => {
     await openAdminTicket();
     expect(screen.getByRole("button", { name: "IT Staff Queue" })).toHaveClass("btn-success");
     expect(api.getTicketDetail).toHaveBeenCalledWith(101, 0); expect(api.getStaffTicketDetail).not.toHaveBeenCalled();
-    expect(screen.queryByRole("button", { name: /Claim Ticket|Reassign Ticket|Update IT Priority|Update Status|Problem Appears Resolved/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Claim Ticket|Problem Appears Resolved/ })).toBeNull();
+    expect(await screen.findByRole("button", { name: "Reassign Ticket" })).toBeEnabled(); expect(screen.getByRole("button", { name: "Update IT Priority" })).toBeEnabled(); expect(screen.getByRole("button", { name: "Update Status" })).toBeEnabled();
     expect(await screen.findByRole("button", { name: "Complete action #41" })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "Back to IT Staff Queue" }));
     await screen.findByRole("heading", { name: "IT Staff Ticket Queue" });

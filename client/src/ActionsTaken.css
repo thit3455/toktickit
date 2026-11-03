@@ -26,3 +26,7 @@
   .actions-taken .card-body, .action-editor, .action-history { padding: .75rem; }
   .action-editor .action-buttons { align-items: stretch; flex-direction: column; }
 }
+
+/* Maintain AA text contrast on the editors' light gray backgrounds. */
+.actions-taken .btn-link { --bs-btn-color: #006b3c; --bs-btn-hover-color: #004d2b; --bs-btn-active-color: #004d2b; }
+.actions-taken .btn-outline-secondary { --bs-btn-color: #495057; --bs-btn-border-color: #495057; }

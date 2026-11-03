@@ -11,3 +11,7 @@
   .ticket-workflow .card-body, .ticket-workflow .workflow-editor, .ticket-workflow .workflow-history { padding: .75rem; }
   .ticket-workflow .workflow-controls { flex-direction: column; }
 }
+
+/* Maintain AA text contrast on the editors' light gray backgrounds. */
+.ticket-workflow .btn-link { --bs-btn-color: #006b3c; --bs-btn-hover-color: #004d2b; --bs-btn-active-color: #004d2b; }
+.ticket-workflow .btn-outline-secondary { --bs-btn-color: #495057; --bs-btn-border-color: #495057; }

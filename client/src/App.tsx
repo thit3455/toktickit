@@ -2308,11 +2308,11 @@ if (currentUser.mustChangePassword) {
                   <div className="card-body">
                     <div className="row g-3">
                       <div className="col-md-4">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-ticket-number">
                           Ticket Number
                         </label>
 
-                        <input
+                        <input id="ticket-detail-ticket-number"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2322,11 +2322,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-4">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-current-status">
                           Current Status
                         </label>
 
-                        <input
+                        <input id="ticket-detail-current-status"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2336,11 +2336,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-4">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-requested-priority">
                           Requested Priority
                         </label>
 
-                        <input
+                        <input id="ticket-detail-requested-priority"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2350,11 +2350,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-requester">
                           Requester
                         </label>
 
-                        <input
+                        <input id="ticket-detail-requester"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2364,11 +2364,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-requester-email">
                           Requester Email
                         </label>
 
-                        <input
+                        <input id="ticket-detail-requester-email"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2379,11 +2379,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-category">
                           Category
                         </label>
 
-                        <input
+                        <input id="ticket-detail-category"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2393,11 +2393,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-related-system">
                           Related System
                         </label>
 
-                        <input
+                        <input id="ticket-detail-related-system"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2407,11 +2407,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-12">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-ticket-summary">
                           Ticket Summary
                         </label>
 
-                        <input
+                        <input id="ticket-detail-ticket-summary"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2421,11 +2421,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-12">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-description">
                           Description
                         </label>
 
-                        <textarea
+                        <textarea id="ticket-detail-description"
                           className="form-control bg-light"
                           readOnly
                           rows={5}
@@ -2436,11 +2436,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-created">
                           Created
                         </label>
 
-                        <input
+                        <input id="ticket-detail-created"
                           className="form-control bg-light"
                           readOnly
                           value={formatDate(
@@ -2450,11 +2450,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-last-updated">
                           Last Updated
                         </label>
 
-                        <input
+                        <input id="ticket-detail-last-updated"
                           className="form-control bg-light"
                           readOnly
                           value={formatDate(

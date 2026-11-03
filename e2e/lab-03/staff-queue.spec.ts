@@ -34,6 +34,7 @@ test('queue is usable without horizontal overflow and opens staff detail', async
   await page.getByLabel('Email', { exact: true }).fill('staff@example.test');
   await page.getByLabel('Password', { exact: true }).fill('TestPassword123!');
   await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await page.getByRole('button', { name: 'IT Staff Queue', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Open QUEUE-101' })).toBeVisible();
   await expect(page.locator('.staff-queue-table').getByText('Unassigned', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

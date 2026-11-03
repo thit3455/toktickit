@@ -287,6 +287,11 @@ router.post(
       }
 
 
+      // A successful first-login change must replace the temporary credential.
+      if (await bcrypt.compare(newPassword, user.passwordHash)) {
+        return res.status(400).json({ error: { code: "WEAK_PASSWORD", message: "New password must differ from the current password." } });
+      }
+
       const newHash =
         await bcrypt.hash(
           newPassword,

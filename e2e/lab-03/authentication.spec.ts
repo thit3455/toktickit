@@ -1,12 +1,13 @@
 import { test, expect, Page } from "@playwright/test";
-import { PrismaClient } from "../../server/node_modules/@prisma/client";
+import { ownedI6Prisma, assertI6ApiUrl } from "../../server/tests/helpers/i6-database";
 import bcrypt from "../../server/node_modules/bcrypt";
 import { randomUUID } from "node:crypto";
 
 // Same disposable database-fixture convention as user-administration.spec.ts; no API mocks.
-process.loadEnvFile("server/.env");
-const prisma = new PrismaClient();
-const api = process.env.E2E_API_URL ?? "http://localhost:3001";
+// Explicit controller-owned schema/API only; never load .env or use development defaults.
+const prisma = ownedI6Prisma();
+const api = assertI6ApiUrl();
+test.use({ baseURL: "http://localhost:5174", trace: "retain-on-failure", screenshot: "only-on-failure" });
 const initial = "Authentication123!";
 let id: number;
 let email: string;
@@ -43,9 +44,9 @@ test("valid login persists; logout invalidates the session and replayed cookie",
   await page.screenshot({ path: testInfo.outputPath("login.png"), fullPage: true });
   await prisma.user.update({ where: { id }, data: { mustChangePassword: false } });
   await login(page);
-  await expect(page.getByRole("heading", { name: "Create Ticket", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Requester Dashboard", exact: true })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Create Ticket", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Requester Dashboard", exact: true })).toBeVisible();
   const cookie = (await page.context().cookies(api)).find(c => c.name === "toktickit_session")!;
   expect(cookie).toBeTruthy();
   await page.getByRole("button", { name: "Logout", exact: true }).click();
@@ -95,15 +96,15 @@ for (const [label, password] of [["8 characters", "Abcd123!"], ["72 bytes", "a".
     await change(page, password, password, "WrongCurrent123!");
     await expect(page.getByRole("alert")).toContainText("Current password is incorrect.");
     await change(page, password);
-    await expect(page.getByRole("heading", { name: "Create Ticket", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Requester Dashboard", exact: true })).toBeVisible();
     expect((await page.request.get(`${api}/api/tickets`)).status()).toBe(200);
     expect((await prisma.user.findUniqueOrThrow({ where: { id } })).mustChangePassword).toBe(false);
     await page.reload();
-    await expect(page.getByRole("heading", { name: "Create Ticket", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Requester Dashboard", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Logout", exact: true }).click();
     await login(page, initial);
     await expect(page.getByRole("alert")).toContainText("Invalid email or password");
     await login(page, password);
-    await expect(page.getByRole("heading", { name: "Create Ticket", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Requester Dashboard", exact: true })).toBeVisible();
   });
 }

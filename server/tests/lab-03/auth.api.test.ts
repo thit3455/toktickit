@@ -1,3 +1,4 @@
+import { ownedI6Prisma } from "../helpers/i6-database.js";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
@@ -11,7 +12,7 @@ vi.mock("../../src/prisma.js", () => ({ getPrisma: () => isolated }));
 
 describe("Lab 2 migration and initial-password authentication", () => {
   const schema = `migration_auth_${randomUUID().replaceAll("-", "")}`;
-  const existing = new PrismaClient();
+  const existing = ownedI6Prisma();
   const repair = "20261003090000_repair_migrated_requester_passwords";
   const initialPassword = "Password123!";
   const marker = "$2b$10$TemporaryPasswordHash";
@@ -29,7 +30,7 @@ describe("Lab 2 migration and initial-password authentication", () => {
   }
 
   beforeAll(async () => {
-    if (!process.env.DATABASE_URL) process.loadEnvFile(".env");
+    // The owned I6 factory already validated the bootstrap target; no .env fallback.
     const url = new URL(process.env.DATABASE_URL!);
     if (!/^migration_auth_[a-f0-9]{32}$/.test(schema) || url.searchParams.get("schema") === schema) throw new Error("Unsafe test schema");
     await existing.$executeRawUnsafe(`CREATE SCHEMA "${schema}"`);

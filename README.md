@@ -2,6 +2,10 @@
 
 TokTickIT is an IT Service Desk application developed for CPE 334 Software Engineering. Lab 3 extends the Lab 2 Requester workflow with authenticated role-based access, IT Staff ticket operations, and Administrator user management in a responsive Zen Green UI.
 
+## Current local application ports
+
+Use one active TokTickIT worktree for the integrated Lab 4 application and future I7: frontend http://localhost:5173, backend http://localhost:3001, development PostgreSQL localhost:5433. BankCore retains application 3000 and PostgreSQL 5432. Local Vite development and built-preview commands fail if 5173 is occupied; they do not silently select another port. [Configuration audit and safe preview](docs/lab-04/local-configuration.md) distinguishes permanent settings, isolated tests and historical evidence. Existing private environment files are never overwritten by this setup.
+
 ## Lab 3 Features
 
 - Email/password authentication, session-based access and logout, and required initial-password change before normal application access.
@@ -33,7 +37,7 @@ npm install
 
 Copy server/.env.example to server/.env and configure the local database and authentication settings. Do not commit real configuration or credentials.
 
-From server, apply the existing migrations and generate the Prisma client. Seed development data when required:
+The existing approved read-only preview requires no migrations or seeds. Fresh database initialization is a separate operation requiring an explicitly approved target; the commands below are not part of a port switch or manual preview. From server, apply existing migrations and generate the Prisma client only for that approved initialization:
 
 ```powershell
 npx prisma validate
@@ -45,10 +49,11 @@ npm run prisma:seed
 For migration development, npm run prisma:migrate runs prisma migrate dev. To start the backend with local configuration loaded:
 
 ```powershell
+$env:PORT = "3001"
 node --env-file=.env --import tsx src/index.ts
 ```
 
-The API defaults to http://localhost:3000. The existing npm run dev script provides watch mode; ensure the required environment configuration is loaded when using it.
+The API defaults to http://localhost:3001. The existing npm run dev script provides watch mode; ensure the required environment configuration is loaded when using it.
 
 ## Frontend Setup
 
@@ -60,7 +65,7 @@ npm install
 npm run dev
 ```
 
-The frontend normally runs at http://localhost:5173 and defaults to API port 3000. If the API uses another port, configure the client API base URL to match before starting Vite. Use provisioned development accounts; credentials are intentionally not listed here.
+The frontend normally runs at http://localhost:5173 and defaults to API port 3001. If the API uses another port, configure the client API base URL to match before starting Vite. Use provisioned development accounts; credentials are intentionally not listed here.
 
 ## Tests and Builds
 
@@ -68,10 +73,11 @@ Run from the repository root:
 
 ```powershell
 npm --prefix client test -- --run
-npm --prefix server test -- --no-file-parallelism
 npm --prefix client run build
 npm --prefix server run build
 ```
+
+Database-backed server tests require the separately approved disposable setup and [I6 guarded execution instructions](docs/lab-04/regression-report.md); do not point them at the development database or the read-only manual preview.
 
 The frontend build runs TypeScript checking and Vite production compilation; the backend build runs TypeScript compilation. Root npm test is a placeholder, so use the client/server commands above.
 
@@ -92,13 +98,9 @@ npm install
 npx playwright install chromium webkit
 ```
 
-Start PostgreSQL, the API and Vite first; Playwright does not start servers. The configured frontend URL is http://localhost:5173. Real-API browser suites default to API port 3001 and load server/.env; configure the API server and frontend API base URL consistently for that port. Alternatively, configure E2E_API_URL to match the API you already run. Use a development database, not production: these suites create and clean up disposable fixtures.
+The regular playwright.config.ts retains the standard frontend URL http://localhost:5173. Current Lab 4 database-backed verification uses explicit guarded fixture servers, playwright.i6.config.ts, a separate test frontend on 5174 and allocated API ports. Follow the [I6 commands and private configuration requirements](docs/lab-04/regression-report.md); do not run database-backed tests against the running development preview or load development .env files for fixtures.
 
-```powershell
-npx playwright test --workers=1
-```
-
-Profiles are desktop Chromium, iPad Mini WebKit and Pixel 7 Chromium. Authentication, Staff ticket flow, Administrator and Requester suites use real APIs. The supplemental Staff queue suite uses mocked API responses. Generated output is under test-results/.
+The profiles remain desktop Chromium, iPad Mini WebKit and Pixel 7 Chromium. Real API and supplemental mocked coverage are identified in the I6 report. Historical Lab 3 results below remain attributed to their original runs.
 
 ## Lab 3 Verification Results
 

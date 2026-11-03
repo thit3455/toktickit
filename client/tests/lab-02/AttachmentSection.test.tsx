@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import {
   beforeEach,
   describe,
@@ -107,10 +108,10 @@ const activeAttachment = {
 async function openTicketDetail() {
   render(<App />);
 
-  await screen.findByRole("heading", { name: "Create Ticket" });
+  await screen.findByRole("heading", { name: "Requester Dashboard" });
 
   await screen.findByRole("heading", {
-    name: "Create Ticket",
+    name: "Requester Dashboard",
   });
 
   fireEvent.click(

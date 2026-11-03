@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "../../src/App";
@@ -35,6 +36,7 @@ async function openAsStaff(id: number) {
   fireEvent.change(await screen.findByRole("textbox"), { target: { value: `staff${id}@example.test` } });
   fireEvent.change(view.container.querySelector('input[type="password"]')!, { target: { value: "TestPassword123!" } });
   fireEvent.click(screen.getByRole("button", { name: "Login" }));
+  fireEvent.click(await screen.findByRole("button", { name: "IT Staff Queue" }));
   fireEvent.click(await screen.findByRole("button", { name: "Open STAFF-101" }));
   await screen.findByRole("button", { name: "Update Status" }); return view;
 }

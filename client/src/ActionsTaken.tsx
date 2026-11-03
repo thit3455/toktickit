@@ -7,7 +7,7 @@ import { actionContentInput, actionDraft, activeActionTicket, bangkokActionTime,
 import "./ActionsTaken.css";
 
 interface Props {
-  ticketId: number; ticketStatus: string; role: AccountRole; userName: string; refreshKey?: number;
+  ticketId: number; ticketStatus: string; role: AccountRole; userName: string; refreshKey?: number; targetActionId?: number;
   onRefreshTicket: () => Promise<void>; onAccessFailure: (code: string) => void;
 }
 type Mode = "create" | "edit" | "start" | "complete" | "cancel";
@@ -18,7 +18,7 @@ interface Editor {
 const label = (value: string) => value.replaceAll("_", " ");
 const safeError = (error: unknown) => error instanceof ActionsApiError ? error.message : "Unable to complete the request. Your draft has been kept. Please try again.";
 
-export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKey = 0, onRefreshTicket, onAccessFailure }: Props) {
+export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKey = 0, targetActionId, onRefreshTicket, onAccessFailure }: Props) {
   const operational = role === "IT_STAFF" || role === "ADMINISTRATOR";
   const activeTicket = activeActionTicket(ticketStatus);
   const [list, setList] = useState<ActionList | null>(null);
@@ -43,6 +43,8 @@ export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKe
   const alive = useRef(false);
   const pending = useRef(false);
   const listRequest = useRef(0);
+  const focusedTarget = useRef<number | null>(null);
+  const [targetMessage, setTargetMessage] = useState("");
   const callbacks = useRef({ onRefreshTicket, onAccessFailure });
   callbacks.current = { onRefreshTicket, onAccessFailure };
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
@@ -81,6 +83,17 @@ export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKe
     else trigger.current?.focus();
   }, [editor?.mode, editor?.base?.id]);
   useEffect(() => { if (success) successRef.current?.focus(); }, [success]);
+
+  useEffect(() => {
+    if (!targetActionId || focusedTarget.current === targetActionId || !list || loading || editor || list.pagination.page !== page) return;
+    if (list.items.some(action => action.id === targetActionId)) {
+      focusedTarget.current = targetActionId; setTargetMessage("");
+      const target = document.getElementById("action-" + targetActionId); target?.focus(); target?.scrollIntoView?.({ block: "center" });
+    } else if (page < list.pagination.totalPages) {
+      setTargetMessage("Locating the selected action in its chronological pages..."); setPage(value => value + 1);
+    } else { focusedTarget.current = targetActionId; setTargetMessage("The selected action is unavailable in the current authorized list."); }
+  }, [targetActionId, list, loading, page, editor]);
+
   function open(mode: Mode, action: ActionTaken | null, opener: HTMLElement) {
     if (!list) return;
     // Pointer activation need not focus a button. Always remember the actual trigger.
@@ -194,6 +207,7 @@ export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKe
   const operationAllowed = !base || editor?.mode === "edit" || nextActionStatuses(base.status).includes(editor?.mode === "cancel" ? "CANCELLED" : editor?.mode === "start" ? "IN_PROGRESS" : "COMPLETED");
   const immutableAssignmentChanged = base?.status === "COMPLETED" && Number(editor?.draft.assignedToId) !== base.assignedTo.id;
   return <section className="actions-taken card mb-4" aria-labelledby={`actions-title-${ticketId}`}>
+    {targetMessage && <p role="status">{targetMessage}</p>}
     <div className="card-header"><h3 id={`actions-title-${ticketId}`} className="h5 mb-0">Actions Taken</h3></div>
     <div className="card-body">
       <p>Action Date/Time is the server creation time. Dates use Asia/Bangkok (UTC+07:00).</p>
@@ -205,7 +219,7 @@ export function ActionsTaken({ ticketId, ticketStatus, role, userName, refreshKe
       {list && !loading && !list.items.length && <p>{list.pagination.total === 0 ? "No Actions Taken recorded yet." : "No actions on this page. Return to the previous page."}</p>}
       {list && <>
         <table className="actions-table" role="table"><caption className="visually-hidden">Actions in creation order</caption><thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Action Date/Time</th><th role="columnheader" scope="col">Action Description and details</th><th role="columnheader" scope="col">Status and operations</th></tr></thead>
-          <tbody role="rowgroup">{list.items.map(action => <tr key={action.id} role="row">
+          <tbody role="rowgroup">{list.items.map(action => <tr key={action.id} id={"action-" + action.id} tabIndex={-1} role="row">
             <td role="cell" data-label="Action Date/Time"><time dateTime={action.createdAt}>{bangkokActionTime(action.createdAt)}</time></td>
             <td role="cell" data-label="Action Description"><strong>Action #{action.id}</strong><p>{action.description}</p>
               <details><summary>View action #{action.id} details</summary><dl>

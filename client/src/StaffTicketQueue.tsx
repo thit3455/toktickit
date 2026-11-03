@@ -23,16 +23,17 @@ function Badge({ value, strong = false, semantic = false }: { value: string; str
   return <span className={`badge rounded-pill border ${colors}`}>{label(value)}</span>;
 }
 
-export function StaffTicketQueue({ onOpen }: { onOpen: (id: number) => void }) {
-  const [query, setQuery] = useState<GetStaffTicketsParams>(initialQuery);
-  const [search, setSearch] = useState("");
+export function StaffTicketQueue({ onOpen, initialQuery: suppliedQuery, onQueryChange, onAccessFailure }: { onOpen: (id: number) => void; initialQuery?: GetStaffTicketsParams; onQueryChange?: (query: GetStaffTicketsParams) => void; onAccessFailure?: (code: string) => void }) {
+  const [query, setQuery] = useState<GetStaffTicketsParams>(() => ({ ...(suppliedQuery ?? initialQuery) }));
+  const [search, setSearch] = useState(suppliedQuery?.search ?? "");
   const [result, setResult] = useState<StaffTicketQueueResponse | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "forbidden" | "unauthenticated" | "error">("loading");
   const [retry, setRetry] = useState(0);
-  const filtered = !!(query.search || query.status || query.priority || query.itPriority || query.assigned !== undefined);
+  useEffect(() => { onQueryChange?.(query); }, [query, onQueryChange]);
+  const filtered = !!(query.search || query.status || query.statuses || query.asOf || query.owner || query.priority || query.itPriority || query.assigned !== undefined);
   const change = (patch: Partial<GetStaffTicketsParams>) => {
     setState("loading");
-    setQuery(current => ({ ...current, ...patch, page: 1 }));
+    setQuery(current => ({ ...current, ...patch, ...(Object.hasOwn(patch, "status") ? { statuses: undefined } : {}), ...(Object.hasOwn(patch, "assigned") ? { owner: undefined } : {}), page: 1 }));
   };
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export function StaffTicketQueue({ onOpen }: { onOpen: (id: number) => void }) {
     }).catch(error => {
       if (!active) return;
       setResult(null);
+      if (error instanceof StaffQueueError && [401, 403].includes(error.status)) onAccessFailure?.(error.status === 401 ? "UNAUTHENTICATED" : "FORBIDDEN");
       setState(error instanceof StaffQueueError && error.status === 403 ? "forbidden" : error instanceof StaffQueueError && error.status === 401 ? "unauthenticated" : "error");
     });
     return () => { active = false; controller.abort(); };
@@ -63,6 +65,7 @@ export function StaffTicketQueue({ onOpen }: { onOpen: (id: number) => void }) {
 
   return <section className="staff-queue" aria-labelledby="staff-queue-title">
     <h2 id="staff-queue-title" className="h4 mb-3">IT Staff Ticket Queue</h2>
+    {query.asOf && <p className="alert alert-success" role="status">Dashboard cutoff: {query.asOf}. {query.statuses ? "Statuses: " + query.statuses.replaceAll("_", " ") + ". " : ""}{query.owner === "me" ? "Owned by you. " : ""}Lists remain live; Reset clears dashboard filters.</p>}
     <div className="card border-success-subtle mb-3"><div className="card-body">
       <form className="d-flex flex-wrap gap-2 align-items-end mb-3" onSubmit={event => { event.preventDefault(); change({ search: search.trim() || undefined }); }}>
         <div className="flex-grow-1 staff-queue-search">

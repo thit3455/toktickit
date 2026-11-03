@@ -1,3 +1,5 @@
+import { dashboardRoutes } from "./dashboard/dashboard.routes.js";
+import { listDashboardFilters } from "./dashboard/dashboard.rules.js";
 import { discussionRoutes } from "./discussion.routes.js";
 import { actionRoutes } from "./actions/actions.routes.js";
 import { getWorkflowTicket, indicateTicketResolution } from "./workflow/ticket-workflow.service.js";
@@ -60,6 +62,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api", actionRoutes);
 app.use("/api", ticketWorkflowRoutes);
+app.use("/api", dashboardRoutes);
 
 app.use("/api/auth", authRoutes);
 
@@ -199,6 +202,9 @@ app.get(
   async (req: AuthRequest, res: Response) => {
     try {
       const requesterId = req.user!.userId;
+      let dashboardFilters: Prisma.TicketWhereInput;
+      try { dashboardFilters = listDashboardFilters(req.query, "requester", requesterId); }
+      catch { return res.status(400).json({ error: { code: "INVALID_QUERY", message: "Invalid My Tickets dashboard filters." } }); }
 
       const page = Number(
         req.query.page ?? 1
@@ -404,6 +410,7 @@ app.get(
 
       const where: Prisma.TicketWhereInput =
         {
+          ...dashboardFilters,
           requesterId,
         };
 
@@ -487,8 +494,8 @@ app.get(
       const [
         tickets,
         totalItems,
-      ] = await Promise.all([
-        prisma.ticket.findMany({
+      ] = await prisma.$transaction(async tx => Promise.all([
+        tx.ticket.findMany({
           where,
 
           select: {
@@ -525,10 +532,10 @@ app.get(
           take: pageSize,
         }),
 
-        prisma.ticket.count({
+        tx.ticket.count({
           where,
         }),
-      ]);
+      ]), { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
 
       const totalPages =
         totalItems === 0

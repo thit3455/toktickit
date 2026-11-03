@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { AdminUserManagement } from "../../src/AdminUserManagement";
@@ -262,6 +263,7 @@ describe("Administrator User Management", () => {
     vi.spyOn(api, "getCurrentUser").mockResolvedValue(admin);
     vi.spyOn(api, "logout").mockResolvedValue();
     render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "User Management" }));
     await screen.findByRole("heading", { name: "User Management" });
     expect(screen.getByText("Test Administrator", { selector: "main > div > div > p > strong" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Administrator navigation" })).toBeInTheDocument();
@@ -277,7 +279,7 @@ describe("Administrator User Management", () => {
     vi.spyOn(api, "getRelatedSystems").mockResolvedValue([]);
     vi.spyOn(api, "getStaffTickets").mockResolvedValue({ data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 0 } });
     render(<App />);
-    await screen.findByRole("heading", { name: role === "REQUESTER" ? "Create Ticket" : "IT Staff Ticket Queue" });
+    await screen.findByRole("heading", { name: role === "REQUESTER" ? "Requester Dashboard" : "IT Staff Dashboard" });
     expect(api.getAdminUsers).not.toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "User Management" })).toBeNull();
   });

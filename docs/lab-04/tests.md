@@ -363,3 +363,52 @@ Initial full frontend result was 248 passed/40 failed (old landing assumptions),
 **Isolation:** only the approved newly owned PostgreSQL 18.6 Docker database toktickit_lab4_test_i5_2262f51b582d at 127.0.0.1:64729 was used. Private random credentials, restricted runner, exact expected identity, empty-target checks and unique owned schemas guarded all writes. All schemas were disposed; the container/tmpfs was then removed and port 5174 released. Development, BankCore and the existing port-55432 cluster were untouched. No schema/migration/env/auth implementation change or existing account/Ticket/Action write occurred.
 
 Ready for the student's final review and designated peer review of I5. Original 99 dirty files and 83 I4 local artifacts remain byte-for-byte preserved. No staging/commit/push/PR/merge, whole-lab completion, benchmark, final-main run or peer approval is claimed.
+
+
+## 6.8. I6 regression, accessibility and responsive verification, 2026-11-03
+
+GitHub #68; feature/lab4-regression-testing; separate regression worktree based on d8ba0a5184e8dc006d258b4fd1877f46aa13acf8 (merged I5 PR #67). The complete teacher PDF and approved contracts were reviewed. [regression-report.md](regression-report.md) contains the AC1-7 traceability matrix, actual commands, original failures/reruns, exact candidate allowlist, isolation and limitations.
+
+| Fresh I6 executed group | Actual result |
+|---|---|
+| Complete non-dashboard backend, final run | 722 passed / 29 files, zero failed/skipped |
+| Dashboard APIs | 16 passed / 2 files, zero failed/skipped |
+| Approved representative performance smoke | 1 passed / 1 file |
+| Full frontend | 300 passed / 26 files, zero failed/skipped |
+| Legacy Requester/auth/Admin browsers | 27 passed |
+| Actions/Workflow/Staff browsers, final full rerun | 30 passed |
+| Dashboard browsers | 12 passed |
+| New keyboard/accessibility/responsive browsers | 15 passed |
+| Server/client/browser TypeScript; both builds; compiled health; final whitespace/scope | Passed |
+
+The disjoint backend groups total 739 passes / 32 files; the disjoint browser groups total 84 passes (28 each desktop/tablet/mobile), zero final failures/skips. Focused repeats and the earlier independent baseline (299 frontend, 270 pure/mock backend, 17 new guard cases) overlap these totals and are not additional tests. Dashboard API ran earlier within I6; its implementation stayed unchanged. The four affected Ticket Detail cases passed again after a typing-only correction. Historical I5 counts remain attributed to I5.
+
+Actual coverage:
+- REG-01/AUTH-01: earlier health/catalogs, requester tickets/attachments/comments, Staff discussion/notes, Administrator safeguards and all browser specs. All-role temporary-password gate, unchanged hash/flag on rejected reuse, genuinely different password, old credential rejection, subsequent normal login, logout and expired-session API assertions.
+- ACT/WF/CON/DUP: existing permissions, eligibility, revision/replay, lifecycle/gates/cascade/terminal states, concurrency and rollback coverage passed. No operational permissions were broadened.
+- MIG-01/02 and SEED-01: migration preservation, repeatability/actor eligibility and actual populated Action/revision/replay recovery with subsequent writes/source preservation passed. Both recovery cases executed; the historical recovery skip is not counted as a pass.
+- DASH-01-05: metrics/priority/current-assignee, bounded lists, ownership/privacy, Bangkok/inclusive cutoff rules and exact drill-downs retained.
+- A11Y-01/RESP-01/STYLE-01: 81 axe screen/state audits, zero violations; actual keyboard/focus/validation checks; zero page overflow/control overlaps; 93 closed-native-select contrast measurements (minimum 15.426:1). Desktop1440/tablet768/mobile390 plus all-role320 smoke. Seven actual screenshot visual reviews; 18 selected images. Native popup/screen-reader/physical-device coverage is explicitly limited.
+- PERF-01: separately student-approved 1000 Tickets/3000 actions, three warmups and twenty measured authenticated sequential requests per endpoint, p95<=2000ms. Final Requester18.64ms/Staff18.09ms; all40 measured plus6warmups HTTP200; every sample retained.
+
+Defects corrected: demonstrated same-password acceptance (initial3 failures; affected12 passed), compiled start path, eleven unassociated read-only labels, error retry/editor contrast, unsafe legacy .env/default API test setup and obsolete navigation assumptions. Existing negative authorization checks remain. Initial accessibility results (6/9, then desktop3/2 label and3/2 contrast), a one-off tablet timeout (29/1 followed by unchanged affected3/0 and full30/0), early guard collection/typing/Windows runner errors and a component query typing error remain recorded honestly. Nothing was converted to a skip or silently weakened.
+
+Only separately approved container toktickit-i6-ddfdebd14943 at127.0.0.1:54030 and its three new databases were used. PG18.6 identity, restricted runners, exact targets and empty state were checked before groups; unique owned schemas confined migrations, fixtures and recovery. Explicit PG18.4 client tools and process-local credentials were used. The new container/tmpfs was removed, port5174 released, existing services/databases untouched by I6 operations. No existing account, password, Ticket, Action, schema, environment file or BankCore resource was modified.
+
+Original99 files, I4's83 artifacts and I5's124 local evidence files passed SHA-256 preservation. [accessibility-report.md](accessibility-report.md), [responsive-report.md](responsive-report.md) and selected [verification-summary.json](../../artifacts/lab-04/i6/verification-summary.json) detail the results. Ready for student/peer review with stated limitations; no staging, commit, push, PR, merge, issue completion or final-main/full-lab claim.
+
+## 6.9. Standard local ports, 2026-11-04
+
+The student authorized one local application frontend5173/backend3001/development database5433. [local-configuration.md](local-configuration.md) records the reference audit, public example/default/runbook corrections and preserved isolated test configuration. Private environment files, business permissions and databases were not modified.
+
+Actual fresh checks: focused transport/discussion10 passed; full frontend306 passed/27 files; database-independent harness/guard44 passed/4 files; zero failures/skips in those completed runs. Client TypeScript/Vite and server TypeScript builds passed. HTTP login document/modules, API health200, credentialed CORS and five403 PREVIEW_READ_ONLY probes passed. The focused10 overlap306, and44 overlap earlier backend coverage. No database-backed tests, migration or seed ran during this follow-up.
+
+The new configuration tests cover both API transports with default3001, an explicit deployment URL and explicit empty/same-origin configuration. Vite dev and built preview now pin5173 with strictPort. Temporary isolated frontend5174/allocated APIs and database guard ports remain unchanged. Browser inspection and actual successful login/Requester/Staff/Admin interface checks are deferred to the student; no new browser pass is claimed. The standard read-only processes remain running for manual review. Original I6 test results retain their earlier dates and counts.
+
+## 6.10. Student manual review and publication audit, 2026-11-04
+
+The student confirmed completion of manual Requester, IT Staff and Administrator dashboard review and reported that the UI looks correct. This completes the dashboard review deferred at the end of6.9; it adds no automated test passes or broader screen-reader/native-popup claims.
+
+Fresh final audit:10 focused client transport/discussion tests and44 database-independent harness/guard tests passed, zero failures/skips. Client/server TypeScript builds, changed-browser TypeScript and whitespace checks passed. These are overlapping focused reruns, not additions to306 frontend/739 backend coverage. The84 browser cases and actual recovery/performance evidence retain their original dates; no database-dependent tests or database operations ran for publication.
+
+GitHub #68's AC1-7 match the recorded traceability. The issue was observed closed with its checkboxes unchecked; it was not modified. The exact final scope is59 files after port standardization, with all raw preview files/credentials/unrelated work excluded. The student authorized staging only that verified set, then commit/push only the feature branch after staged validation. No PR or merge is authorized; designated peer review remains pending.

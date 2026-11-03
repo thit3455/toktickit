@@ -20,7 +20,7 @@ export function useDashboard<T>(load: (signal?: AbortSignal) => Promise<T>, onAc
 export function DashboardFeedback({ loading, error, refresh }: { loading: boolean; error: string; refresh: () => void }) {
   return <><button className="btn btn-outline-success mb-3" disabled={loading} onClick={refresh}>Refresh Dashboard</button>
     {loading && <p role="status">Loading dashboard...</p>}
-    {error && <div className="alert alert-danger" role="alert"><p>{error}</p><button className="btn btn-outline-success" onClick={refresh}>Retry dashboard</button></div>}</>;
+    {error && <div className="alert alert-danger" role="alert"><p>{error}</p><button className="btn btn-success" onClick={refresh}>Retry dashboard</button></div>}</>;
 }
 export function Metric({ label, value, onView, viewLabel }: { label: string; value: number; onView?: () => void; viewLabel?: string }) {
   return <section className="card dashboard-metric" aria-label={label}><div className="card-body"><h3 className="h6">{label}</h3><p className="dashboard-value">{value}</p>{onView && <button className="btn btn-outline-success" onClick={onView}>{viewLabel ?? "View " + label}</button>}</div></section>;

@@ -1,0 +1,489 @@
+{
+  "issue": 68,
+  "branch": "feature/lab4-regression-testing",
+  "base": "d8ba0a5184e8dc006d258b4fd1877f46aa13acf8",
+  "date": "2026-11-03",
+  "attribution": "Actual I6 runs; focused repeats not added",
+  "backend": {
+    "totalPassed": 739,
+    "failed": 0,
+    "skipped": 0,
+    "files": 32,
+    "groups": [
+      {
+        "passed": 722,
+        "files": 29,
+        "source": "backend-1793721264519.txt"
+      },
+      {
+        "passed": 16,
+        "files": 2,
+        "source": "dashboard-api-1793717404041.txt"
+      },
+      {
+        "passed": 1,
+        "files": 1,
+        "source": "performance-1793721409844.txt"
+      }
+    ],
+    "attribution": "Original I6 isolated runs, not rerun during port standardization"
+  },
+  "frontend": {
+    "passed": 306,
+    "failed": 0,
+    "skipped": 0,
+    "files": 27,
+    "source": "port-audit-a0446818ba/frontend-standard-ports.json",
+    "date": "2026-11-04",
+    "previous": {
+      "passed": 300,
+      "failed": 0,
+      "skipped": 0,
+      "files": 26,
+      "source": "frontend-final.json",
+      "laterAffectedDetailRerun": {
+        "passed": 4,
+        "failed": 0
+      }
+    }
+  },
+  "browser": {
+    "passed": 84,
+    "failed": 0,
+    "skipped": 0,
+    "retries": 0,
+    "workers": 1,
+    "perProject": {
+      "desktop": 28,
+      "tablet": 28,
+      "mobile": 28
+    },
+    "groups": {
+      "legacy": {
+        "source": "legacy-1793718621159.json",
+        "startTime": "2026-11-03T15:10:22.276Z",
+        "duration": 117984.62700000001,
+        "expected": 27,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "workflow": {
+        "source": "workflow-browser-1793721470161.json",
+        "startTime": "2026-11-03T15:57:50.602Z",
+        "duration": 186299.554,
+        "expected": 30,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "dashboard": {
+        "source": "dashboard-browser-1793720914189.json",
+        "startTime": "2026-11-03T15:48:34.651Z",
+        "duration": 54050.537,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "accessibility": {
+        "source": "a11y-1793721137627.json",
+        "startTime": "2026-11-03T15:52:18.155Z",
+        "duration": 78740.11200000001,
+        "expected": 15,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    "attribution": "Original I6 isolated runs; standard-port browser/manual verification deferred to student"
+  },
+  "audit": {
+    "source": "accessibility-audits.json",
+    "screens": 81,
+    "axeViolations": 0,
+    "overlappingControls": 0,
+    "closedSelectMeasurements": 93,
+    "minimumClosedSelectContrast": 15.426285095510265,
+    "nativeSelectIncompleteScreens": 27,
+    "agentVisualScreenshotReviews": 7,
+    "humanScreenReaderRun": false
+  },
+  "checks": {
+    "serverTypeScript": "passed",
+    "clientTypeScriptBuild": "passed",
+    "serverBuild": "passed",
+    "changedBrowserTypeScript": "passed",
+    "compiledHealth": {
+      "configuredStart": "node dist/src/index.js",
+      "host": "127.0.0.1",
+      "port": 55541,
+      "databaseEnvironmentRemoved": true,
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "service": "TokTickIT API"
+      },
+      "pid": 44216,
+      "ownedProcessStopped": true
+    },
+    "gitDiffCheck": "passed",
+    "newFileWhitespace": "passed"
+  },
+  "preservation": [
+    {
+      "worktree": "original",
+      "files": 99,
+      "sha256Unchanged": true,
+      "branch": "feature/lab4-actions-ui"
+    },
+    {
+      "worktree": "i4",
+      "files": 83,
+      "sha256Unchanged": true,
+      "branch": "feature/lab4-ticket-lifecycle"
+    },
+    {
+      "worktree": "i5",
+      "files": 124,
+      "sha256Unchanged": true,
+      "branch": "feature/lab4-dashboards"
+    }
+  ],
+  "cleanup": {
+    "source": "cleanup-1793721780957.json",
+    "container": "toktickit-i6-ddfdebd14943",
+    "containerId": "5761dfc5779693c30c2b54922528361dfc095bccda936f780e9f0896da70a690",
+    "ownedContainerRemoved": true,
+    "existingDatabasesUntouched": true,
+    "testPortsReleased": [
+      5174,
+      54030
+    ]
+  },
+  "initialFailures": [
+    {
+      "source": "backend-1793717773960.txt",
+      "passed": 0,
+      "failed": 3,
+      "cause": "Same-password change accepted"
+    },
+    {
+      "source": "workflow-browser-1793719426434.json",
+      "passed": 29,
+      "failed": 1,
+      "cause": "Tablet editor pointer timeout; unchanged affected3 and final full30 passed"
+    },
+    {
+      "source": "a11y-1793720286748.json",
+      "passed": 6,
+      "failed": 9,
+      "cause": "Finite-transition contrast timing"
+    },
+    {
+      "source": "a11y-1793720407732.json",
+      "passed": 3,
+      "failed": 2,
+      "cause": "Unassociated read-only labels"
+    },
+    {
+      "source": "a11y-1793720541010.json",
+      "passed": 3,
+      "failed": 2,
+      "cause": "Real retry/editor contrast"
+    }
+  ],
+  "evidence": [
+    {
+      "file": "desktop-login.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b3848-d-change-work-for-all-roles-desktop/login.png",
+      "sha256": "34b91b34ee0dfd1322103d8faf3f761118f8505e075823f87939548414e478c2",
+      "bytes": 19220
+    },
+    {
+      "file": "desktop-mandatory-requester.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b3848-d-change-work-for-all-roles-desktop/mandatory-requester.png",
+      "sha256": "bfc7116cd8ad9781e181b74afd8b3d7210801d64f317841e87f3b6045b9b4900",
+      "bytes": 23752
+    },
+    {
+      "file": "desktop-requester-create-validation.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b10c3-ion-safe-feedback-and-focus-desktop/requester-create-validation.png",
+      "sha256": "43344a139866730d3213c52d2b32420a89106ae1003adf8ce268aad3152ae95d",
+      "bytes": 51646
+    },
+    {
+      "file": "desktop-requester-safe-error.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b10c3-ion-safe-feedback-and-focus-desktop/requester-safe-error.png",
+      "sha256": "be0cf91e036c2a122377308f5a22af7774e84df9a5189c444fdacac41a356880",
+      "bytes": 27572
+    },
+    {
+      "file": "desktop-staff-detail-workflow.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-desktop/staff-detail-workflow.png",
+      "sha256": "01cc46f2639b505351afd06216ed740814d8a9882d15162b5d53cbdbbf79db54",
+      "bytes": 197347
+    },
+    {
+      "file": "desktop-action-editor-focus.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-desktop/action-editor-focus.png",
+      "sha256": "a1787d44c60512168252923ec9f788e3ac51d2bbb86cf05069c0da7955a9ff10",
+      "bytes": 237596
+    },
+    {
+      "file": "desktop-action-revision-history.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-desktop/action-revision-history.png",
+      "sha256": "ca2e95bb745cc2faa7c3d147e79ff7ebfc1405c998ce29d7eb1ecc89a78fd07e",
+      "bytes": 216294
+    },
+    {
+      "file": "desktop-ticket-status-history.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-desktop/ticket-status-history.png",
+      "sha256": "e068f56e0470dda86346d07afcc2c3359fb56bb17c476f306d3544e78d63ab69",
+      "bytes": 234781
+    },
+    {
+      "file": "desktop-administrator-validation.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-c0bcd-on-retain-role-restrictions-desktop/administrator-validation.png",
+      "sha256": "2138396d475f02b083d1681b1d648a013859149c5bf7288415eac5159517f8ca",
+      "bytes": 168269
+    },
+    {
+      "file": "tablet-requester-dashboard.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b10c3-ion-safe-feedback-and-focus-tablet/requester-dashboard.png",
+      "sha256": "852449d33d7c230670554e04fb65fab4401865166e8dd66532709be109a54c42",
+      "bytes": 187298
+    },
+    {
+      "file": "tablet-staff-queue.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-tablet/staff-queue.png",
+      "sha256": "100a74b6160f767e31b381cbd23c2b3d2ab3eff8e6fa416b5a77f4044cfcd6f9",
+      "bytes": 590533
+    },
+    {
+      "file": "tablet-administrator-users.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-c0bcd-on-retain-role-restrictions-tablet/administrator-users.png",
+      "sha256": "76ee7374240cc4acc8ea4ced73bc56f57c03c07f9271f754b1338b9be353eee2",
+      "bytes": 361289
+    },
+    {
+      "file": "mobile-requester-detail-actions.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b10c3-ion-safe-feedback-and-focus-mobile/requester-detail-actions.png",
+      "sha256": "c6f7135bf1d3702a7e7669d58311cc16de9493be371c7cde2c323d8093c34e3c",
+      "bytes": 750412
+    },
+    {
+      "file": "mobile-action-cancel-dialog.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-mobile/action-cancel-dialog.png",
+      "sha256": "60a753884719d0d2425346e39b177599e9b76076d35a1bfbafa1bd96169eecf9",
+      "bytes": 1026054
+    },
+    {
+      "file": "mobile-workflow-editor.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-5ee37-tory-support-keyboard-focus-mobile/workflow-editor.png",
+      "sha256": "bf6a4c6488f658d0677378202f289bf26578816afd8d11fc3b128c7d560f7966",
+      "bytes": 979203
+    },
+    {
+      "file": "mobile-administrator-dashboard.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-c0bcd-on-retain-role-restrictions-mobile/administrator-dashboard.png",
+      "sha256": "817192b66c283d8aa239c912e9d53ffdbcbfcd687b3053315980fceec739e954",
+      "bytes": 646193
+    },
+    {
+      "file": "mobile-small-mobile-administrator.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-739e3-readable-dashboard-controls-mobile/small-mobile-administrator.png",
+      "sha256": "568e1141b7dcbbdb0ce921c0436e67dea9d650ca85f23e64c51e6cf112af0faa",
+      "bytes": 649120
+    },
+    {
+      "file": "mobile-requester-list.png",
+      "source": "artifacts/lab-04/i6-local/a11y-browser-1793721137627/lab-04-accessibility-respo-b10c3-ion-safe-feedback-and-focus-mobile/requester-list.png",
+      "sha256": "0fe1ce2fd47472a5c133b8ce86efef2b364b3637016a00ffff69d6eb08f783eb",
+      "bytes": 285468
+    }
+  ],
+  "limits": [
+    "Retained one-off tablet timeout; exact cause unproven",
+    "Native OS popup/screen-reader not certified",
+    "Emulated rather than physical devices",
+    "Sequential local performance smoke, not production load"
+  ],
+  "publication": {
+    "snapshot": "Before the authorized commit/push",
+    "date": "2026-11-04",
+    "studentCommitPushApproved": true,
+    "manualReviewComplete": true,
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "pullRequestCreated": false,
+    "peerApproval": false
+  },
+  "scopeAudit": {
+    "branch": "feature/lab4-regression-testing",
+    "head": "d8ba0a5184e8dc006d258b4fd1877f46aa13acf8",
+    "candidateFiles": 59,
+    "sourceTestDocs": 37,
+    "evidence": 22,
+    "stagedFiles": 0,
+    "extras": {
+      "rawI6": 565,
+      "generatedDashboardCache": 16
+    },
+    "newFileWhitespacePassed": true,
+    "sensitiveLiteralReview": "Pre-existing public example placeholders and synthetic guard-test fixtures only; no private credentials",
+    "earlierTestPlanPreserved": true,
+    "administratorCreateTicketDenialPreserved": true,
+    "otherWorktrees": [
+      {
+        "name": "original",
+        "files": 99,
+        "head": "f910107142f013621084064558082b96014248e9"
+      },
+      {
+        "name": "i4",
+        "files": 83,
+        "head": "8038059708f2de800fbd1c6b05e1d7c54ae5d5b1"
+      },
+      {
+        "name": "i5",
+        "files": 93,
+        "head": "7b821be43165107c47f0156105050f1ed2577965"
+      }
+    ]
+  },
+  "configurationFollowUp": {
+    "date": "2026-11-04",
+    "ports": {
+      "frontend": 5173,
+      "backend": 3001,
+      "developmentPostgreSQL": 5433
+    },
+    "http": {
+      "date": "2026-11-04",
+      "frontendUrl": "http://localhost:5173",
+      "backendUrl": "http://localhost:3001",
+      "frontendPID": 39468,
+      "backendPID": 22160,
+      "branch": "feature/lab4-regression-testing",
+      "worktree": "C:\\Users\\ASUS\\Documents\\Software eng_lab\\Lab1_Starter_Scaffold\\toktickit-lab4-regression",
+      "developmentDatabasePort": 5433,
+      "loginDocumentAndModulesServed": true,
+      "interactiveLogin": "manual verification deferred to user",
+      "authenticatedDashboards": "manual verification deferred to user",
+      "apiHealth": 200,
+      "credentialedCors": true,
+      "apiBaseVerified": "http://localhost:3001",
+      "readOnlyBusinessPreview": true,
+      "blockedWriteChecks": [
+        {
+          "method": "POST",
+          "path": "/api/tickets",
+          "status": 403
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/staff/tickets/0/status",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/change-password",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/api/admin/users",
+          "status": 403
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/tickets/0/actions-taken/0",
+          "status": 403
+        }
+      ],
+      "realAccountWrites": 0,
+      "businessRecordWrites": 0,
+      "agentLoginSessionsCreated": 0,
+      "browserInspection": "skipped as requested"
+    },
+    "safeHarness": {
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "files": 4,
+      "overlapsPriorBackend": true
+    },
+    "builds": "client/server passed",
+    "privateEnvironmentsChanged": false,
+    "databaseBusinessWrites": 0,
+    "preservation": [
+      {
+        "worktree": "original",
+        "files": 99,
+        "sha256Unchanged": true
+      },
+      {
+        "worktree": "i4",
+        "files": 83,
+        "sha256Unchanged": true
+      },
+      {
+        "worktree": "i5",
+        "files": 124,
+        "sha256Unchanged": true
+      }
+    ],
+    "whitespace": "passed",
+    "manualReview": {
+      "date": "2026-11-04",
+      "source": "Student confirmation in this conversation",
+      "roles": [
+        "REQUESTER",
+        "IT_STAFF",
+        "ADMINISTRATOR"
+      ],
+      "scope": "Role dashboards visually reviewed; student reports the UI looks correct",
+      "status": "complete",
+      "automatedBrowserInspection": false
+    }
+  },
+  "manualReview": {
+    "date": "2026-11-04",
+    "source": "Student confirmation in this conversation",
+    "roles": [
+      "REQUESTER",
+      "IT_STAFF",
+      "ADMINISTRATOR"
+    ],
+    "scope": "Role dashboards visually reviewed; student reports the UI looks correct",
+    "status": "complete",
+    "automatedBrowserInspection": false
+  },
+  "publicationAudit": {
+    "date": "2026-11-04",
+    "issue": 68,
+    "issueObservedState": "closed",
+    "issueCheckboxesEdited": false,
+    "criteriaMapped": 7,
+    "files": 59,
+    "focusedClient": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "files": 2
+    },
+    "safeHarness": {
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "files": 4
+    },
+    "clientBuild": "passed",
+    "serverBuild": "passed",
+    "changedBrowserTypeScript": "passed",
+    "databaseOperations": "none",
+    "resultAttribution": "Focused reruns overlap earlier totals; original full DB/browser tests were not repeated"
+  }
+}

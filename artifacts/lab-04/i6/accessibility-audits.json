@@ -1,0 +1,4855 @@
+{
+  "source": "a11y-1793721137627.json",
+  "stats": {
+    "startTime": "2026-11-03T15:52:18.155Z",
+    "duration": 78740.11200000001,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "audits": [
+    {
+      "screen": "login",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT Login"
+          },
+          {
+            "level": "H2",
+            "text": "Welcome back"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-requester",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-it_staff",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-administrator",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-dashboard",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-list",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#ticket-category-filter"
+              ],
+              [
+                "#ticket-system-filter"
+              ],
+              [
+                "#ticket-priority-filter"
+              ],
+              [
+                "#ticket-status-filter"
+              ],
+              [
+                "#ticket-sort"
+              ],
+              [
+                "#ticket-sort-order"
+              ],
+              [
+                "#page-size"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "My Tickets"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "ticket-category-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-system-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-priority-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-sort",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-sort-order",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "page-size",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-detail-actions",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Problem Appears Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-create",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#category"
+              ],
+              [
+                "#related-system"
+              ],
+              [
+                "#requested-priority"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Create Ticket"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "category",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "related-system",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "requested-priority",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-create-validation",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#category"
+              ],
+              [
+                "#related-system"
+              ],
+              [
+                "#requested-priority"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Create Ticket"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "category",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "related-system",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "requested-priority",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-loading",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-safe-error",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-empty",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "staff-dashboard",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "staff-queue",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#staff-filter-status"
+              ],
+              [
+                "#staff-filter-requested"
+              ],
+              [
+                "#staff-filter-it"
+              ],
+              [
+                "#staff-filter-owner"
+              ],
+              [
+                "#staff-queue-sort"
+              ],
+              [
+                "#staff-queue-order"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Ticket Queue"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "staff-filter-status",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-requested",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-it",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-owner",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-queue-sort",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-queue-order",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "staff-detail-workflow",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "action-editor-focus",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#action-3-assignedToId"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Record a Planned action"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "action-3-assignedToId",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "action-cancel-dialog",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "CANCEL action #3"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "workflow-editor",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#ticket-workflow-3-status"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H4",
+            "text": "Change Ticket status"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "ticket-workflow-3-status",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "action-revision-history",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Private operational revision history"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "ticket-status-history",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H4",
+            "text": "Private Ticket status history"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Private operational revision history"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "administrator-dashboard",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Administrator Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "administrator-users",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Manage an account"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "administrator-editor",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ],
+              [
+                "#admin-role"
+              ],
+              [
+                "#admin-active"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Create New User"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-role",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-active",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "administrator-validation",
+      "project": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ],
+              [
+                "#admin-role"
+              ],
+              [
+                "#admin-active"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 1440,
+        "document": 1440,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Create New User"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-role",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-active",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "small-mobile-requester",
+      "project": "desktop",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "small-mobile-it_staff",
+      "project": "desktop",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "small-mobile-administrator",
+      "project": "desktop",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Administrator Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "login",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT Login"
+          },
+          {
+            "level": "H2",
+            "text": "Welcome back"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-requester",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-it_staff",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-administrator",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-dashboard",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-list",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#ticket-category-filter"
+              ],
+              [
+                "#ticket-system-filter"
+              ],
+              [
+                "#ticket-priority-filter"
+              ],
+              [
+                "#ticket-status-filter"
+              ],
+              [
+                "#ticket-sort"
+              ],
+              [
+                "#ticket-sort-order"
+              ],
+              [
+                "#page-size"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "My Tickets"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "ticket-category-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-system-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-priority-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-sort",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-sort-order",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "page-size",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-detail-actions",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Problem Appears Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-create",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#category"
+              ],
+              [
+                "#related-system"
+              ],
+              [
+                "#requested-priority"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Create Ticket"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "category",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "related-system",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "requested-priority",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-create-validation",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#category"
+              ],
+              [
+                "#related-system"
+              ],
+              [
+                "#requested-priority"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Create Ticket"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "category",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "related-system",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "requested-priority",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-loading",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-safe-error",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-empty",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "staff-dashboard",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "staff-queue",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#staff-filter-status"
+              ],
+              [
+                "#staff-filter-requested"
+              ],
+              [
+                "#staff-filter-it"
+              ],
+              [
+                "#staff-filter-owner"
+              ],
+              [
+                "#staff-queue-sort"
+              ],
+              [
+                "#staff-queue-order"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Ticket Queue"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "staff-filter-status",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-requested",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-it",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-owner",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-queue-sort",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-queue-order",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "staff-detail-workflow",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "action-editor-focus",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#action-8-assignedToId"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Record a Planned action"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "action-8-assignedToId",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "action-cancel-dialog",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "CANCEL action #8"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "workflow-editor",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#ticket-workflow-8-status"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H4",
+            "text": "Change Ticket status"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "ticket-workflow-8-status",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "action-revision-history",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Private operational revision history"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "ticket-status-history",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H4",
+            "text": "Private Ticket status history"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Private operational revision history"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "administrator-dashboard",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Administrator Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "administrator-users",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Manage an account"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "administrator-editor",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ],
+              [
+                "#admin-role"
+              ],
+              [
+                "#admin-active"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Create New User"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-role",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-active",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "administrator-validation",
+      "project": "tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ],
+              [
+                "#admin-role"
+              ],
+              [
+                "#admin-active"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 768,
+        "document": 768,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Create New User"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-role",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-active",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "small-mobile-requester",
+      "project": "tablet",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "small-mobile-it_staff",
+      "project": "tablet",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "small-mobile-administrator",
+      "project": "tablet",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Administrator Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "login",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT Login"
+          },
+          {
+            "level": "H2",
+            "text": "Welcome back"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-requester",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-it_staff",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "mandatory-administrator",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "Change Password"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-dashboard",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-list",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#ticket-category-filter"
+              ],
+              [
+                "#ticket-system-filter"
+              ],
+              [
+                "#ticket-priority-filter"
+              ],
+              [
+                "#ticket-status-filter"
+              ],
+              [
+                "#ticket-sort"
+              ],
+              [
+                "#ticket-sort-order"
+              ],
+              [
+                "#page-size"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "My Tickets"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "ticket-category-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-system-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-priority-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-sort",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "ticket-sort-order",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "page-size",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-detail-actions",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Problem Appears Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-create",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#category"
+              ],
+              [
+                "#related-system"
+              ],
+              [
+                "#requested-priority"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Create Ticket"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "category",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "related-system",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "requested-priority",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-create-validation",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#category"
+              ],
+              [
+                "#related-system"
+              ],
+              [
+                "#requested-priority"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Create Ticket"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "category",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "related-system",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "requested-priority",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "requester-loading",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-safe-error",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "requester-empty",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "staff-dashboard",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "staff-queue",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#staff-filter-status"
+              ],
+              [
+                "#staff-filter-requested"
+              ],
+              [
+                "#staff-filter-it"
+              ],
+              [
+                "#staff-filter-owner"
+              ],
+              [
+                "#staff-queue-sort"
+              ],
+              [
+                "#staff-queue-order"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Ticket Queue"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "staff-filter-status",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-requested",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-it",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-filter-owner",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-queue-sort",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "staff-queue-order",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "staff-detail-workflow",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "action-editor-focus",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#action-13-assignedToId"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Record a Planned action"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "action-13-assignedToId",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "action-cancel-dialog",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "CANCEL action #13"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "workflow-editor",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#ticket-workflow-13-status"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H4",
+            "text": "Change Ticket status"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "ticket-workflow-13-status",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "action-revision-history",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Private operational revision history"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "ticket-status-history",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Ticket Detail"
+          },
+          {
+            "level": "H3",
+            "text": "Ticket Workflow"
+          },
+          {
+            "level": "H4",
+            "text": "Resolution requirements"
+          },
+          {
+            "level": "H4",
+            "text": "Private Ticket status history"
+          },
+          {
+            "level": "H3",
+            "text": "Actions Taken"
+          },
+          {
+            "level": "H4",
+            "text": "Private operational revision history"
+          },
+          {
+            "level": "H3",
+            "text": "Public Comments"
+          },
+          {
+            "level": "H3",
+            "text": "Internal Notes"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "administrator-dashboard",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Administrator Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "administrator-users",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Manage an account"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "administrator-editor",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ],
+              [
+                "#admin-role"
+              ],
+              [
+                "#admin-active"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Create New User"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-role",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-active",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "administrator-validation",
+      "project": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "targets": [
+              [
+                "#admin-role-filter"
+              ],
+              [
+                "#admin-status-filter"
+              ],
+              [
+                "#admin-role"
+              ],
+              [
+                "#admin-active"
+              ]
+            ]
+          }
+        ]
+      },
+      "layout": {
+        "viewport": 390,
+        "document": 390,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "User Management"
+          },
+          {
+            "level": "H3",
+            "text": "Users"
+          },
+          {
+            "level": "H3",
+            "text": "Create New User"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": [
+          {
+            "id": "admin-role-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-status-filter",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-role",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          },
+          {
+            "id": "admin-active",
+            "foreground": "rgb(33, 37, 41)",
+            "background": "rgb(255, 255, 255)",
+            "ratio": 15.426285095510265
+          }
+        ]
+      }
+    },
+    {
+      "screen": "small-mobile-requester",
+      "project": "mobile",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Requester Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "My Open Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "Needs My Attention"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Resolved"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated"
+          },
+          {
+            "level": "H3",
+            "text": "Tickets Needing Your Attention"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "small-mobile-it_staff",
+      "project": "mobile",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "IT Staff Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    },
+    {
+      "screen": "small-mobile-administrator",
+      "project": "mobile",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "audit": {
+        "version": "4.14.0",
+        "violations": [],
+        "incomplete": []
+      },
+      "layout": {
+        "viewport": 320,
+        "document": 320,
+        "headings": [
+          {
+            "level": "H1",
+            "text": "TokTickIT"
+          },
+          {
+            "level": "H2",
+            "text": "Administrator Dashboard"
+          },
+          {
+            "level": "H3",
+            "text": "Unassigned Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          },
+          {
+            "level": "H3",
+            "text": "Active Tickets by IT Priority"
+          },
+          {
+            "level": "H3",
+            "text": "LOW"
+          },
+          {
+            "level": "H3",
+            "text": "MEDIUM"
+          },
+          {
+            "level": "H3",
+            "text": "HIGH"
+          },
+          {
+            "level": "H3",
+            "text": "URGENT"
+          },
+          {
+            "level": "H3",
+            "text": "Recently Updated Tickets"
+          },
+          {
+            "level": "H3",
+            "text": "My Active Actions"
+          }
+        ],
+        "smallTargets": []
+      },
+      "geometry": {
+        "overlaps": [],
+        "selectContrast": []
+      }
+    }
+  ]
+}

@@ -180,6 +180,15 @@ describe(
       ).mockResolvedValue([]);
     });
 
+    it("associates every read-only Ticket field with its visible label", async () => {
+      await selectRequesterAndOpenMyTickets();
+      fireEvent.click(await screen.findByRole("button", { name: ticket.ticketNumber }));
+      await screen.findByRole("heading", { name: "Ticket Detail" });
+      for (const name of ["Ticket Number", "Current Status", "Requested Priority", "Requester", "Requester Email", "Category", "Related System", "Ticket Summary", "Description", "Created", "Last Updated"]) {
+        expect(screen.getByRole("textbox", { name })).toHaveAttribute("readonly");
+      }
+    });
+
     it(
       "opens an owned Ticket Detail from My Tickets",
       async () => {

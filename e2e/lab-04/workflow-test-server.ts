@@ -54,7 +54,7 @@ async function start() {
   if (!address || typeof address === "string") throw new Error("API port unavailable.");
   const apiUrl = `http://localhost:${address.port}`;
   const { createServer } = await import(pathToFileURL(resolve("../client/node_modules/vite/dist/node/index.js")).href);
-  const vite = await createServer({ configFile: resolve("../client/vite.config.ts"), root: resolve("../client"),
+  const vite = await createServer({ configFile: resolve("../client/vite.config.ts"), root: resolve("../client"), cacheDir: resolve("../artifacts/lab-04/i6-local/workflow-vite-cache"),
     server: { host: "localhost", port: 5174, strictPort: true }, define: { "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl) }, logLevel: "silent" });
   frontend = vite;
   await vite.listen();

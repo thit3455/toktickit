@@ -8,6 +8,7 @@ test("real Staff workflow persists ownership, priority, status, public comment a
   const comment = "We are investigating the Wi-Fi connection and will update you shortly.";
   const note = "Check the wireless driver and access point logs before replacing hardware.";
   async function searchQueue() {
+    await page.getByRole("button", { name: "IT Staff Queue", exact: true }).click();
     await expect(page.getByRole("heading", { name: "IT Staff Ticket Queue", exact: true })).toBeVisible();
     await page.getByLabel("Search tickets").fill(number); await page.getByRole("button", { name: "Search", exact: true }).click();
     await expect(page.getByRole("button", { name: "Open " + number, exact: true })).toBeVisible();

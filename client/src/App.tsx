@@ -1,3 +1,7 @@
+import { RequesterDashboard } from "./RequesterDashboard";
+import { StaffDashboard } from "./StaffDashboard";
+import type { DashboardLink } from "./dashboard.api";
+import type { GetMyTicketsParams, GetStaffTicketsParams } from "./api";
 import { StaffTicketQueue } from "./StaffTicketQueue";
 import { AdminUserManagement } from "./AdminUserManagement";
 import "./Requester.css";
@@ -76,6 +80,7 @@ type AttachmentActionState =
   | "working";
 
 type Screen =
+  | "dashboard"
   | "create"
   | "myTickets"
   | "ticketDetail"
@@ -161,6 +166,9 @@ const [passwordChangeBusy, setPasswordChangeBusy] =
 
 const [workflowRefreshKey, setWorkflowRefreshKey] = useState(0);
 const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
+const [dashboardTicketFilters, setDashboardTicketFilters] = useState<Pick<GetMyTicketsParams, "asOf" | "statuses" | "resolvedSince" | "resolvedUntil">>({});
+const [staffQueueQuery, setStaffQueueQuery] = useState<GetStaffTicketsParams>({ page: 1, limit: 10, sort: "createdAt", order: "desc" });
+const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
 
   // =========================================================
   // Reference Data
@@ -467,6 +475,7 @@ const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
 
         const result =
           await getMyTickets({
+            ...dashboardTicketFilters,
             page: ticketPage,
 
             pageSize,
@@ -536,6 +545,7 @@ const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
     sortBy,
     sortOrder,
     reloadTicketsKey,
+    dashboardTicketFilters,
   ]);
   // =========================================================
   // Load Ticket Detail
@@ -664,21 +674,13 @@ const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
 // Role Routing
 // =========================================================
 
-// Settle the role landing screen before navigation becomes interactive.
-// A passive effect can otherwise overwrite an immediate queue selection.
+// The existing mandatory password gate still renders before Dashboard.
 useLayoutEffect(() => {
-  if (
-    currentUser?.role === "IT_STAFF"
-  ) {
-    setScreen("staffQueue");
-  } else if (currentUser?.role === "REQUESTER") {
-    setScreen("create");
-  } else if (currentUser?.role === "ADMINISTRATOR") {
-    setScreen("adminUsers");
+  if (currentUser) {
+    setScreen("dashboard"); setDashboardTicketFilters({});
+    setStaffQueueQuery({ page: 1, limit: 10, sort: "createdAt", order: "desc" }); setSelectedActionId(null);
   }
-}, [
-  currentUser,
-]);
+}, [currentUser?.id, currentUser?.role, currentUser?.mustChangePassword]);
 
   // =========================================================
   // Reset Create Ticket
@@ -945,6 +947,7 @@ useLayoutEffect(() => {
   // =========================================================
 
   function resetTicketFilters() {
+    setDashboardTicketFilters({});
     setSearch("");
 
     setFilterCategoryId("");
@@ -976,9 +979,32 @@ useLayoutEffect(() => {
     );
   }
 
+
+  function dashboardAccessFailure(code: string) {
+    setTickets([]); setTicketDetail(null); setTicketAttachments([]); setSelectedTicketId(null); setSelectedActionId(null);
+    resetTicketFilters(); setStaffQueueQuery({ page: 1, limit: 10, sort: "createdAt", order: "desc" });
+    if (code === "PASSWORD_CHANGE_REQUIRED") setCurrentUser(previous => previous ? { ...previous, mustChangePassword: true } : null);
+    else { setCurrentUser(null); setScreen("create"); }
+  }
+  function navigateDashboard(link: DashboardLink) {
+    const query = link.query;
+    if (link.screen === "myTickets" && currentUser?.role === "REQUESTER") {
+      resetTicketFilters();
+      setDashboardTicketFilters({ asOf: String(query.asOf), statuses: query.statuses === undefined ? undefined : String(query.statuses), resolvedSince: query.resolvedSince === undefined ? undefined : String(query.resolvedSince), resolvedUntil: query.resolvedUntil === undefined ? undefined : String(query.resolvedUntil) });
+      setFilterStatus((query.currentStatus ?? "") as TicketStatus | "");
+      setSortBy(query.sortBy === "createdAt" || query.sortBy === "ticketNumber" ? query.sortBy : "updatedAt");
+      setSortOrder(query.sortOrder === "asc" ? "asc" : "desc"); setTicketPage(1); setScreen("myTickets");
+    } else if (link.screen === "staffQueue" && currentUser && currentUser.role !== "REQUESTER") {
+      setStaffQueueQuery({ page: 1, limit: 10, asOf: String(query.asOf), statuses: query.statuses === undefined ? undefined : String(query.statuses), owner: query.owner === "me" ? "me" : undefined, assigned: query.assigned === undefined ? undefined : query.assigned === "true", itPriority: query.itPriority as GetStaffTicketsParams["itPriority"], sort: String(query.sort ?? "createdAt"), order: query.order === "asc" ? "asc" : "desc" });
+      setScreen("staffQueue");
+    }
+    setSelectedTicketId(null); setSelectedActionId(null);
+  }
+
   function openTicketDetail(
-    ticketId: number
+    ticketId: number, actionId?: number
   ) {
+    setSelectedActionId(actionId ?? null);
     setSelectedTicketId(
       ticketId
     );
@@ -1448,10 +1474,11 @@ if (currentUser.mustChangePassword) {
 
       <nav
         className="d-flex flex-wrap gap-2 mb-4"
-        aria-label={currentUser.role === "ADMINISTRATOR" ? "Administrator navigation" : "Requester navigation"}
+        aria-label={currentUser.role === "ADMINISTRATOR" ? "Administrator navigation" : currentUser.role === "IT_STAFF" ? "IT Staff navigation" : "Requester navigation"}
       >
+        <button type="button" className={screen === "dashboard" ? "btn btn-success" : "btn btn-outline-success"} aria-current={screen === "dashboard" ? "page" : undefined} onClick={() => { setScreen("dashboard"); setSelectedTicketId(null); }}>Dashboard</button>
         {currentUser?.role === "REQUESTER" && (
-        <button
+        <button aria-current={screen === "myTickets" || screen === "ticketDetail" ? "page" : undefined}
           type="button"
           className={
             screen === "myTickets" ||
@@ -1475,7 +1502,7 @@ if (currentUser.mustChangePassword) {
         </button>
         )}
         {currentUser?.role === "REQUESTER" && (
-        <button
+        <button aria-current={screen === "create" ? "page" : undefined}
           type="button"
           className={
             screen === "create"
@@ -1495,7 +1522,7 @@ if (currentUser.mustChangePassword) {
         )}
         {(currentUser?.role === "IT_STAFF" || currentUser?.role === "ADMINISTRATOR") && (
          <div>
-         <button
+         <button aria-current={screen === "staffQueue" || screen === "ticketDetail" ? "page" : undefined}
               type="button"
               className={
                 screen === "staffQueue" || screen === "ticketDetail"
@@ -1514,8 +1541,12 @@ if (currentUser.mustChangePassword) {
          </div>
         )}
 
-        {currentUser.role === "ADMINISTRATOR" && <button type="button" className={screen === "adminUsers" ? "btn btn-success" : "btn btn-outline-success"} onClick={() => setScreen("adminUsers")}>User Management</button>}
+        {currentUser.role === "ADMINISTRATOR" && <button aria-current={screen === "adminUsers" ? "page" : undefined} type="button" className={screen === "adminUsers" ? "btn btn-success" : "btn btn-outline-success"} onClick={() => setScreen("adminUsers")}>User Management</button>}
       </nav>
+
+      {screen === "dashboard" && (currentUser.role === "REQUESTER"
+        ? <RequesterDashboard key={currentUser.id + ":requester"} onNavigate={navigateDashboard} onOpenTicket={openTicketDetail} onAccessFailure={dashboardAccessFailure} />
+        : <StaffDashboard key={currentUser.id + ":" + currentUser.role} administrator={currentUser.role === "ADMINISTRATOR"} onNavigate={navigateDashboard} onOpenTicket={openTicketDetail} onAccessFailure={dashboardAccessFailure} />)}
 
       {currentUser.role === "ADMINISTRATOR" && screen === "adminUsers" && <AdminUserManagement
         currentUserId={currentUser.id}
@@ -1534,6 +1565,7 @@ if (currentUser.mustChangePassword) {
               <h2 className="h4 mb-1">
                 My Tickets
               </h2>
+              {dashboardTicketFilters.asOf && <div className="alert alert-success" role="status">Dashboard cutoff: {formatDate(dashboardTicketFilters.asOf)}. {dashboardTicketFilters.statuses ? "Status set: " + dashboardTicketFilters.statuses.replaceAll("_", " ") + ". " : ""}{dashboardTicketFilters.resolvedSince ? "Resolution window: " + formatDate(dashboardTicketFilters.resolvedSince) + " through " + formatDate(dashboardTicketFilters.resolvedUntil!) + ", inclusive. " : ""}Lists remain live.<button className="btn btn-outline-success ms-2" onClick={resetTicketFilters}>Clear dashboard filters</button></div>}
 
               <p className="text-muted mb-0">
                 Tickets belonging to{" "}
@@ -1743,6 +1775,7 @@ if (currentUser.mustChangePassword) {
                     onChange={(
                       event
                     ) => {
+                      setDashboardTicketFilters(previous => ({ ...previous, statuses: undefined }));
                       setFilterStatus(
                         event.target
                           .value as
@@ -2465,7 +2498,7 @@ if (currentUser.mustChangePassword) {
                     {resolutionError && <p role="alert" className="text-danger mt-2">{resolutionError}</p>}
                   </div>
                 </section>}
-                <ActionsTaken key={`${currentUser.id}:${ticketDetail.id}`} ticketId={ticketDetail.id} ticketStatus={ticketDetail.currentStatus} role={currentUser.role} userName={currentUser.name} refreshKey={actionsRefreshKey}
+                <ActionsTaken targetActionId={selectedActionId ?? undefined} key={`${currentUser.id}:${ticketDetail.id}`} ticketId={ticketDetail.id} ticketStatus={ticketDetail.currentStatus} role={currentUser.role} userName={currentUser.name} refreshKey={actionsRefreshKey}
                   onRefreshTicket={async () => {
                     // Background refresh preserves mounted discussion/action drafts.
                     const saved = await getActionTicketSummary(ticketDetail.id);
@@ -2799,7 +2832,7 @@ if (currentUser.mustChangePassword) {
               IT STAFF TICKET QUEUE
           ====================================================== */}
 
-          {screen === "staffQueue" && <StaffTicketQueue onOpen={openTicketDetail} />}
+          {screen === "staffQueue" && <StaffTicketQueue onOpen={openTicketDetail} initialQuery={staffQueueQuery} onQueryChange={setStaffQueueQuery} onAccessFailure={dashboardAccessFailure} />}
 
       {/* =====================================================
           CREATE TICKET

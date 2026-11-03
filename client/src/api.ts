@@ -229,6 +229,7 @@ export interface TicketListResponse {
 }
 
 export interface GetMyTicketsParams {
+  asOf?: string; statuses?: string; resolvedSince?: string; resolvedUntil?: string;
   page?: number;
   pageSize?: 10 | 20 | 50;
   search?: string;
@@ -247,6 +248,8 @@ export async function getMyTickets(
   params: GetMyTicketsParams
 ): Promise<TicketListResponse> {
   const query = new URLSearchParams();
+  for (const key of ["asOf","statuses","resolvedSince","resolvedUntil"] as const) { if (params[key] !== undefined) query.set(key, String(params[key])); }
+
 
 
   query.set(
@@ -724,6 +727,7 @@ export interface StaffTicketQueueResponse {
 
 
 export interface GetStaffTicketsParams {
+  asOf?: string; statuses?: string; owner?: "me";
   search?: string;
 
   status?: string;
@@ -756,6 +760,8 @@ export async function getStaffTickets(
 
   const query =
     new URLSearchParams();
+  for (const key of ["asOf","statuses","owner"] as const) { if (params[key] !== undefined) query.set(key, String(params[key])); }
+
 
 
   if (params.search) {

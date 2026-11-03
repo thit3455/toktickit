@@ -11,6 +11,7 @@ import { parseAssignment, parsePriority, parseStatus } from "../workflow/ticket-
 import { assignTicket, getWorkflowTicket, prioritizeTicket, transitionTicket } from "../workflow/ticket-workflow.service.js";
 import { workflowFailure } from "../workflow/ticket-workflow.routes.js";
 
+import { listDashboardFilters } from "../dashboard/dashboard.rules.js";
 const router = Router();
 
 
@@ -39,11 +40,15 @@ router.get("/tickets", authenticateToken, requireRole("IT_STAFF", "ADMINISTRATOR
       !Number.isSafeInteger(Number(page)) || Number(page) > 1000000 || Number(limit) > 100) {
     return res.status(400).json({ error: { code: "INVALID_QUERY", message: "Invalid ticket queue filters, sorting or pagination." } });
   }
+  let dashboardFilters: Prisma.TicketWhereInput;
+  try { dashboardFilters = listDashboardFilters(query, "staff", req.user!.userId); }
+  catch { return res.status(400).json({ error: { code: "INVALID_QUERY", message: "Invalid ticket queue dashboard filters." } }); }
   const where: Prisma.TicketWhereInput = {
+    ...dashboardFilters,
     ...(status ? { currentStatus: status as TicketStatus } : {}),
     ...(priority ? { requestedPriority: priority as RequestedPriority } : {}),
     ...(itPriority ? { itPriority: itPriority as TicketPriority } : {}),
-    ...(assigned === "true" ? { assignedStaffId: { not: null } } : assigned === "false" ? { assignedStaffId: null } : {}),
+    ...(query.owner === "me" ? {} : assigned === "true" ? { assignedStaffId: { not: null } } : assigned === "false" ? { assignedStaffId: null } : {}),
     ...(search ? { OR: [
       { ticketNumber: { contains: search, mode: "insensitive" } },
       { summary: { contains: search, mode: "insensitive" } },

@@ -118,7 +118,8 @@ describe("Lab 3 Requester authorization and resolution", () => {
     for (const i of [2, 3]) expect((await f.agents[i].post("/api/tickets").send({})).status).toBe(403);
   });
   it("returns safe server failure without leaking database details", async () => {
-    vi.spyOn(prisma.ticket, "updateMany").mockRejectedValueOnce(new Error("secret database connection"));
+    // I4 places the indication write inside a transaction; inject at that boundary.
+    vi.spyOn(prisma, "$transaction").mockRejectedValueOnce(new Error("secret database connection"));
     const result = await f.agents[0].patch(`/api/tickets/${ticketId}/resolution-indication`);
     expect(result.status).toBe(500); expect(result.text).not.toContain("secret");
     vi.spyOn(prisma.ticketComment, "findMany").mockRejectedValueOnce(new Error("secret note"));

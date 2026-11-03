@@ -1,5 +1,7 @@
 import { discussionRoutes } from "./discussion.routes.js";
 import { actionRoutes } from "./actions/actions.routes.js";
+import { getWorkflowTicket, indicateTicketResolution } from "./workflow/ticket-workflow.service.js";
+import { ticketWorkflowRoutes, workflowFailure } from "./workflow/ticket-workflow.routes.js";
 import express, {
   Request,
   Response,
@@ -57,6 +59,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api", actionRoutes);
+app.use("/api", ticketWorkflowRoutes);
 
 app.use("/api/auth", authRoutes);
 
@@ -564,111 +567,12 @@ app.get(
 // Only the owning Requester may retrieve the Ticket.
 // ---------------------------------------------------------------------------
 
-app.get(
-  "/api/tickets/:id",
-  authenticateToken,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const ticketId = Number(
-        req.params.id
-      );
-
-      const requesterId = req.user!.userId;
-
-      if (
-  !Number.isInteger(ticketId) ||
-  ticketId <= 0
-  ){
-        return res.status(400).json({
-          error: {
-            code:
-              "INVALID_QUERY",
-
-            message:
-              "A valid Ticket ID and Requester ID are required.",
-          },
-        });
-      }
-
-      const prisma = getPrisma();
-
-      // Requester ownership enforcement
-      const ticket =
-        await prisma.ticket.findFirst(
-          {
-            where: {
-              id: ticketId,
-              ...(req.user!.role === "REQUESTER" ? { requesterId } : {}),
-            },
-
-            select: {
-              id: true,
-              ticketNumber: true,
-              requesterId: true,
-              categoryId: true,
-              relatedSystemId: true,
-              summary: true,
-              description: true,
-              requesterResolvedAt: true,
-              requestedPriority: true,
-              currentStatus: true,
-              createdAt: true,
-              updatedAt: true,
-
-              requester: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
-
-              category: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-
-              relatedSystem: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-            },
-          }
-        );
-
-      if (!ticket) {
-        return res.status(404).json({
-          error: {
-            code:
-              "TICKET_NOT_FOUND",
-
-            message:
-              "Ticket was not found.",
-          },
-        });
-      }
-
-      return res.status(200).json({
-        data: ticket,
-      });
-    } catch {
-      return res.status(500).json({
-        error: {
-          code:
-            "TICKET_DETAIL_ERROR",
-
-          message:
-            "Unable to retrieve Ticket details.",
-        },
-      });
-    }
-  }
-);
-
+app.get("/api/tickets/:id", authenticateToken, async (req: AuthRequest, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0 || id > 2147483647) return res.status(400).json({ error: { code: "INVALID_QUERY", message: "A valid Ticket ID is required." } });
+  try { return res.json({ data: await getWorkflowTicket(id, req.user!.userId) }); }
+  catch (error) { return workflowFailure(res, error); }
+});
 // ---------------------------------------------------------------------------
 // Lab 2 — Add Ticket Attachment
 // Only the owning Requester may add an attachment.
@@ -1527,20 +1431,11 @@ app.post(
 // Lab 3 Issue 5 — Public Ticket Comments
 // ---------------------------------------------------------------------------
 
-app.patch("/api/tickets/:id/resolution-indication", authenticateToken, requireRole("REQUESTER"), async (req: AuthRequest, res: Response) => {
+app.patch("/api/tickets/:id/resolution-indication", authenticateToken, requireRole("REQUESTER"), async (req: AuthRequest, res) => {
   const id = Number(req.params.id);
-  if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: { code: "INVALID_QUERY", message: "A valid Ticket ID is required." } });
-  try {
-    const prisma = getPrisma();
-    const where = { id, requesterId: req.user!.userId };
-    // Idempotent: preserve the first indication timestamp. Never mutate status.
-    await prisma.ticket.updateMany({ where: { ...where, requesterResolvedAt: null }, data: { requesterResolvedAt: new Date() } });
-    const data = await prisma.ticket.findFirst({ where, select: { id: true, requesterResolvedAt: true, currentStatus: true, updatedAt: true } });
-    if (!data) return res.status(404).json({ error: { code: "TICKET_NOT_FOUND", message: "Ticket was not found." } });
-    return res.json({ data });
-  } catch {
-    return res.status(500).json({ error: { code: "RESOLUTION_INDICATION_ERROR", message: "Unable to save resolution indication." } });
-  }
+  if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) return res.status(400).json({ error: { code: "INVALID_QUERY", message: "A valid Ticket ID is required." } });
+  try { return res.json({ data: await indicateTicketResolution(id, req.user!.userId) }); }
+  catch (error) { return workflowFailure(res, error); }
 });
 
 app.use("/api", discussionRoutes);

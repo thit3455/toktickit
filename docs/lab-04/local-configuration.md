@@ -70,3 +70,9 @@ Verified obsolete Node PIDs18116 (I5 frontend5173),45036 (I6 frontend5174),28556
 The earlier I6 backend739/browser84/audit81/performance results remain attributed to their original approved isolated runs; no database-dependent suite was rerun during this configuration change. The focused10 are included in the306 frontend total. The44 guard cases overlap the original backend coverage.
 
 Open http://localhost:5173 and refresh old tabs with Ctrl+F5. Use existing current passwords; no reset is required or performed. Review dashboards, search/filter/pagination, Ticket/Action read views, allowed histories and form drafts. Saving business/password/account changes remains blocked. The preview stays running for manual review.
+
+## I7 integration verification, 2026-11-04
+
+The final worktree is based on staging91d627a, which includes I6's standard-port configuration unchanged. The permanent application remains the existing read-only frontend5173/API3001, development PostgreSQL5433. Its I6 process labels identify its source worktree; git diff confirms that source equals the integrated I7 product source. No parallel permanent I7 application was created, no process switch was needed and no environment file was edited.
+
+Fresh HTTP checks returned200 for the React document and API health, with credentialed CORS for http://localhost:5173. The compiled I7 backend also returned200 from an owned temporary health process without database variables; that process was stopped. Disposable browser/frontend5174 and allocated API/database ports remain temporary test resources. Final results and exact attribution are in [final-testing-report.md](final-testing-report.md).

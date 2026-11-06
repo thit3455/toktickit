@@ -39,3 +39,9 @@ Eighteen selected screenshots are in [artifacts/lab-04/i6](../../artifacts/lab-0
 Axe retained 27 screen-level incomplete color-contrast checks on native selects. Closed-state CSS foreground/background contrast was explicitly measured above; OS-rendered popup menus were not certified. No human screen-reader session, physical device, high-contrast-mode or exhaustive WCAG assessment was performed. Keyboard interaction was automated through actual browser Tab/Enter/focus events; the screenshot inspection is agent visual review, not a claimed human keyboard/screen-reader audit.
 
 Reference thresholds: [W3C Contrast Minimum](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), [W3C Focus Visible](https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html). Inactive controls are distinguished from enabled text; remaining native-control limitations are not relabelled automated passes.
+
+## Fresh I7 integration verification, 2026-11-04
+
+The unchanged I6 implementation was rerun in the separately approved new I7 environment. All84 browser project cases passed (28 per device), including15 accessibility/responsive cases and81 actual screen/state audits. Zero axe violations, control overlaps or page overflows;93 measured closed-native-select contrast samples, minimum15.426:1;27 native-select incomplete audits retained. One worker, retries disabled, desktop1440/tablet768/mobile390 plus320 smoke. Existing human/screen-reader/native-popup/physical-device limits remain explicit.
+
+[Final testing report](final-testing-report.md) and [I7 verification summary](../../artifacts/lab-04/i7/verification-summary.json) provide fresh result provenance, selected screenshots and hashes. These are feature-branch results, not final-main verification. Prior I6 evidence remains unchanged.

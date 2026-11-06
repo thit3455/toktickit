@@ -25,3 +25,9 @@ Eighteen selected full-page images are retained under [artifacts/lab-04/i6](../.
 The initial workflow group had one tablet pointer/editor timeout (29 passed/1 failed). The affected unchanged tablet file passed 3/3 and the final full group passed 30/30 without a timeout increase or automatic retry. Its original screenshot/trace remains retained; the precise transient cause is unproven and should be monitored in peer/CI execution.
 
 These are browser/device emulations, not physical-device tests. Human screen-reader, OS native-popup, exhaustive zoom/high-contrast and final-main verification are not claimed. All final required project cases passed with no skipped cases; peer review remains pending.
+
+## Fresh I7 integration verification, 2026-11-04
+
+The unchanged I6 implementation was rerun in the separately approved new I7 environment. All84 browser project cases passed (28 per device), including15 accessibility/responsive cases and81 actual screen/state audits. Zero axe violations, control overlaps or page overflows;93 measured closed-native-select contrast samples, minimum15.426:1;27 native-select incomplete audits retained. One worker, retries disabled, desktop1440/tablet768/mobile390 plus320 smoke. Existing human/screen-reader/native-popup/physical-device limits remain explicit.
+
+[Final testing report](final-testing-report.md) and [I7 verification summary](../../artifacts/lab-04/i7/verification-summary.json) provide fresh result provenance, selected screenshots and hashes. These are feature-branch results, not final-main verification. Prior I6 evidence remains unchanged.

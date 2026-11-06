@@ -1,5 +1,7 @@
 # TokTickIT Lab 4 REST API Contract
 
+> I7 execution note (2026-11-04): this approved contract retains its original planning language and rule IDs below. I2-I6 are integrated at staging `91d627afa88a9cf1d6f2730b00c5b3784d134817`. Current execution status is in [final integration](final-integration-report.md), [test results](final-testing-report.md) and [traceability](final-traceability.md). Historical Planned/Not run statements describe the original plan, not a fresh execution claim. Final-main and submission gates remain pending. No business rule is changed by this note.
+
 Status: **planned contract, not implemented or tested**. PDF section 6 requires exact capabilities/contracts and safe authorization/conflicts. Paths, DTOs, limits, matrices and mechanisms here are student-approved design choices (SD), not prescribed PDF routes. [specification.md](specification.md) defines FR/BR/AC and is authoritative for the action/Ticket matrices and four-condition gate; [tests.md](tests.md) maps planned verification. Existing API statements below are code inspection, not runtime proof.
 
 ## 1. Existing API inventory and approved changes

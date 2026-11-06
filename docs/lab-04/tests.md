@@ -1,5 +1,7 @@
 # TokTickIT Lab 4 Test Plan and Traceability
 
+> Current I7 execution (2026-11-04):739 backend/32 files,306 frontend/27 files and84 browser project cases passed, zero failed/skipped. See section6.11 and final-testing-report.md. Earlier Planned/Final cells are retained as dated plan/history; they do not supersede this execution record. Final-main verification remains pending.
+
 Status: **I4 execution updated 2026-11-01 (section 6.4); plan established before implementation; I2 execution updated 2026-10-30; I3 regression and approved development browser verification updated 2026-10-31 (Asia/Bangkok).** The historical I2 result is **5 files / 157 passes**, reported by the user and corroborated by the saved cache; see section 6.2 for attribution. Fresh I3 results and verification limits are recorded in section 6.3. These results are not final-main or peer-approval evidence. Source: SE Lab 4 sections 10/12/14 and the student-approved choices in [specification.md](specification.md).
 
 ## 1. Strategy and execution boundaries
@@ -412,3 +414,13 @@ The student confirmed completion of manual Requester, IT Staff and Administrator
 Fresh final audit:10 focused client transport/discussion tests and44 database-independent harness/guard tests passed, zero failures/skips. Client/server TypeScript builds, changed-browser TypeScript and whitespace checks passed. These are overlapping focused reruns, not additions to306 frontend/739 backend coverage. The84 browser cases and actual recovery/performance evidence retain their original dates; no database-dependent tests or database operations ran for publication.
 
 GitHub #68's AC1-7 match the recorded traceability. The issue was observed closed with its checkboxes unchecked; it was not modified. The exact final scope is59 files after port standardization, with all raw preview files/credentials/unrelated work excluded. The student authorized staging only that verified set, then commit/push only the feature branch after staged validation. No PR or merge is authorized; designated peer review remains pending.
+
+## 6.11. Final integration I7, 2026-11-04
+
+Fresh feature-worktree verification at staging base91d627afa88a9cf1d6f2730b00c5b3784d134817: backend722+16+1=739/32 files, frontend306/27 files, Playwright27+30+12+15=84 project cases (28 each desktop/tablet/mobile), all zero failures/skips/flaky retries. Initial294 pure/mock backend passes overlap739 and are not added. Server/client/browser TypeScript, both production builds and compiled backend health200 passed. No product-code changes or assertion weakening were needed.
+
+ACT-01-08/AUTH-01/WF-01-07/CON-01/DUP-01/DASH-01-05/FAIL-01/MIG-01-02/SEED-01/TOOL-01/REG-01/UI-01-05/E2E-01-03 executed through the corresponding existing full suites. Both actual preservation/populated recovery tests passed, including restored subsequent writes and source preservation.81 axe/state audits had zero violations/overlaps/overflow;93 native-select CSS samples had minimum15.426:1, with27 incomplete native-select audit targets retained. Browser keyboard/focus checks passed; human screen-reader/physical-device coverage is not claimed. PERF-01 passed the separately approved1000/3000 and20-sample target; all sample timings are retained.
+
+Only separately approved I7 container toktickit-i7-a731c8e042d9/PG18.6 at127.0.0.1:59026 and its three new nonce-named databases were used. Exact target identity/permissions/empty state preceded tests; migrations/fixtures/restores stayed in owned schemas. After all groups, cleanup removed only this ID/nonce-verified new container/tmpfs. Development5433, existing55432, BankCore and other worktrees were not test targets.
+
+[Final testing report](final-testing-report.md) records actual commands, outputs, device sizes, attribution, mocks and limits. [Traceability](final-traceability.md) maps all30 contract ACs and all10 actual Issue70 criteria. DOC-01 is verified; DOC-02 prepares actual reviewer/AI/setup records. REL-01 and SUB-01 remain partial until I7 review, authorized staging/main release, actual final-main output, final all-Done Project evidence and updated final PDF. Historical user results are not counted as new tests; no GitHub checkbox or release status was changed.

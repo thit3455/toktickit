@@ -1,5 +1,7 @@
 # TokTickIT Lab 4 UI Specification
 
+> I7 execution note (2026-11-04): this approved contract retains its original planning language and rule IDs below. I2-I6 are integrated at staging `91d627afa88a9cf1d6f2730b00c5b3784d134817`. Current execution status is in [final integration](final-integration-report.md), [test results](final-testing-report.md) and [traceability](final-traceability.md). Historical Planned/Not run statements describe the original plan, not a fresh execution claim. Final-main and submission gates remain pending. No business rule is changed by this note.
+
 Status: **planned UI contract; not implemented, visually verified or screenshot-captured**. PDF sections 7/8/14 require coherence, states, accessibility and responsive evidence. Concrete cards, field limits, modes and lifecycle choices below are approved student decisions (SD). Use [specification.md](specification.md) for numbered rules/matrices and [api-spec.md](api-spec.md) for exact request/DTO/version behavior. [tests.md](tests.md) contains planned checks; no unchecked checklist item is a pass.
 
 ## 1. Existing design language and shell

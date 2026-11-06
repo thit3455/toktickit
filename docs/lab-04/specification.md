@@ -1,5 +1,7 @@
 # TokTickIT Sprint 4 Engineering Specification
 
+> I7 execution note (2026-11-04): this approved contract retains its original planning language and rule IDs below. I2-I6 are integrated at staging `91d627afa88a9cf1d6f2730b00c5b3784d134817`. Current execution status is in [final integration](final-integration-report.md), [test results](final-testing-report.md) and [traceability](final-traceability.md). Historical Planned/Not run statements describe the original plan, not a fresh execution claim. Final-main and submission gates remain pending. No business rule is changed by this note.
+
 Status: student-approved design, documented before feature implementation; implementation and verification pending. Prepared 2026-10-27 (Asia/Bangkok).
 
 Source: the complete 11-page **SE Lab 4** handout, supplied as `SE+Lab+4.pdf`. Section/page references below identify the handout, not repository implementation. **PDF** means an explicit handout obligation. **SD** means a student-approved design decision resolving choices the handout leaves open. Approval of a design is not reviewer approval, passing-test evidence, or implementation completion. FR/BR/AC IDs are local to Lab 4 and remain stable. I1-I7 are planned Issue groups, not verified GitHub issue numbers.

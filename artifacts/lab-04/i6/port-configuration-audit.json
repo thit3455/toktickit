@@ -1,0 +1,3737 @@
+{
+  "standardizationDate": "2026-11-04",
+  "status": "Pre-change reference audit plus verified standardized runtime",
+  "ports": {
+    "frontend": 5173,
+    "backend": 3001,
+    "developmentPostgreSQL": 5433
+  },
+  "before": {
+    "date": "2026-11-03",
+    "ports": [
+      3000,
+      3001,
+      3002,
+      3003,
+      3004,
+      5173,
+      5174,
+      5432,
+      5433,
+      55432
+    ],
+    "scope": "Tracked and nonignored source/config/docs/local scripts; raw generated logs, dependency caches and binary evidence excluded",
+    "summaries": [
+      {
+        "worktree": "toktickit",
+        "scannedTextFiles": 125,
+        "filesWithMatches": 27,
+        "occurrences": {
+          "application": 5,
+          "configuration": 5,
+          "tests": 17,
+          "documentation": 32,
+          "temporary": 15,
+          "numericNotPort": 2
+        }
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "scannedTextFiles": 155,
+        "filesWithMatches": 49,
+        "occurrences": {
+          "application": 5,
+          "configuration": 5,
+          "tests": 26,
+          "documentation": 61,
+          "temporary": 73,
+          "numericNotPort": 18
+        }
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "scannedTextFiles": 167,
+        "filesWithMatches": 41,
+        "occurrences": {
+          "application": 5,
+          "configuration": 5,
+          "tests": 37,
+          "documentation": 73,
+          "temporary": 25,
+          "numericNotPort": 9
+        }
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "scannedTextFiles": 179,
+        "filesWithMatches": 49,
+        "occurrences": {
+          "application": 5,
+          "configuration": 6,
+          "tests": 66,
+          "documentation": 82,
+          "temporary": 25,
+          "numericNotPort": 14
+        }
+      }
+    ],
+    "references": [
+      {
+        "worktree": "toktickit",
+        "file": "README.md",
+        "line": 51,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "README.md",
+        "line": 63,
+        "ports": [
+          5173,
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "README.md",
+        "line": 95,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "client/.env.example",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "client/src/TicketDiscussion.tsx",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "client/src/api.ts",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "client/vite.config.ts",
+        "line": 6,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-02/ai-use.md",
+        "line": 41,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 105,
+        "ports": [
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 117,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-03/requester-verification.md",
+        "line": 57,
+        "ports": [
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-03/ticket-queue-verification.md",
+        "line": 58,
+        "ports": [
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/actions-backend-report.md",
+        "line": 488,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 66,
+        "ports": [
+          5433,
+          3000,
+          5432,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 90,
+        "ports": [
+          5173,
+          3001,
+          5433,
+          5432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/tests.md",
+        "line": 144,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/tests.md",
+        "line": 158,
+        "ports": [
+          3000,
+          3001
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/tests.md",
+        "line": 164,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/tests.md",
+        "line": 170,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/tests.md",
+        "line": 249,
+        "ports": [
+          5433,
+          5173,
+          3001,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "docs/lab-04/tests.md",
+        "line": 255,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-02/requester-ticket-flow.spec.ts",
+        "line": 8,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-03/authentication.spec.ts",
+        "line": 9,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-03/staff-ticket-flow.spec.ts",
+        "line": 10,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-03/user-administration.spec.ts",
+        "line": 8,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 6,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 127,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 29,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "playwright.config.ts",
+        "line": 9,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/.env.example",
+        "line": 3,
+        "ports": [
+          5432
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/.env.example",
+        "line": 4,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/src/app.ts",
+        "line": 34,
+        "ports": [
+          5173,
+          5174
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/src/index.ts",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/tests/helpers/lab4-database.ts",
+        "line": 77,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 7,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          55432,
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 12,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 86,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 99,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/inspect.cjs",
+        "line": 9,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/inspect.cjs",
+        "line": 29,
+        "ports": [
+          3001
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/inspect.cjs",
+        "line": 35,
+        "ports": [
+          3001
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/inspect.cjs",
+        "line": 38,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/inspect.cjs",
+        "line": 42,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 12,
+        "ports": [
+          3001
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 13,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 15,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 18,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 95,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 96,
+        "ports": [
+          3001
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit",
+        "file": "artifacts/lab-04/dev-i3-b3695c26/verify.cjs",
+        "line": 116,
+        "ports": [
+          5432,
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "README.md",
+        "line": 51,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "README.md",
+        "line": 63,
+        "ports": [
+          5173,
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "README.md",
+        "line": 95,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "client/.env.example",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "client/src/TicketDiscussion.tsx",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "client/src/api.ts",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "client/vite.config.ts",
+        "line": 6,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-02/ai-use.md",
+        "line": 41,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 105,
+        "ports": [
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 117,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-03/requester-verification.md",
+        "line": 57,
+        "ports": [
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-03/ticket-queue-verification.md",
+        "line": 58,
+        "ports": [
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/actions-backend-report.md",
+        "line": 488,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 66,
+        "ports": [
+          5433,
+          3000,
+          5432,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 90,
+        "ports": [
+          5173,
+          3001,
+          5433,
+          5432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 144,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 158,
+        "ports": [
+          3000,
+          3001
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 164,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 170,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 249,
+        "ports": [
+          5433,
+          5173,
+          3001,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 255,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 284,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 295,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 309,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/tests.md",
+        "line": 330,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 77,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 79,
+        "ports": [
+          5432,
+          5433,
+          55432,
+          5174,
+          3000,
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 210,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 228,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 230,
+        "ports": [
+          5174,
+          3002,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 236,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 238,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 295,
+        "ports": [
+          5173,
+          3002,
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 297,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 301,
+        "ports": [
+          5433,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 321,
+        "ports": [
+          3002
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 322,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-02/requester-ticket-flow.spec.ts",
+        "line": 8,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-03/authentication.spec.ts",
+        "line": 9,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-03/staff-queue.spec.ts",
+        "line": 2,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-03/staff-ticket-flow.spec.ts",
+        "line": 2,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-03/user-administration.spec.ts",
+        "line": 8,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 9,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 137,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 29,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/ticket-resolution.spec.ts",
+        "line": 4,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 29,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "playwright.config.ts",
+        "line": 9,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/.env.example",
+        "line": 3,
+        "ports": [
+          5432
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/.env.example",
+        "line": 4,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/src/app.ts",
+        "line": 36,
+        "ports": [
+          5173,
+          5174
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/src/index.ts",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/helpers/lab4-database.ts",
+        "line": 77,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 7,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          55432,
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 12,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 86,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 99,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 15,
+        "ports": [
+          55432
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/legacy-runner.cjs",
+        "line": 10,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/legacy-runner.cjs",
+        "line": 12,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/admin-reset-private-prompt-20261103.ps1",
+        "line": 42,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 12,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 14,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 15,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 25,
+        "ports": [
+          3002,
+          5174
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 26,
+        "ports": [
+          5174
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 27,
+        "ports": [
+          5174,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 30,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/close-5174-only.mjs",
+        "line": 31,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/complete-admin-role-20261103.mjs",
+        "line": 5,
+        "ports": [
+          3002,
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/complete-admin-role-20261103.mjs",
+        "line": 26,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/frontend-5173.mjs",
+        "line": 5,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/frontend-5173.mjs",
+        "line": 7,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/local-admin-flow-20261103.mjs",
+        "line": 7,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/normal-role-browser.mjs",
+        "line": 5,
+        "ports": [
+          3002,
+          5174
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-auth-guard.test.mjs",
+        "line": 16,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-auth-guard.test.mjs",
+        "line": 20,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-auth-guard.test.mjs",
+        "line": 23,
+        "ports": [
+          3000
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-auth-guard.test.mjs",
+        "line": 25,
+        "ports": [
+          5174,
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-auth-guard.test.mjs",
+        "line": 26,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-common.mjs",
+        "line": 13,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-common.mjs",
+        "line": 16,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-common.mjs",
+        "line": 24,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-server.mjs",
+        "line": 19,
+        "ports": [
+          5173,
+          5174
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-server.mjs",
+        "line": 24,
+        "ports": [
+          3002,
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-server.mjs",
+        "line": 27,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-server.mjs",
+        "line": 28,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/preview-server.mjs",
+        "line": 29,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-admin-first-login-20261103.mjs",
+        "line": 6,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-admin-first-login-20261103.mjs",
+        "line": 17,
+        "ports": [
+          3002
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-admin-first-login-20261103.mjs",
+        "line": 22,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-browser.before-role-checks.mjs",
+        "line": 8,
+        "ports": [
+          3002,
+          5174
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-browser.mjs",
+        "line": 8,
+        "ports": [
+          3002,
+          5174
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-frontend-5173.mjs",
+        "line": 5,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-frontend-5173.mjs",
+        "line": 46,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-frontend-5173.mjs",
+        "line": 49,
+        "ports": [
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-frontend-5173.mjs",
+        "line": 57,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-hazel-login-again-20261103.mjs",
+        "line": 5,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-hazel-login-again-20261103.mjs",
+        "line": 19,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-preview-auth-20261103.mjs",
+        "line": 5,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-preview-auth-20261103.mjs",
+        "line": 20,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-preview-auth-20261103.mjs",
+        "line": 21,
+        "ports": [
+          3002
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/manual-20261102/verify-role-privacy-20261103.mjs",
+        "line": 5,
+        "ports": [
+          3002,
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/regression-runner.ts",
+        "line": 17,
+        "ports": [
+          5432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/runner.cjs",
+        "line": 10,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-ticket-lifecycle",
+        "file": "artifacts/lab-04/i4-local/runner.cjs",
+        "line": 12,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "README.md",
+        "line": 51,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "README.md",
+        "line": 63,
+        "ports": [
+          5173,
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "README.md",
+        "line": 95,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "client/.env.example",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "client/src/TicketDiscussion.tsx",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "client/src/api.ts",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "client/vite.config.ts",
+        "line": 6,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-02/ai-use.md",
+        "line": 41,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 105,
+        "ports": [
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 117,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-03/requester-verification.md",
+        "line": 57,
+        "ports": [
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-03/ticket-queue-verification.md",
+        "line": 58,
+        "ports": [
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/actions-backend-report.md",
+        "line": 488,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 66,
+        "ports": [
+          5433,
+          3000,
+          5432,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 90,
+        "ports": [
+          5173,
+          3001,
+          5433,
+          5432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 91,
+        "ports": [
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 140,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 146,
+        "ports": [
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 147,
+        "ports": [
+          5174,
+          5173,
+          3002
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 148,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 144,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 158,
+        "ports": [
+          3000,
+          3001
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 164,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 170,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 249,
+        "ports": [
+          5433,
+          5173,
+          3001,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 255,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 284,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 295,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 309,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 330,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/tests.md",
+        "line": 363,
+        "ports": [
+          5174,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 77,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 79,
+        "ports": [
+          5432,
+          5433,
+          55432,
+          5174,
+          3000,
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 210,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 228,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 230,
+        "ports": [
+          5174,
+          3002,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 236,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 238,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 295,
+        "ports": [
+          5173,
+          3002,
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 297,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 301,
+        "ports": [
+          5433,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 321,
+        "ports": [
+          3002
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 322,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-02/requester-ticket-flow.spec.ts",
+        "line": 8,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-03/authentication.spec.ts",
+        "line": 9,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-03/staff-queue.spec.ts",
+        "line": 2,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-03/staff-ticket-flow.spec.ts",
+        "line": 2,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-03/user-administration.spec.ts",
+        "line": 8,
+        "ports": [
+          3001
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 9,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 137,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/dashboard-test-server.ts",
+        "line": 54,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/dashboard-test-server.ts",
+        "line": 62,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/dashboards.spec.ts",
+        "line": 3,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 29,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/ticket-resolution.spec.ts",
+        "line": 4,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 29,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "playwright.config.ts",
+        "line": 9,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/.env.example",
+        "line": 3,
+        "ports": [
+          5432
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/.env.example",
+        "line": 4,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/src/app.ts",
+        "line": 38,
+        "ports": [
+          5173,
+          5174
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/src/index.ts",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/helpers/i5-database.ts",
+        "line": 7,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/helpers/lab4-database.ts",
+        "line": 77,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 7,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          55432,
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/dashboard-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/dashboard-harness.unit.test.ts",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/dashboard-harness.unit.test.ts",
+        "line": 15,
+        "ports": [
+          55432
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 12,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 86,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 99,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/i5-database-guard.unit.test.ts",
+        "line": 8,
+        "ports": [
+          5433
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/i5-database-guard.unit.test.ts",
+        "line": 9,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 15,
+        "ports": [
+          55432
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/database-controller.cjs",
+        "line": 9,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/database-controller.cjs",
+        "line": 29,
+        "ports": [
+          5432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/database-controller.cjs",
+        "line": 30,
+        "ports": [
+          5432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/backend.mjs",
+        "line": 13,
+        "ports": [
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/backend.mjs",
+        "line": 15,
+        "ports": [
+          3003,
+          5173
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/backend.mjs",
+        "line": 18,
+        "ports": [
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/frontend.mjs",
+        "line": 8,
+        "ports": [
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/frontend.mjs",
+        "line": 9,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/frontend.mjs",
+        "line": 11,
+        "ports": [
+          5173,
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/frontend.mjs",
+        "line": 13,
+        "ports": [
+          5173,
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/preview-common.mjs",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/preview-common.mjs",
+        "line": 25,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/preview-common.mjs",
+        "line": 27,
+        "ports": [
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/verify-alice.mjs",
+        "line": 4,
+        "ports": [
+          5173,
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/verify-alice.mjs",
+        "line": 7,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/verify-alice.mjs",
+        "line": 9,
+        "ports": [
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-dashboards",
+        "file": "artifacts/lab-04/i5-local/manual-preview-20261103-mw0mkmhn/verify-alice.mjs",
+        "line": 16,
+        "ports": [
+          5173,
+          3003
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "README.md",
+        "line": 51,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "README.md",
+        "line": 63,
+        "ports": [
+          5173,
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "README.md",
+        "line": 95,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "client/.env.example",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "client/src/TicketDiscussion.tsx",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "client/src/api.ts",
+        "line": 2,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "client/vite.config.ts",
+        "line": 6,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-02/ai-use.md",
+        "line": 41,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 105,
+        "ports": [
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-03/admin-verification.md",
+        "line": 117,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-03/requester-verification.md",
+        "line": 57,
+        "ports": [
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-03/ticket-queue-verification.md",
+        "line": 58,
+        "ports": [
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/actions-backend-report.md",
+        "line": 488,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 66,
+        "ports": [
+          5433,
+          3000,
+          5432,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/actions-ui-report.md",
+        "line": 90,
+        "ports": [
+          5173,
+          3001,
+          5433,
+          5432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 91,
+        "ports": [
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 140,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 146,
+        "ports": [
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 147,
+        "ports": [
+          5174,
+          5173,
+          3002
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/dashboards-report.md",
+        "line": 148,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 144,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 158,
+        "ports": [
+          3000,
+          3001
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 164,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 170,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 249,
+        "ports": [
+          5433,
+          5173,
+          3001,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 255,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 284,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 295,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 309,
+        "ports": [
+          5173,
+          3002
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 330,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 363,
+        "ports": [
+          5174,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/tests.md",
+        "line": 392,
+        "ports": [
+          3000
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 77,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 79,
+        "ports": [
+          5432,
+          5433,
+          55432,
+          5174,
+          3000,
+          3001,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 210,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 228,
+        "ports": [
+          5173,
+          3001
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 230,
+        "ports": [
+          5174,
+          3002,
+          5173
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 236,
+        "ports": [
+          5433
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 238,
+        "ports": [
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 295,
+        "ports": [
+          5173,
+          3002,
+          5174
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 297,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 301,
+        "ports": [
+          5433,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 321,
+        "ports": [
+          3002
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/ticket-workflow-report.md",
+        "line": 322,
+        "ports": [
+          5173
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-02/requester-ticket-flow.spec.ts",
+        "line": 9,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-03/authentication.spec.ts",
+        "line": 10,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-03/staff-queue.spec.ts",
+        "line": 2,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-03/staff-ticket-flow.spec.ts",
+        "line": 2,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-03/user-administration.spec.ts",
+        "line": 9,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 9,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/actions-taken-flow.spec.ts",
+        "line": 137,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/dashboard-test-server.ts",
+        "line": 54,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/dashboard-test-server.ts",
+        "line": 62,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/dashboards.spec.ts",
+        "line": 3,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 29,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/ticket-resolution.spec.ts",
+        "line": 4,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 29,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 58,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 61,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/workflow-test-server.ts",
+        "line": 94,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "playwright.config.ts",
+        "line": 9,
+        "ports": [
+          5173
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/.env.example",
+        "line": 3,
+        "ports": [
+          5432
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/.env.example",
+        "line": 4,
+        "ports": [
+          3000
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/src/app.ts",
+        "line": 38,
+        "ports": [
+          5173,
+          5174
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/src/index.ts",
+        "line": 3,
+        "ports": [
+          3000
+        ],
+        "category": "application"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/helpers/i5-database.ts",
+        "line": 7,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/helpers/lab4-database.ts",
+        "line": 77,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 7,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/actions-ui-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          55432,
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/dashboard-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/dashboard-harness.unit.test.ts",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/dashboard-harness.unit.test.ts",
+        "line": 15,
+        "ports": [
+          55432
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 12,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 86,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/database-tools.unit.test.ts",
+        "line": 99,
+        "ports": [
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/i5-database-guard.unit.test.ts",
+        "line": 8,
+        "ports": [
+          5433
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/i5-database-guard.unit.test.ts",
+        "line": 9,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 13,
+        "ports": [
+          5432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/ticket-workflow-harness.unit.test.ts",
+        "line": 15,
+        "ports": [
+          55432
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/controller.cjs",
+        "line": 11,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/controller.cjs",
+        "line": 18,
+        "ports": [
+          5432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/controller.cjs",
+        "line": 19,
+        "ports": [
+          5432
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/backend.mjs",
+        "line": 22,
+        "ports": [
+          3004,
+          5174
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/backend.mjs",
+        "line": 25,
+        "ports": [
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/frontend.mjs",
+        "line": 11,
+        "ports": [
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/frontend.mjs",
+        "line": 12,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/frontend.mjs",
+        "line": 15,
+        "ports": [
+          5174,
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/frontend.mjs",
+        "line": 16,
+        "ports": [
+          5174,
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/preflight.mjs",
+        "line": 12,
+        "ports": [
+          5174,
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/preflight.mjs",
+        "line": 13,
+        "ports": [
+          5174,
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/preview-common.mjs",
+        "line": 14,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/preview-common.mjs",
+        "line": 25,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/preview-common.mjs",
+        "line": 27,
+        "ports": [
+          3004
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "artifacts/lab-04/i6-local/manual-preview-20261103-9f797956ab/preview-smoke.cjs",
+        "line": 9,
+        "ports": [
+          5433
+        ],
+        "category": "temporary"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/regression-report.md",
+        "line": 44,
+        "ports": [
+          5174,
+          5173,
+          3002,
+          3003,
+          3000,
+          5432,
+          5433,
+          55432
+        ],
+        "category": "documentation"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/regression-report.md",
+        "line": 83,
+        "ports": [
+          3000
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/regression-report.md",
+        "line": 89,
+        "ports": [
+          3000
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "docs/lab-04/regression-report.md",
+        "line": 127,
+        "ports": [
+          5174
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "e2e/lab-04/accessibility-responsive.spec.ts",
+        "line": 4,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "playwright.i6.config.ts",
+        "line": 5,
+        "ports": [
+          5174
+        ],
+        "category": "configuration"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/helpers/i6-database.ts",
+        "line": 26,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/helpers/i6-database.ts",
+        "line": 52,
+        "ports": [
+          3000,
+          3001,
+          3002,
+          3003,
+          5173,
+          5174,
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/helpers/i6-execution.ts",
+        "line": 51,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/helpers/i6-execution.ts",
+        "line": 66,
+        "ports": [
+          5174
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/dashboard-performance.test.ts",
+        "line": 42,
+        "ports": [
+          3000
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/dashboard-performance.test.ts",
+        "line": 62,
+        "ports": [
+          3000
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/i6-database-guard.unit.test.ts",
+        "line": 9,
+        "ports": [
+          5433
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/i6-database-guard.unit.test.ts",
+        "line": 11,
+        "ports": [
+          5432,
+          5433,
+          55432
+        ],
+        "category": "tests"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/i6-database-guard.unit.test.ts",
+        "line": 23,
+        "ports": [
+          5433
+        ],
+        "category": "numericNotPort"
+      },
+      {
+        "worktree": "toktickit-lab4-regression",
+        "file": "server/tests/lab-04/i6-database-guard.unit.test.ts",
+        "line": 24,
+        "ports": [
+          3000,
+          3002,
+          3003,
+          3001,
+          5173,
+          5174
+        ],
+        "category": "tests"
+      }
+    ]
+  },
+  "after": {
+    "frontendPID": 39468,
+    "backendPID": 22160,
+    "readOnlyBusinessPreview": true,
+    "apiHealth": 200,
+    "credentialedCors": true,
+    "blockedWriteProbes": 5,
+    "frontendTests": 306,
+    "safeHarnessTests": 44,
+    "browserInspection": "deferred to user",
+    "manualReview": {
+      "date": "2026-11-04",
+      "source": "Student confirmation in this conversation",
+      "roles": [
+        "REQUESTER",
+        "IT_STAFF",
+        "ADMINISTRATOR"
+      ],
+      "scope": "Role dashboards visually reviewed; student reports the UI looks correct",
+      "status": "complete",
+      "automatedBrowserInspection": false
+    }
+  }
+}

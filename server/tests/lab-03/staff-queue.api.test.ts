@@ -2,15 +2,20 @@ import { beforeAll, afterAll, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import bcrypt from "bcrypt";
 import { app } from "../../src/app.js";
-import { getPrisma } from "../../src/prisma.js";
+import { PrismaClient } from "@prisma/client";
+import { isolatedLab4Database } from "../helpers/lab4-database.js";
+let isolatedPrisma: PrismaClient;
+vi.mock("../../src/prisma.js", () => ({ getPrisma: () => isolatedPrisma }));
 
 describe("IT Staff queue queries", () => {
-  const prisma = getPrisma();
+  let prisma: PrismaClient;
+  let database: Awaited<ReturnType<typeof isolatedLab4Database>>;
   const stamp = `queue-${Date.now()}`;
   const staff = request.agent(app), requester = request.agent(app), admin = request.agent(app);
   const userIds: number[] = [], ids: number[] = [];
   let categoryId: number, systemId: number;
   beforeAll(async () => {
+    database = await isolatedLab4Database(); prisma = isolatedPrisma = database.prisma; database.migrate();
     const passwordHash = await bcrypt.hash("QueueTest123!", 10);
     for (const [index, role] of (["IT_STAFF", "REQUESTER", "ADMINISTRATOR"] as const).entries()) {
       const email = `${stamp}-${index}@example.test`;
@@ -29,15 +34,8 @@ describe("IT Staff queue queries", () => {
         createdAt: new Date(`2026-01-0${index + 1}T00:00:00Z`), updatedAt: new Date(`2026-02-0${3 - index}T00:00:00Z`),
       } })).id);
     }
-  }, 30000);
-  afterAll(async () => {
-    vi.restoreAllMocks();
-    await prisma.ticket.deleteMany({ where: { id: { in: ids } } });
-    await prisma.session.deleteMany({ where: { userId: { in: userIds } } });
-    await prisma.user.deleteMany({ where: { id: { in: userIds } } });
-    if (categoryId) await prisma.category.delete({ where: { id: categoryId } });
-    if (systemId) await prisma.relatedSystem.delete({ where: { id: systemId } });
-  });
+  }, 120000);
+  afterAll(async () => { vi.restoreAllMocks(); await database?.dispose(); }, 30000);
   const queue = (query = {}) => staff.get("/api/staff/tickets").query({ search: stamp, ...query });
   const ticketIds = (response: { body: { data: { id: number }[] } }) => response.body.data.map(ticket => ticket.id);
   it("loads all statuses with default newest-first order and safe owner fields", async () => {
@@ -89,10 +87,20 @@ describe("IT Staff queue queries", () => {
   it.each([{ page: "0" }, { page: "-1" }, { page: "1.5" }, { limit: "101" }, { limit: "NaN" }, { sort: "passwordHash" }, { order: "sideways" }, { status: "FAKE" }, { priority: "URGENT" }, { itPriority: "FAKE" }, { assigned: "yes" }, { search: ["one", "two"] }])("rejects malformed queries %j", async query => {
     expect((await queue(query)).status).toBe(400);
   });
-  it("enforces existing staff-only access on the server", async () => {
+  it("allows Administrator queue reads while retaining authentication and requester restrictions", async () => {
     expect((await request(app).get("/api/staff/tickets")).status).toBe(401);
     expect((await requester.get("/api/staff/tickets")).status).toBe(403);
-    expect((await admin.get("/api/staff/tickets")).status).toBe(403);
+    const response = await admin.get("/api/staff/tickets").query({ search: stamp });
+    expect(response.status).toBe(200);
+    expect(ticketIds(response)).toEqual([...ids].reverse());
+  });
+  it.each(["assign", "priority", "status"])("allows only the approved versioned Administrator Ticket %s write", async operation => {
+    const before = await prisma.ticket.findUniqueOrThrow({ where: { id: ids[0] } });
+    const response = await admin.patch(`/api/staff/tickets/${ids[0]}/${operation}`).send({ expectedTicketVersion: before.version, ...(operation === "assign" ? { assignedStaffId: userIds[0] } : operation === "priority" ? { itPriority: "HIGH" } : { currentStatus: "IN_PROGRESS" }) });
+    expect(response.status).toBe(200);
+    const after = await prisma.ticket.findUniqueOrThrow({ where: { id: ids[0] } });
+    expect(after.version).toBe(before.version + 1); expect(after.requesterId).toBe(before.requesterId); expect(after.summary).toBe(before.summary);
+    expect(after).toMatchObject(operation === "assign" ? { assignedStaffId: userIds[0] } : operation === "priority" ? { itPriority: "HIGH" } : { currentStatus: "IN_PROGRESS" });
   });
   it("returns a safe server failure without database details", async () => {
     const spy = vi.spyOn(prisma, "$transaction").mockRejectedValueOnce(new Error("private database error"));

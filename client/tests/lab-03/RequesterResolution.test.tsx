@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "../../src/App";
@@ -11,6 +12,7 @@ const ticket: api.TicketDetail = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(api.getActionsTaken).mockResolvedValue({ ticketId: 101, ticketVersion: 0, items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: [] }) }));
   vi.mocked(api.getCurrentUser).mockResolvedValue({ id: 1, name: "Alice", email: "alice@test.test", role: "REQUESTER", mustChangePassword: false });
   vi.mocked(api.getCategories).mockResolvedValue([ticket.category]);
@@ -22,7 +24,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 async function open() {
   render(<App />);
-  await screen.findByRole("heading", { name: "Create Ticket" });
+  await screen.findByRole("heading", { name: "Requester Dashboard" });
   fireEvent.click(await screen.findByRole("button", { name: "My Tickets" }));
   fireEvent.click(await screen.findByRole("button", { name: "TKT-101" }));
   await screen.findByRole("button", { name: "Problem Appears Resolved" });

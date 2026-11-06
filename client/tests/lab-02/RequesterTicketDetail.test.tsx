@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import {
   beforeEach,
   describe,
@@ -22,9 +23,12 @@ import {
   getCurrentUser,
   getTicketAttachments,
   getTicketDetail,
+  getActionsTaken,
 } from "../../src/api.js";
 
 vi.mock("../../src/api.js", () => ({
+  getActionsTaken: vi.fn(),
+  ActionsApiError: class extends Error {},
   getCurrentUser: vi.fn(),
   getCategories: vi.fn(),
   getRelatedSystems: vi.fn(),
@@ -98,12 +102,12 @@ const ticketDetail = {
 async function selectRequesterAndOpenMyTickets() {
   render(<App />);
 
-  await screen.findByRole("heading", { name: "Create Ticket" });
+  await screen.findByRole("heading", { name: "Requester Dashboard" });
 
   await screen.findByRole(
     "heading",
     {
-      name: "Create Ticket",
+      name: "Requester Dashboard",
     }
   );
 
@@ -125,6 +129,7 @@ describe(
   "Requester Ticket Detail",
   () => {
     beforeEach(() => {
+      vi.mocked(getActionsTaken).mockResolvedValue({ ticketId: 101, ticketVersion: 0, items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
       vi.clearAllMocks();
 
       sessionStorage.clear();
@@ -173,6 +178,15 @@ describe(
       vi.mocked(
         getTicketAttachments
       ).mockResolvedValue([]);
+    });
+
+    it("associates every read-only Ticket field with its visible label", async () => {
+      await selectRequesterAndOpenMyTickets();
+      fireEvent.click(await screen.findByRole("button", { name: ticket.ticketNumber }));
+      await screen.findByRole("heading", { name: "Ticket Detail" });
+      for (const name of ["Ticket Number", "Current Status", "Requested Priority", "Requester", "Requester Email", "Category", "Related System", "Ticket Summary", "Description", "Created", "Last Updated"]) {
+        expect(screen.getByRole("textbox", { name })).toHaveAttribute("readonly");
+      }
     });
 
     it(

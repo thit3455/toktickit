@@ -1,5 +1,7 @@
 # TokTickIT Lab 4 UI Specification
 
+> I7 execution note (2026-11-04): this approved contract retains its original planning language and rule IDs below. I2-I6 are integrated at staging `91d627afa88a9cf1d6f2730b00c5b3784d134817`. Current execution status is in [final integration](final-integration-report.md), [test results](final-testing-report.md) and [traceability](final-traceability.md). Historical Planned/Not run statements describe the original plan, not a fresh execution claim. Final-main and submission gates remain pending. No business rule is changed by this note.
+
 Status: **planned UI contract; not implemented, visually verified or screenshot-captured**. PDF sections 7/8/14 require coherence, states, accessibility and responsive evidence. Concrete cards, field limits, modes and lifecycle choices below are approved student decisions (SD). Use [specification.md](specification.md) for numbered rules/matrices and [api-spec.md](api-spec.md) for exact request/DTO/version behavior. [tests.md](tests.md) contains planned checks; no unchecked checklist item is a pass.
 
 ## 1. Existing design language and shell
@@ -8,7 +10,7 @@ Extend the current React/Bootstrap application, not a new unrelated interface. R
 
 Preserve existing Zen Green palette: primary #006B3C, secondary #0B7A46, pale green #EAF6EF, background #F5F7F6, white cards, subtle borders and existing spacing/button hierarchy. Use clear heading levels, textual labels, safe wrapped long values and existing badges. Status/priority meaning must remain readable as text, not color alone. Differentiate shared Actions Taken/Public Comments from private Internal Notes. No private data belongs in an action form that the requester will read.
 
-After authentication/password change, show current name/role and Logout; Dashboard is the proposed role-appropriate landing page. Preserve navigation destinations:
+After authentication/password change, show current name/role and Logout; Dashboard is the approved role-appropriate landing page. Preserve navigation destinations:
 
 | Role | Navigation |
 |---|---|
@@ -24,7 +26,7 @@ Use concise existing-style metric cards with label/value, and a small number of 
 
 Desktop uses wrapping cards with a recent-list area; tablet reduces columns; mobile stacks cards/lists and wraps actions. Reuse existing button/card/table feedback conventions. Provide Refresh to fetch a new authoritative snapshot; it does not silently overwrite any Ticket/action editor draft. Backend counts determine values; frontend does not recompute from its five displayed rows. Labels/window explanation match specification BR-18-21 exactly.
 
-Proposed timestamp clarification: show the single server response `asOf` as the evaluation/last-updated time and copy it unchanged into every practical list drill-down. Do not calculate a separate cutoff in the browser or regenerate it when paging/sorting. Ticket metrics/lists require both Ticket.createdAt and updatedAt <= asOf; My Active Actions also requires parent eligibility and action.createdAt/updatedAt <= asOf. Equality is included and a timestamp later than cutoff is excluded. Only Recently Resolved uses the approved seven-calendar-day event interval [Bangkok midnight six calendar days before asOf, asOf], both endpoints inclusive; its link copies start/end/asOf verbatim. Other current counts/latest-five lists have no lower date bound: do not label them "last seven days" or hide older eligible records. This is student-design clarification, not a newly prescribed PDF window.
+Timestamp clarification (student-approved 2026-11-03): show the single server response `asOf` as the evaluation/last-updated time and copy it unchanged into every practical list drill-down. Do not calculate a separate cutoff in the browser or regenerate it when paging/sorting. Ticket metrics/lists require both Ticket.createdAt and updatedAt <= asOf; My Active Actions also requires parent eligibility and action.createdAt/updatedAt <= asOf. Equality is included and a timestamp later than cutoff is excluded. Only Recently Resolved uses the approved seven-calendar-day event interval [Bangkok midnight six calendar days before asOf, asOf], both endpoints inclusive; its link copies start/end/asOf verbatim. Other current counts/latest-five lists have no lower date bound: do not label them "last seven days" or hide older eligible records. This is student-design clarification, not a newly prescribed PDF window.
 
 Linked lists remain live current-state views with retained date predicates, not reconstructed historical snapshots. A later update/status/ownership change may change membership (an updatedAt after the original cutoff is excluded); explain this without silently dropping the cutoff. Refresh Dashboard obtains a new asOf. Detail/action links open latest authorized records rather than time-travel versions. Keep original filters/cutoff visible in list context and offer ordinary clear filters to return to unfiltered behavior.
 

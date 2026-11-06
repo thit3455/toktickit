@@ -1,11 +1,12 @@
 import { test, expect, Page } from "@playwright/test";
-import { PrismaClient } from "../../server/node_modules/@prisma/client";
+import { ownedI6Prisma, assertI6ApiUrl } from "../../server/tests/helpers/i6-database";
 import bcrypt from "../../server/node_modules/bcrypt";
 import { randomUUID } from "node:crypto";
 
-process.loadEnvFile("server/.env");
-const prisma = new PrismaClient();
-const api = process.env.E2E_API_URL ?? "http://localhost:3001";
+// Explicit controller-owned schema/API only; never load .env or use development defaults.
+const prisma = ownedI6Prisma();
+const api = assertI6ApiUrl();
+test.use({ baseURL: "http://localhost:5174", trace: "retain-on-failure", screenshot: "only-on-failure" });
 test.describe("Administrator User Management with real API", () => {
   let adminId: number, adminEmail: string, managedEmail: string;
   let extraIds: number[] = [];
@@ -16,6 +17,7 @@ test.describe("Administrator User Management with real API", () => {
     await page.getByRole("button", { name: "Login", exact: true }).click();
   }
   async function search(page: Page, value: string) {
+    await page.getByRole("button", { name: "User Management", exact: true }).click();
     await page.getByLabel("Search users").fill(value);
     await page.getByRole("button", { name: "Search", exact: true }).click();
   }
@@ -29,6 +31,8 @@ test.describe("Administrator User Management with real API", () => {
     adminId = (await prisma.user.create({ data: { name: "Browser Administrator", email: adminEmail, role: "ADMINISTRATOR", passwordHash: await bcrypt.hash(password, 4), mustChangePassword: false } })).id;
     await page.goto("/");
     await login(page, adminEmail, password);
+    await expect(page.getByRole("heading", { name: "Administrator Dashboard", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "User Management", exact: true }).click();
     await expect(page.getByRole("heading", { name: "User Management" })).toBeVisible();
   });
   test.afterEach(async () => {
@@ -41,7 +45,9 @@ test.describe("Administrator User Management with real API", () => {
   test("creates, edits, filters, activates and resets an account with persistence", async ({ page }, testInfo) => {
     test.setTimeout(90000);
     await expect(page.getByRole("navigation", { name: "Administrator navigation" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "IT Staff Queue" })).toHaveCount(0);
+    // Approved I3 Queue visibility and I4 scoped operations supersede this Lab 3 navigation expectation.
+    await expect(page.getByRole("button", { name: "IT Staff Queue" })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "Create Ticket", exact: true })).toHaveCount(0);
     await search(page, adminEmail);
     await expect(page.getByRole("row", { name: `User ${adminEmail}` })).toBeVisible();
     await noOverflow(page);
@@ -117,6 +123,8 @@ test.describe("Administrator User Management with real API", () => {
     await page.getByLabel("New Password", { exact: true }).fill("ChangedBrowser123!");
     await page.getByLabel("Confirm New Password", { exact: true }).fill("ChangedBrowser123!");
     await page.getByRole("button", { name: "Change Password", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "IT Staff Dashboard", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "IT Staff Queue", exact: true }).click();
     await expect(page.getByRole("heading", { name: "IT Staff Ticket Queue" })).toBeVisible();
     expect((await page.request.get(`${api}/api/admin/users`)).status()).toBe(403);
     const saved = await prisma.user.findUniqueOrThrow({ where: { email: managedEmail } });

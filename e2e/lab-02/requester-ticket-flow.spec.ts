@@ -1,11 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { PrismaClient } from "../../server/node_modules/@prisma/client";
+import { ownedI6Prisma, assertI6ApiUrl } from "../../server/tests/helpers/i6-database";
 import bcrypt from "../../server/node_modules/bcrypt";
 import { randomUUID } from "node:crypto";
 
-process.loadEnvFile("server/.env");
-const prisma = new PrismaClient();
-const api = process.env.E2E_API_URL ?? "http://localhost:3001";
+// Explicit controller-owned schema/API only; never load .env or use development defaults.
+const prisma = ownedI6Prisma();
+const api = assertI6ApiUrl();
+test.use({ baseURL: "http://localhost:5174", trace: "retain-on-failure", screenshot: "only-on-failure" });
 test.describe("Authenticated Requester regression", () => {
   let userId: number, email: string;
   const password = "RequesterBrowser123!";
@@ -16,6 +17,8 @@ test.describe("Authenticated Requester regression", () => {
     await page.getByLabel("Email", { exact: true }).fill(email);
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Login", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Requester Dashboard" })).toBeVisible();
+    await page.getByRole("button", { name: "Create Ticket", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Create Ticket" })).toBeVisible();
   });
   test.afterEach(async () => {

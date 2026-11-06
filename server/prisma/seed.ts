@@ -1,6 +1,7 @@
 import { getPrisma } from "../src/prisma.js";
 import bcrypt from "bcrypt";
 import { RequestedPriority, TicketPriority, TicketStatus } from "@prisma/client";
+import { seedLab4 } from "./seed-lab4.js";
 
 async function main() {
   const prisma = getPrisma();
@@ -239,6 +240,9 @@ async function main() {
     });
   }
   console.log(`Lab 3 queue examples seeded. Total tickets: ${await prisma.ticket.count()}`);
+
+  await seedLab4(prisma, passwordHash);
+  console.log("Lab 4 create-only examples seeded.");
 
   console.log("Category seed completed.");
   console.log("User seed completed.");

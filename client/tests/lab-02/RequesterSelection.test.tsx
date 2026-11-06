@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import App from "../../src/App.js";
@@ -23,7 +24,7 @@ describe("Authenticated Requester identity replaces selection", () => {
     expect(change).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("Confirm New Password"), { target: { value: "NewRequester123!" } });
     fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
-    await screen.findByRole("heading", { name: "Create Ticket" });
+    await screen.findByRole("heading", { name: "Requester Dashboard" });
     expect(change).toHaveBeenCalledWith("Password123!", "NewRequester123!");
   });
   it.each([
@@ -43,7 +44,7 @@ describe("Authenticated Requester identity replaces selection", () => {
     fireEvent.change(screen.getByLabelText("Confirm New Password"), { target: { value: password } });
     fireEvent.click(screen.getByRole("button", { name: "Change Password" }));
     if (valid) {
-      await screen.findByRole("heading", { name: "Create Ticket" });
+      await screen.findByRole("heading", { name: "Requester Dashboard" });
       expect(change).toHaveBeenCalledWith("Password123!", password);
     } else {
       expect(change).not.toHaveBeenCalled();
@@ -65,9 +66,9 @@ describe("Authenticated Requester identity replaces selection", () => {
     sessionStorage.setItem("developmentRequesterId", "999");
     vi.spyOn(api, "getCurrentUser").mockResolvedValue(user);
     render(<App />);
-    await screen.findByRole("heading", { name: "Create Ticket" });
+    await screen.findByRole("heading", { name: "Requester Dashboard" });
     expect(screen.getByText("Alice Johnson")).toBeInTheDocument();
-    expect(screen.getByText(/REQUESTER/)).toBeInTheDocument();
+    expect(screen.getByText(user.name).closest("p")).toHaveTextContent("REQUESTER");
     for (const name of ["Change Requester", "IT Staff Queue", "Claim Ticket", "User Management"]) expect(screen.queryByRole("button", { name })).toBeNull();
     expect(screen.queryByText("Internal Notes")).toBeNull();
   });
@@ -92,6 +93,6 @@ describe("Authenticated Requester identity replaces selection", () => {
     render(<App />);
     fireEvent.click(await screen.findByRole("button", { name: "Logout" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Unable to log out");
-    expect(screen.getByRole("heading", { name: "Create Ticket" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Requester Dashboard" })).toBeInTheDocument();
   });
 });

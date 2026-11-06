@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 type Message = { id: number; message: string; createdAt: string; user?: { name: string } };
 
 function Messages({ ticketId, internal = false }: { ticketId: number; internal?: boolean }) {

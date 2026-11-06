@@ -1,0 +1,281 @@
+{
+  "dataset": {
+    "tickets": 1000,
+    "actions": 3000
+  },
+  "warmups": 3,
+  "samplesPerEndpoint": 20,
+  "thresholdMilliseconds": 2000,
+  "method": "Sequential authenticated Supertest HTTP round-trip using performance.now; all samples retained",
+  "machine": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "node": "v24.14.0",
+    "postgres": "18.6 (Debian 18.6-1.pgdg13+2)"
+  },
+  "results": [
+    {
+      "endpoint": "/api/requester/dashboard",
+      "warmups": [
+        200,
+        200,
+        200
+      ],
+      "samples": [
+        {
+          "milliseconds": 19.78139999999985,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 17.21550000000002,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 17.729900000000043,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 17.931400000000167,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 18.639400000000023,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.41689999999994,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 13.721199999999953,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 13.94679999999994,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 13.798199999999952,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 13.666899999999941,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 13.8746000000001,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 12.949500000000171,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.950400000000172,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.69640000000004,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.61239999999998,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.053699999999935,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.578999999999724,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.226500000000215,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.527900000000045,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.75,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        }
+      ],
+      "p95": 18.639400000000023
+    },
+    {
+      "endpoint": "/api/staff/dashboard",
+      "warmups": [
+        200,
+        200,
+        200
+      ],
+      "samples": [
+        {
+          "milliseconds": 20.328899999999976,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 17.896799999999985,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 18.094100000000253,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 18.017899999999827,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.61850000000004,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.70089999999982,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 15.327400000000125,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.08089999999993,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 15.182199999999739,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.885600000000068,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.25949999999966,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 15.394900000000234,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.329299999999876,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.390799999999672,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 16.747100000000046,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.900000000000091,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.924799999999777,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 14.668899999999667,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 13.809999999999945,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        },
+        {
+          "milliseconds": 15.022799999999734,
+          "status": 200,
+          "recent": 5,
+          "secondary": 5
+        }
+      ],
+      "p95": 18.094100000000253
+    }
+  ]
+}

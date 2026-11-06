@@ -1,10 +1,16 @@
+import { RequesterDashboard } from "./RequesterDashboard";
+import { StaffDashboard } from "./StaffDashboard";
+import type { DashboardLink } from "./dashboard.api";
+import type { GetMyTicketsParams, GetStaffTicketsParams } from "./api";
 import { StaffTicketQueue } from "./StaffTicketQueue";
 import { AdminUserManagement } from "./AdminUserManagement";
 import "./Requester.css";
 import "./ZenTables.css";
 import { LoginScreen } from "./LoginScreen.js";
 import { TicketDiscussion } from "./TicketDiscussion.js";
-import { useEffect, useState } from "react";
+import { ActionsTaken } from "./ActionsTaken";
+import { TicketWorkflow } from "./TicketWorkflow";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import {
   Category,
@@ -22,13 +28,8 @@ import {
   getRelatedSystems,
   getTicketAttachments,
   getTicketDetail,
+  getActionTicketSummary,
   getStaffTicketDetail,
-  claimStaffTicket,
-  getActiveStaffUsers,
-  reassignStaffTicket,
-  ActiveStaffUser,
-  updateStaffTicketPriority,
-  updateStaffTicketStatus,
   removeAttachment,
   uploadTicketAttachment,
   TicketStatus,
@@ -79,6 +80,7 @@ type AttachmentActionState =
   | "working";
 
 type Screen =
+  | "dashboard"
   | "create"
   | "myTickets"
   | "ticketDetail"
@@ -162,20 +164,11 @@ const [passwordChangeBusy, setPasswordChangeBusy] =
   // IT Staff Ticket Queue
   // =========================================================
 
-const [staffActionStatus, setStaffActionStatus] =
-  useState("");
-
-const [staffActionPriority, setStaffActionPriority] =
-  useState("");
-
-const [staffActionMessage, setStaffActionMessage] = useState("");
-const [staffActionBusy, setStaffActionBusy] = useState(false);
-const [activeStaffUsers, setActiveStaffUsers] = useState<ActiveStaffUser[]>([]);
-const [staffUsersState, setStaffUsersState] = useState<"loading" | "ready" | "error">("loading");
-const [staffUsersError, setStaffUsersError] = useState("");
-const [staffUsersRetry, setStaffUsersRetry] = useState(0);
-const [reassignTo, setReassignTo] = useState("");
-
+const [workflowRefreshKey, setWorkflowRefreshKey] = useState(0);
+const [actionsRefreshKey, setActionsRefreshKey] = useState(0);
+const [dashboardTicketFilters, setDashboardTicketFilters] = useState<Pick<GetMyTicketsParams, "asOf" | "statuses" | "resolvedSince" | "resolvedUntil">>({});
+const [staffQueueQuery, setStaffQueueQuery] = useState<GetStaffTicketsParams>({ page: 1, limit: 10, sort: "createdAt", order: "desc" });
+const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
 
   // =========================================================
   // Reference Data
@@ -482,6 +475,7 @@ const [reassignTo, setReassignTo] = useState("");
 
         const result =
           await getMyTickets({
+            ...dashboardTicketFilters,
             page: ticketPage,
 
             pageSize,
@@ -551,28 +545,11 @@ const [reassignTo, setReassignTo] = useState("");
     sortBy,
     sortOrder,
     reloadTicketsKey,
+    dashboardTicketFilters,
   ]);
   // =========================================================
   // Load Ticket Detail
   // =========================================================
-
-  useEffect(() => {
-    if (screen !== "ticketDetail" || currentUser?.role !== "IT_STAFF" || selectedTicketId === null) return;
-    let active = true;
-    setReassignTo("");
-    setStaffUsersState("loading");
-    setStaffUsersError("");
-    getActiveStaffUsers().then(users => {
-      if (active) { setActiveStaffUsers(users); setStaffUsersState("ready"); }
-    }).catch(error => {
-      if (active) {
-        setActiveStaffUsers([]);
-        setStaffUsersState("error");
-        setStaffUsersError(error instanceof Error ? error.message : "Unable to load active IT Staff.");
-      }
-    });
-    return () => { active = false; };
-  }, [screen, currentUser?.role, selectedTicketId, staffUsersRetry]);
 
   useEffect(() => {
     if (
@@ -615,8 +592,6 @@ const [reassignTo, setReassignTo] = useState("");
 
         if (!active) return;
         setTicketDetail(detail);
-        setStaffActionPriority(detail.itPriority ?? "MEDIUM");
-        setStaffActionStatus(detail.currentStatus);
 
         setTicketDetailState(
           "ready"
@@ -699,19 +674,13 @@ const [reassignTo, setReassignTo] = useState("");
 // Role Routing
 // =========================================================
 
-useEffect(() => {
-  if (
-    currentUser?.role === "IT_STAFF"
-  ) {
-    setScreen("staffQueue");
-  } else if (currentUser?.role === "REQUESTER") {
-    setScreen("create");
-  } else if (currentUser?.role === "ADMINISTRATOR") {
-    setScreen("adminUsers");
+// The existing mandatory password gate still renders before Dashboard.
+useLayoutEffect(() => {
+  if (currentUser) {
+    setScreen("dashboard"); setDashboardTicketFilters({});
+    setStaffQueueQuery({ page: 1, limit: 10, sort: "createdAt", order: "desc" }); setSelectedActionId(null);
   }
-}, [
-  currentUser,
-]);
+}, [currentUser?.id, currentUser?.role, currentUser?.mustChangePassword]);
 
   // =========================================================
   // Reset Create Ticket
@@ -978,6 +947,7 @@ useEffect(() => {
   // =========================================================
 
   function resetTicketFilters() {
+    setDashboardTicketFilters({});
     setSearch("");
 
     setFilterCategoryId("");
@@ -1009,11 +979,32 @@ useEffect(() => {
     );
   }
 
+
+  function dashboardAccessFailure(code: string) {
+    setTickets([]); setTicketDetail(null); setTicketAttachments([]); setSelectedTicketId(null); setSelectedActionId(null);
+    resetTicketFilters(); setStaffQueueQuery({ page: 1, limit: 10, sort: "createdAt", order: "desc" });
+    if (code === "PASSWORD_CHANGE_REQUIRED") setCurrentUser(previous => previous ? { ...previous, mustChangePassword: true } : null);
+    else { setCurrentUser(null); setScreen("create"); }
+  }
+  function navigateDashboard(link: DashboardLink) {
+    const query = link.query;
+    if (link.screen === "myTickets" && currentUser?.role === "REQUESTER") {
+      resetTicketFilters();
+      setDashboardTicketFilters({ asOf: String(query.asOf), statuses: query.statuses === undefined ? undefined : String(query.statuses), resolvedSince: query.resolvedSince === undefined ? undefined : String(query.resolvedSince), resolvedUntil: query.resolvedUntil === undefined ? undefined : String(query.resolvedUntil) });
+      setFilterStatus((query.currentStatus ?? "") as TicketStatus | "");
+      setSortBy(query.sortBy === "createdAt" || query.sortBy === "ticketNumber" ? query.sortBy : "updatedAt");
+      setSortOrder(query.sortOrder === "asc" ? "asc" : "desc"); setTicketPage(1); setScreen("myTickets");
+    } else if (link.screen === "staffQueue" && currentUser && currentUser.role !== "REQUESTER") {
+      setStaffQueueQuery({ page: 1, limit: 10, asOf: String(query.asOf), statuses: query.statuses === undefined ? undefined : String(query.statuses), owner: query.owner === "me" ? "me" : undefined, assigned: query.assigned === undefined ? undefined : query.assigned === "true", itPriority: query.itPriority as GetStaffTicketsParams["itPriority"], sort: String(query.sort ?? "createdAt"), order: query.order === "asc" ? "asc" : "desc" });
+      setScreen("staffQueue");
+    }
+    setSelectedTicketId(null); setSelectedActionId(null);
+  }
+
   function openTicketDetail(
-    ticketId: number
+    ticketId: number, actionId?: number
   ) {
-    setStaffActionMessage("");
-    setReassignTo("");
+    setSelectedActionId(actionId ?? null);
     setSelectedTicketId(
       ticketId
     );
@@ -1042,77 +1033,6 @@ useEffect(() => {
       (value) => value + 1
     );
   }
-  async function handleClaimTicket() {
-  if (!ticketDetail || ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null || staffActionBusy) return;
-  setStaffActionBusy(true);
-  setStaffActionMessage("");
-  try {
-    const result = await claimStaffTicket(ticketDetail.id);
-    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
-    setStaffActionMessage("Ticket claimed successfully.");
-  } catch (error) {
-    setStaffActionMessage(error instanceof Error ? error.message : "Unable to claim ticket. Please try again.");
-    // Another staff member may have claimed it since this detail was loaded.
-    try { setTicketDetail(await getStaffTicketDetail(ticketDetail.id)); } catch { /* Keep the existing error visible. */ }
-  } finally { setStaffActionBusy(false); }
-}
-
-async function handleReassignTicket() {
-  if (!ticketDetail || !reassignTo || staffActionBusy) return;
-  setStaffActionBusy(true);
-  setStaffActionMessage("");
-  try {
-    const result = await reassignStaffTicket(ticketDetail.id, Number(reassignTo));
-    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
-    setReassignTo("");
-    setStaffActionMessage(`Ticket reassigned to ${result.data.assignedStaff.name} successfully.`);
-  } catch (error) {
-    setStaffActionMessage(error instanceof Error ? error.message : "Unable to reassign ticket. Please try again.");
-  } finally { setStaffActionBusy(false); }
-}
-
-async function handleStaffUpdate(kind: "priority" | "status") {
-  if (!ticketDetail || staffActionBusy) return;
-  setStaffActionBusy(true);
-  setStaffActionMessage("");
-  try {
-    const result = kind === "priority"
-      ? await updateStaffTicketPriority(ticketDetail.id, staffActionPriority)
-      : await updateStaffTicketStatus(ticketDetail.id, staffActionStatus);
-    setTicketDetail(previous => previous ? { ...previous, ...result.data } : previous);
-    setStaffActionMessage(kind === "priority" ? "IT priority updated successfully." : "Ticket status updated successfully.");
-  } catch (error) {
-    setStaffActionMessage(error instanceof Error ? error.message : "Unable to update ticket. Please try again.");
-  } finally { setStaffActionBusy(false); }
-}
-
-
-async function handleUpdateStatus(
-  status: string
-) {
- if (!selectedTicketId || !status) {
-    return;
-  }
-
-  try {
-    await updateStaffTicketStatus(
-      selectedTicketId,
-      status
-    );
-
-    setReloadDetailKey(
-      (value) => value + 1
-    );
-
-  } catch {
-    console.error(
-      "Unable to update status"
-    );
-  }
-}
-
-
-
   function backToStaffQueue() {
   setScreen("staffQueue");
 
@@ -1554,10 +1474,11 @@ if (currentUser.mustChangePassword) {
 
       <nav
         className="d-flex flex-wrap gap-2 mb-4"
-        aria-label={currentUser.role === "ADMINISTRATOR" ? "Administrator navigation" : "Requester navigation"}
+        aria-label={currentUser.role === "ADMINISTRATOR" ? "Administrator navigation" : currentUser.role === "IT_STAFF" ? "IT Staff navigation" : "Requester navigation"}
       >
+        <button type="button" className={screen === "dashboard" ? "btn btn-success" : "btn btn-outline-success"} aria-current={screen === "dashboard" ? "page" : undefined} onClick={() => { setScreen("dashboard"); setSelectedTicketId(null); }}>Dashboard</button>
         {currentUser?.role === "REQUESTER" && (
-        <button
+        <button aria-current={screen === "myTickets" || screen === "ticketDetail" ? "page" : undefined}
           type="button"
           className={
             screen === "myTickets" ||
@@ -1581,7 +1502,7 @@ if (currentUser.mustChangePassword) {
         </button>
         )}
         {currentUser?.role === "REQUESTER" && (
-        <button
+        <button aria-current={screen === "create" ? "page" : undefined}
           type="button"
           className={
             screen === "create"
@@ -1599,12 +1520,12 @@ if (currentUser.mustChangePassword) {
           Create Ticket
         </button>
         )}
-        {currentUser?.role === "IT_STAFF" && (
+        {(currentUser?.role === "IT_STAFF" || currentUser?.role === "ADMINISTRATOR") && (
          <div>
-         <button
+         <button aria-current={screen === "staffQueue" || screen === "ticketDetail" ? "page" : undefined}
               type="button"
               className={
-                screen === "staffQueue"
+                screen === "staffQueue" || screen === "ticketDetail"
                   ? "btn btn-success"
                   : "btn btn-outline-success"
               }
@@ -1616,12 +1537,16 @@ if (currentUser.mustChangePassword) {
             >
               IT Staff Queue
             </button>
-            <p className="text-success mt-2 mb-0">IT Staff - {currentUser.name}</p>
+            {currentUser.role === "IT_STAFF" && <p className="text-success mt-2 mb-0">IT Staff - {currentUser.name}</p>}
          </div>
         )}
 
-        {currentUser.role === "ADMINISTRATOR" && <button type="button" className="btn btn-success" onClick={() => setScreen("adminUsers")}>User Management</button>}
+        {currentUser.role === "ADMINISTRATOR" && <button aria-current={screen === "adminUsers" ? "page" : undefined} type="button" className={screen === "adminUsers" ? "btn btn-success" : "btn btn-outline-success"} onClick={() => setScreen("adminUsers")}>User Management</button>}
       </nav>
+
+      {screen === "dashboard" && (currentUser.role === "REQUESTER"
+        ? <RequesterDashboard key={currentUser.id + ":requester"} onNavigate={navigateDashboard} onOpenTicket={openTicketDetail} onAccessFailure={dashboardAccessFailure} />
+        : <StaffDashboard key={currentUser.id + ":" + currentUser.role} administrator={currentUser.role === "ADMINISTRATOR"} onNavigate={navigateDashboard} onOpenTicket={openTicketDetail} onAccessFailure={dashboardAccessFailure} />)}
 
       {currentUser.role === "ADMINISTRATOR" && screen === "adminUsers" && <AdminUserManagement
         currentUserId={currentUser.id}
@@ -1640,6 +1565,7 @@ if (currentUser.mustChangePassword) {
               <h2 className="h4 mb-1">
                 My Tickets
               </h2>
+              {dashboardTicketFilters.asOf && <div className="alert alert-success" role="status">Dashboard cutoff: {formatDate(dashboardTicketFilters.asOf)}. {dashboardTicketFilters.statuses ? "Status set: " + dashboardTicketFilters.statuses.replaceAll("_", " ") + ". " : ""}{dashboardTicketFilters.resolvedSince ? "Resolution window: " + formatDate(dashboardTicketFilters.resolvedSince) + " through " + formatDate(dashboardTicketFilters.resolvedUntil!) + ", inclusive. " : ""}Lists remain live.<button className="btn btn-outline-success ms-2" onClick={resetTicketFilters}>Clear dashboard filters</button></div>}
 
               <p className="text-muted mb-0">
                 Tickets belonging to{" "}
@@ -1849,6 +1775,7 @@ if (currentUser.mustChangePassword) {
                     onChange={(
                       event
                     ) => {
+                      setDashboardTicketFilters(previous => ({ ...previous, statuses: undefined }));
                       setFilterStatus(
                         event.target
                           .value as
@@ -2309,8 +2236,8 @@ if (currentUser.mustChangePassword) {
               </h2>
 
              <p className="text-muted mb-0">
-              {currentUser?.role === "IT_STAFF"
-                  ? "IT Staff ticket information and actions."
+              {currentUser?.role !== "REQUESTER"
+                  ? "Operational Ticket information and Actions Taken."
                   : "Requester-owned Ticket information and attachments."}
             </p>
             </div>
@@ -2319,13 +2246,13 @@ if (currentUser.mustChangePassword) {
               type="button"
               className="btn btn-outline-success"
               onClick={
-                currentUser?.role === "IT_STAFF"
+                currentUser?.role !== "REQUESTER"
                   ? backToStaffQueue
                    : backToMyTickets
               }
             >
               {
-                 currentUser?.role === "IT_STAFF"
+                 currentUser?.role !== "REQUESTER"
                     ? "Back to IT Staff Queue"
                     : "Back to My Tickets"
               }
@@ -2381,11 +2308,11 @@ if (currentUser.mustChangePassword) {
                   <div className="card-body">
                     <div className="row g-3">
                       <div className="col-md-4">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-ticket-number">
                           Ticket Number
                         </label>
 
-                        <input
+                        <input id="ticket-detail-ticket-number"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2395,11 +2322,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-4">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-current-status">
                           Current Status
                         </label>
 
-                        <input
+                        <input id="ticket-detail-current-status"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2409,11 +2336,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-4">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-requested-priority">
                           Requested Priority
                         </label>
 
-                        <input
+                        <input id="ticket-detail-requested-priority"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2423,11 +2350,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-requester">
                           Requester
                         </label>
 
-                        <input
+                        <input id="ticket-detail-requester"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2437,11 +2364,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-requester-email">
                           Requester Email
                         </label>
 
-                        <input
+                        <input id="ticket-detail-requester-email"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2452,11 +2379,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-category">
                           Category
                         </label>
 
-                        <input
+                        <input id="ticket-detail-category"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2466,11 +2393,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-related-system">
                           Related System
                         </label>
 
-                        <input
+                        <input id="ticket-detail-related-system"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2480,11 +2407,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-12">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-ticket-summary">
                           Ticket Summary
                         </label>
 
-                        <input
+                        <input id="ticket-detail-ticket-summary"
                           className="form-control bg-light"
                           readOnly
                           value={
@@ -2494,11 +2421,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-12">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-description">
                           Description
                         </label>
 
-                        <textarea
+                        <textarea id="ticket-detail-description"
                           className="form-control bg-light"
                           readOnly
                           rows={5}
@@ -2509,11 +2436,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-created">
                           Created
                         </label>
 
-                        <input
+                        <input id="ticket-detail-created"
                           className="form-control bg-light"
                           readOnly
                           value={formatDate(
@@ -2523,11 +2450,11 @@ if (currentUser.mustChangePassword) {
                       </div>
 
                       <div className="col-md-6">
-                        <label className="form-label">
+                        <label className="form-label" htmlFor="ticket-detail-last-updated">
                           Last Updated
                         </label>
 
-                        <input
+                        <input id="ticket-detail-last-updated"
                           className="form-control bg-light"
                           readOnly
                           value={formatDate(
@@ -2543,167 +2470,21 @@ if (currentUser.mustChangePassword) {
     IT STAFF ACTIONS
 ====================================================== */}
 
-{currentUser?.role === "IT_STAFF" &&
- ticketDetail && (
-  <section className="card mb-4">
-
-    <div className="card-header bg-success text-white">
-      IT Staff Actions
-    </div>
-
-    <div className="card-body">
-
-      {staffActionMessage && <p className="alert alert-info" role="status">{staffActionMessage}</p>}
-      <p>Current IT Priority: <strong>{ticketDetail.itPriority ?? "MEDIUM"}</strong></p>
-      <p>Current Ticket Status: <strong>{ticketDetail.currentStatus}</strong></p>
-
-      {ticketDetail.requesterResolvedAt && (
-        <section className="alert alert-success" aria-label="Requester resolution indication">
-          <h4 className="h6">Requester: Problem Appears Resolved</h4>
-          <p className="mb-1">Recorded on <time dateTime={ticketDetail.requesterResolvedAt}>{formatDate(ticketDetail.requesterResolvedAt)}</time>.</p>
-          <p className="mb-0">This indication does not change the ticket status. IT Staff can use Update Status to formally resolve or close the ticket.</p>
-        </section>
-      )}
-
-      <p>
-        Assigned Staff:
-        {" "}
-        {
-          ticketDetail.assignedStaff?.name
-          ?? "Unassigned"
-        }
-      </p>
-
-      {!ticketDetail.assignedStaff && ticketDetail.assignedStaffId == null && <button
-        type="button"
-        className="btn btn-success"
-        onClick={handleClaimTicket}
-        disabled={staffActionBusy}
-      >
-        Claim Ticket
-
-      </button>}
-
-      {(ticketDetail.assignedStaff || ticketDetail.assignedStaffId != null) && <section className="mt-3 mb-4" aria-labelledby="reassign-ticket-title">
-        <h3 id="reassign-ticket-title" className="h6">Reassign Ticket</h3>
-        {staffUsersState === "loading" && <p role="status">Loading active IT Staff...</p>}
-        {staffUsersState === "error" && <div className="alert alert-danger" role="alert">
-          {staffUsersError} <button type="button" className="btn btn-outline-success btn-sm" onClick={() => setStaffUsersRetry(value => value + 1)}>Retry staff list</button>
-        </div>}
-        <label className="form-label" htmlFor="reassign-staff">Reassign to</label>
-        <div className="d-flex flex-column flex-sm-row gap-2">
-          <select id="reassign-staff" className="form-select" value={reassignTo} disabled={staffActionBusy || staffUsersState !== "ready"} onChange={event => setReassignTo(event.target.value)}>
-            <option value="">Select an active IT Staff member</option>
-            {activeStaffUsers.filter(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)).map(staff => <option key={staff.id} value={staff.id}>{staff.name} ({staff.email})</option>)}
-          </select>
-          <button type="button" className="btn btn-success flex-shrink-0" disabled={staffActionBusy || staffUsersState !== "ready" || !reassignTo} onClick={handleReassignTicket}>Reassign Ticket</button>
-        </div>
-        {staffUsersState === "ready" && !activeStaffUsers.some(staff => staff.id !== (ticketDetail.assignedStaff?.id ?? ticketDetail.assignedStaffId)) && <p className="text-muted mt-2">No other active IT Staff members are available.</p>}
-      </section>}
-
-    <div className="mt-3">
-  <label className="form-label" htmlFor="staff-it-priority">
-    IT Priority
-  </label>
-
-  <select
-    className="form-select"
-    id="staff-it-priority"
-    disabled={staffActionBusy}
-    value={staffActionPriority}
-    onChange={(e) =>
-      setStaffActionPriority(e.target.value)
-    }
-  >
-    <option value="">
-      Select IT Priority
-    </option>
-
-    <option value="LOW">
-      LOW
-    </option>
-
-    <option value="MEDIUM">
-      MEDIUM
-    </option>
-
-    <option value="HIGH">
-      HIGH
-    </option>
-
-    <option value="URGENT">
-      URGENT
-    </option>
-  </select>
-
-  <button
-    type="button"
-    className="btn btn-success mt-3"
-    disabled={!staffActionPriority || staffActionBusy}
-    onClick={() => handleStaffUpdate("priority")}
-  >
-    Update IT Priority
-  </button>
-</div>
-
-  <label className="form-label" htmlFor="staff-ticket-status">
-    Status
-  </label>
-
-  <select
-    className="form-select"
-    id="staff-ticket-status"
-    disabled={staffActionBusy}
-    value={staffActionStatus}
-    onChange={(e) =>
-      setStaffActionStatus(e.target.value)
-    }
-  >
-    <option value="">
-      Select Status
-    </option>
-    {["NEW", "CANCELLED"].includes(staffActionStatus) && <option value={staffActionStatus}>{staffActionStatus}</option>}
-    <option value="REOPENED">REOPENED</option>
-
-    <option value="OPEN">
-      OPEN
-    </option>
-
-    <option value="IN_PROGRESS">
-      IN_PROGRESS
-    </option>
-
-    <option value="WAITING_FOR_REQUESTER">
-      WAITING_FOR_REQUESTER
-    </option>
-
-    <option value="RESOLVED">
-      RESOLVED
-    </option>
-
-    <option value="CLOSED">
-      CLOSED
-    </option>
-
-  </select>
-<button
-  type="button"
-  className="btn btn-success mt-3"
-  disabled={!staffActionStatus || staffActionBusy}
-  onClick={() => handleStaffUpdate("status")}
->
-  Update Status
-</button>
-</div>
-
-  </section>
-)}
+{currentUser.role !== "REQUESTER" && <TicketWorkflow key={"workflow:" + currentUser.id + ":" + ticketDetail.id}
+                  ticketId={ticketDetail.id} role={currentUser.role} refreshKey={workflowRefreshKey}
+                  onTicketUpdated={saved => setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous)}
+                  onMutated={() => setActionsRefreshKey(value => value + 1)}
+                  onAccessFailure={code => {
+                    setTicketDetail(null); setTicketAttachments([]); setTickets([]); setSelectedTicketId(null);
+                    if (code === "PASSWORD_CHANGE_REQUIRED") setCurrentUser(previous => previous ? { ...previous, mustChangePassword: true } : null);
+                    else { setCurrentUser(null); setScreen("create"); }
+                  }} />}
 
                 {currentRequester && <section className="card mb-3" aria-label="Resolution indication">
                   <div className="card-body">
                     <h3 className="h5">Problem Appears Resolved</h3>
                     <p>This tells IT Staff the problem appears resolved. IT Staff remain responsible for formally resolving or closing the ticket.</p>
-                    {ticketDetail.requesterResolvedAt ? <p role="status">You indicated that the problem appears resolved on {formatDate(ticketDetail.requesterResolvedAt)}.</p> :
+                    {ticketDetail.requesterResolvedAt ? <p role="status">{ticketDetail.currentStatus === "REOPENED" ? "Historical indication: you" : "You"} indicated that the problem appears resolved on {formatDate(ticketDetail.requesterResolvedAt)}.</p> :
                       <button className="btn btn-success" disabled={resolutionBusy} onClick={async () => {
                         setResolutionBusy(true); setResolutionMessage(""); setResolutionError("");
                         try {
@@ -2717,6 +2498,18 @@ if (currentUser.mustChangePassword) {
                     {resolutionError && <p role="alert" className="text-danger mt-2">{resolutionError}</p>}
                   </div>
                 </section>}
+                <ActionsTaken targetActionId={selectedActionId ?? undefined} key={`${currentUser.id}:${ticketDetail.id}`} ticketId={ticketDetail.id} ticketStatus={ticketDetail.currentStatus} role={currentUser.role} userName={currentUser.name} refreshKey={actionsRefreshKey}
+                  onRefreshTicket={async () => {
+                    // Background refresh preserves mounted discussion/action drafts.
+                    const saved = await getActionTicketSummary(ticketDetail.id);
+                    setTicketDetail(previous => previous?.id === saved.id ? { ...previous, ...saved } : previous);
+                    setWorkflowRefreshKey(value => value + 1);
+                  }}
+                  onAccessFailure={code => {
+                    setTicketDetail(null); setTicketAttachments([]); setTickets([]); setSelectedTicketId(null);
+                    if (code === "PASSWORD_CHANGE_REQUIRED") setCurrentUser(previous => previous ? { ...previous, mustChangePassword: true } : null);
+                    else { setCurrentUser(null); setScreen("create"); }
+                  }} />
                 <TicketDiscussion key={ticketDetail.id} ticketId={ticketDetail.id} staff={currentUser.role === "IT_STAFF" || currentUser.role === "ADMINISTRATOR"} />
 
                 {/* Attachment Section */}
@@ -3039,7 +2832,7 @@ if (currentUser.mustChangePassword) {
               IT STAFF TICKET QUEUE
           ====================================================== */}
 
-          {screen === "staffQueue" && <StaffTicketQueue onOpen={openTicketDetail} />}
+          {screen === "staffQueue" && <StaffTicketQueue onOpen={openTicketDetail} initialQuery={staffQueueQuery} onQueryChange={setStaffQueueQuery} onAccessFailure={dashboardAccessFailure} />}
 
       {/* =====================================================
           CREATE TICKET

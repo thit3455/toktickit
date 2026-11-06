@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import {
   afterEach,
   describe,
@@ -46,6 +47,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Create Ticket" }));
     await screen.findByRole("heading", { name: "Create Ticket" });
 
     expect(
@@ -111,6 +113,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Create Ticket" }));
     await screen.findByRole("heading", { name: "Create Ticket" });
 
     const submitButton =
@@ -195,6 +198,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Create Ticket" }));
     await screen.findByRole("heading", { name: "Create Ticket" });
 
     fireEvent.change(
@@ -314,6 +318,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Create Ticket" }));
     await screen.findByRole("heading", { name: "Create Ticket" });
 
     fireEvent.change(
@@ -433,6 +438,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Create Ticket" }));
     await screen.findByRole("heading", { name: "Create Ticket" });
 
     const categorySelect =
@@ -559,6 +565,7 @@ describe("Create Ticket", () => {
 
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "Create Ticket" }));
     await screen.findByRole("heading", { name: "Create Ticket" });
 
     const attachmentInput =

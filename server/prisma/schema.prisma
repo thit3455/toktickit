@@ -37,6 +37,20 @@ enum TicketStatus {
   CANCELLED
 }
 
+enum ActionStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ActionOperation {
+  CREATE
+  EDIT
+  ASSIGN
+  STATUS
+}
+
 model Category {
   id        Int      @id @default(autoincrement())
   name      String   @unique
@@ -67,6 +81,13 @@ model User {
   comments      TicketComment[]
   internalNotes TicketInternalNote[]
 
+  createdActions  ActionTaken[] @relation("ActionCreator")
+  assignedActions ActionTaken[] @relation("ActionAssignee")
+  performedActions ActionTaken[] @relation("ActionPerformer")
+  actionRevisions ActionTakenRevision[]
+  actionRequests ActionCreateRequest[]
+  ticketStatusEvents TicketStatusEvent[]
+
   @@index([isActive])
   @@index([role])
 }
@@ -96,6 +117,7 @@ model Ticket {
   itPriority        TicketPriority    @default(MEDIUM)
   currentStatus     TicketStatus      @default(NEW)
   requesterResolvedAt DateTime?
+  version           Int               @default(0)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -107,6 +129,10 @@ model Ticket {
   attachments   Attachment[]
   comments      TicketComment[]
   internalNotes TicketInternalNote[]
+
+  actions ActionTaken[]
+  actionRequests ActionCreateRequest[]
+  statusEvents TicketStatusEvent[]
 
   @@index([requesterId])
   @@index([assignedStaffId])
@@ -175,4 +201,91 @@ model Session {
   @@index([userId])
   @@index([sessionId])
   @@index([expiresAt])
+}
+
+model ActionTaken {
+  id                 Int @id @default(autoincrement())
+  ticketId           Int
+  createdById        Int
+  assignedToId       Int
+  performedById      Int?
+  description        String
+  result             String @default("")
+  followUpRequired   Boolean @default(false)
+  followUpNote       String @default("")
+  attachmentNotes    String @default("")
+  status             ActionStatus @default(PLANNED)
+  version            Int @default(1)
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @db.Timestamptz(3)
+  completedAt        DateTime? @db.Timestamptz(3)
+  cancelledAt        DateTime? @db.Timestamptz(3)
+  cancellationReason String?
+
+  ticket      Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  createdBy   User @relation("ActionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assignedTo  User @relation("ActionAssignee", fields: [assignedToId], references: [id], onDelete: Restrict)
+  performedBy User? @relation("ActionPerformer", fields: [performedById], references: [id], onDelete: Restrict)
+  revisions   ActionTakenRevision[]
+  createRequest ActionCreateRequest?
+
+  @@index([ticketId, createdAt, id])
+  @@index([assignedToId, status, updatedAt, id])
+  @@index([ticketId, status])
+}
+
+model ActionTakenRevision {
+  id        Int @id @default(autoincrement())
+  actionId  Int
+  version   Int
+  operation ActionOperation
+  actorId   Int
+  actorName String
+  actorRole UserRole
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  snapshot  Json
+
+  action ActionTaken @relation(fields: [actionId], references: [id], onDelete: Restrict)
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@unique([actionId, version])
+  @@index([actorId])
+}
+
+model ActionCreateRequest {
+  id        Int @id @default(autoincrement())
+  actorId   Int
+  ticketId  Int
+  requestId String @db.Uuid
+  actionId  Int @unique
+  payload   Json
+  response  Json
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  action ActionTaken @relation(fields: [actionId], references: [id], onDelete: Restrict)
+
+  @@unique([actorId, ticketId, requestId])
+  @@index([ticketId])
+}
+
+// Storage dependency only: Ticket workflow writes/history endpoint belong to I4.
+model TicketStatusEvent {
+  id         Int @id @default(autoincrement())
+  ticketId   Int
+  fromStatus TicketStatus
+  toStatus   TicketStatus
+  actorId    Int
+  actorName  String
+  actorRole  UserRole
+  reason     String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt, id])
+  @@index([ticketId, toStatus, createdAt])
+  @@index([actorId])
 }

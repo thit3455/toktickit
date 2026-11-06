@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import {
   afterEach,
   describe,
@@ -49,7 +50,7 @@ describe("My Tickets", () => {
   }
 
   async function selectRequester() {
-    await screen.findByRole("heading", { name: "Create Ticket" });
+    await screen.findByRole("heading", { name: "Requester Dashboard" });
 
     await screen.findByRole(
       "button",

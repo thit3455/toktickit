@@ -1,3 +1,4 @@
+import { ownedI6Prisma } from "../helpers/i6-database.js";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
@@ -12,7 +13,7 @@ vi.mock("../../src/prisma.js", () => ({ getPrisma: () => isolated }));
 
 describe("Administrator safety in an isolated database schema", () => {
   const schema = `admin_safety_${randomUUID().replaceAll("-", "")}`;
-  const existing = new PrismaClient();
+  const existing = ownedI6Prisma();
   let schemaCreated = false;
   let adminId: number;
   let actor: ReturnType<typeof request.agent>;
@@ -28,7 +29,7 @@ describe("Administrator safety in an isolated database schema", () => {
     });
   }
   beforeAll(async () => {
-    if (!process.env.DATABASE_URL) process.loadEnvFile(".env");
+    // The owned I6 factory already validated the bootstrap target; no .env fallback.
     const url = new URL(process.env.DATABASE_URL!);
     if (!/^admin_safety_[a-f0-9]{32}$/.test(schema) || url.searchParams.get("schema") === schema) throw new Error("Unsafe test schema");
     snapshot = await administratorStates();

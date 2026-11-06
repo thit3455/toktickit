@@ -1,3 +1,4 @@
+import "../lab-04/mock-dashboard-navigation";
 import {
   beforeEach,
   describe,
@@ -23,11 +24,14 @@ import {
   getCurrentUser,
   getTicketAttachments,
   getTicketDetail,
+  getActionsTaken,
   removeAttachment,
   uploadTicketAttachment,
 } from "../../src/api.js";
 
 vi.mock("../../src/api.js", () => ({
+  getActionsTaken: vi.fn(),
+  ActionsApiError: class extends Error {},
   getCurrentUser: vi.fn(),
   getCategories: vi.fn(),
   getRelatedSystems: vi.fn(),
@@ -104,10 +108,10 @@ const activeAttachment = {
 async function openTicketDetail() {
   render(<App />);
 
-  await screen.findByRole("heading", { name: "Create Ticket" });
+  await screen.findByRole("heading", { name: "Requester Dashboard" });
 
   await screen.findByRole("heading", {
-    name: "Create Ticket",
+    name: "Requester Dashboard",
   });
 
   fireEvent.click(
@@ -133,6 +137,7 @@ async function openTicketDetail() {
 
 describe("Attachment Section", () => {
   beforeEach(() => {
+    vi.mocked(getActionsTaken).mockResolvedValue({ ticketId: 101, ticketVersion: 0, items: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
     vi.clearAllMocks();
 
     sessionStorage.clear();
